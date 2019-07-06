@@ -46,10 +46,8 @@ public class BlockchainPerformance {
         List<Transaction> txs = new ArrayList<>();
         List<TransactionResult> res = new ArrayList<>();
 
-        // TODO: use block gas limit
-
-        int total = 0;
-        for (int i = 0;; i++) {
+        long remainingBlockGas = config.spec().maxBlockGasLimit();
+        for (int i = 0; remainingBlockGas >= config.spec().nonVMTransactionGasCost(); i++) {
             Network network = config.network();
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
@@ -59,14 +57,10 @@ public class BlockchainPerformance {
             long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.EMPTY_BYTES;
             Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(key);
-
-            if (total + tx.size() > 1024 * 1024) {
-                break;
-            }
-
             txs.add(tx);
             res.add(new TransactionResult());
-            total += tx.size();
+
+            remainingBlockGas -= config.spec().nonVMTransactionGasCost();
         }
 
         long number = 1;
@@ -101,12 +95,12 @@ public class BlockchainPerformance {
     }
 
     public static void testBlockValidation(Block block) {
-        Genesis gen = Genesis.load(Network.DEVNET);
+        Genesis genesis = Genesis.load(Network.DEVNET);
 
         long t1 = System.nanoTime();
-        block.validateHeader(gen.getHeader(), block.getHeader());
-        block.validateTransactions(gen.getHeader(), block.getTransactions(), config.network());
-        block.validateResults(gen.getHeader(), block.getResults());
+        block.validateHeader(block.getHeader(), genesis.getHeader());
+        block.validateTransactions(block.getHeader(), block.getTransactions(), config.network());
+        block.validateResults(block.getHeader(), block.getResults());
         // block votes validation skipped
         long t2 = System.nanoTime();
 

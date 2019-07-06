@@ -215,7 +215,8 @@ public class PendingManager implements Runnable, BlockchainListener {
         while (it.hasNext() && blockGasLimit > 0) {
             PendingTransaction tx = it.next();
 
-            long gasUsage = tx.transaction.isVMTransaction() ? tx.result.getGasUsed() : kernel.getConfig().spec().nonVMTransactionGasCost();
+            long gasUsage = tx.transaction.isVMTransaction() ? tx.result.getGasUsed()
+                    : kernel.getConfig().spec().nonVMTransactionGasCost();
             if (blockGasLimit > gasUsage) {
                 txs.add(tx);
                 blockGasLimit -= gasUsage;

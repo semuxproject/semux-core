@@ -35,7 +35,6 @@ import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
-import org.semux.core.TransactionType;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hash;
@@ -772,7 +771,8 @@ public class SemuxBft implements BftManager {
         byte[] data = chain.constructBlockData();
 
         // fetch pending transactions
-        final List<PendingManager.PendingTransaction> pending = pendingMgr.getPendingTransactions(config.poolBlockGasLimit());
+        final List<PendingManager.PendingTransaction> pending = pendingMgr
+                .getPendingTransactions(config.poolBlockGasLimit());
         final List<Transaction> pendingTxs = new ArrayList<>();
         final List<TransactionResult> pendingResults = new ArrayList<>();
 
@@ -792,7 +792,8 @@ public class SemuxBft implements BftManager {
         for (PendingManager.PendingTransaction pendingTx : pending) {
             Transaction tx = pendingTx.transaction;
             if (tx.isVMTransaction()) {
-                // Note: transactions that exceed the remaining block gas limit are ignored; however,
+                // Note: transactions that exceed the remaining block gas limit are ignored;
+                // however,
                 // this doesn't mean they're invalid because the gas usage will be less
                 // than gas limit.
                 if (tx.getGas() <= myRemainingBlockGas) {
@@ -854,7 +855,7 @@ public class SemuxBft implements BftManager {
 
         // [1] check block header
         Block latest = chain.getLatestBlock();
-        if (!block.validateHeader(latest.getHeader(), header)) {
+        if (!block.validateHeader(header, latest.getHeader())) {
             logger.warn("Invalid block header");
             return false;
         }

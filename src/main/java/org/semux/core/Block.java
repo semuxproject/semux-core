@@ -139,10 +139,10 @@ public class Block {
      * Validates block header.
      *
      * @param header
-     * @param previous
+     * @param parentHeader
      * @return
      */
-    public boolean validateHeader(BlockHeader previous, BlockHeader header) {
+    public boolean validateHeader(BlockHeader header, BlockHeader parentHeader) {
         if (header == null) {
             logger.warn("Header was null.");
             return false;
@@ -153,17 +153,17 @@ public class Block {
             return false;
         }
 
-        if (header.getNumber() != previous.getNumber() + 1) {
+        if (header.getNumber() != parentHeader.getNumber() + 1) {
             logger.warn("Header number was not one greater than previous block.");
             return false;
         }
 
-        if (!Arrays.equals(header.getParentHash(), previous.getHash())) {
+        if (!Arrays.equals(header.getParentHash(), parentHeader.getHash())) {
             logger.warn("Header parent hash was not equal to previous block hash.");
             return false;
         }
 
-        if (header.getTimestamp() <= previous.getTimestamp()) {
+        if (header.getTimestamp() <= parentHeader.getTimestamp()) {
             logger.warn("Header timestamp was before previous block.");
             return false;
         }
@@ -229,7 +229,7 @@ public class Block {
      * @param results
      * @return
      */
-    public boolean validateResults(BlockHeader header, List<TransactionResult> results) {
+    public static boolean validateResults(BlockHeader header, List<TransactionResult> results) {
         // validate results
         for (TransactionResult result : results) {
             if (result.getCode().isRejected()) {

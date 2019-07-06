@@ -118,7 +118,7 @@ public class BlockTest {
                 resultsRoot, stateRoot, data);
         Block block = new Block(header, transactions);
 
-        assertTrue(block.validateHeader(previousHeader, header));
+        assertTrue(block.validateHeader(header, previousHeader));
         assertTrue(block.validateTransactions(previousHeader, transactions, Network.DEVNET));
         assertTrue(block.validateResults(previousHeader, results));
     }
@@ -131,7 +131,7 @@ public class BlockTest {
                 resultsRoot, stateRoot, data);
         Block block = new Block(header, transactions);
 
-        assertTrue(block.validateHeader(previousHeader, header));
+        assertTrue(block.validateHeader(header, previousHeader));
         assertTrue(block.validateTransactions(previousHeader, Collections.singleton(transactions.get(0)), transactions,
                 Network.DEVNET));
         assertTrue(block.validateResults(previousHeader, results));
