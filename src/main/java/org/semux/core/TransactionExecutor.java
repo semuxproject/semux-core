@@ -142,7 +142,7 @@ public class TransactionExecutor {
                 continue;
             }
 
-            // TODO: check remaining gas
+            // FIXME: check remaining gas
 
             switch (type) {
             case TRANSFER: {

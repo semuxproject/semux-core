@@ -41,6 +41,11 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * Pending manager maintains all unconfirmed transactions, either from kernel or
  * network. All transactions are evaluated and propagated to peers if success.
  *
+ * Note that: the transaction results in pending manager are not reliable for VM
+ * transactions because these are evaluated against a dummy block. Nevertheless,
+ * transactions included by the pending manager are eligible for inclusion in
+ * block proposing phase.
+ *
  * TODO: sort transaction queue by fee, and other metrics
  *
  */
@@ -69,6 +74,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     private final BlockStore blockStore;
     private AccountState pendingAS;
     private DelegateState pendingDS;
+    private SemuxBlock dummyBlock;
 
     /**
      * Transaction queue.
@@ -103,6 +109,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         this.pendingAS = kernel.getBlockchain().getAccountState().track();
         this.pendingDS = kernel.getBlockchain().getDelegateState().track();
+        this.dummyBlock = createDummyBlock();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
@@ -244,6 +251,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         // reset state
         pendingAS = kernel.getBlockchain().getAccountState().track();
         pendingDS = kernel.getBlockchain().getDelegateState().track();
+        dummyBlock = createDummyBlock();
 
         // clear transaction pool
         List<PendingTransaction> txs = new ArrayList<>(transactions);
@@ -343,22 +351,11 @@ public class PendingManager implements Runnable, BlockchainListener {
         // delayed for the next event loop of PendingManager.
         while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
 
-            // TODO: introduce block state (open, closed, signed, imported)
-
-            // create a dummy block (Note: VM transaction results may depends on the block)
-            Blockchain chain = kernel.getBlockchain();
-            Block prevBlock = chain.getLatestBlock();
-            BlockHeader blockHeader = new BlockHeader(
-                    prevBlock.getNumber() + 1,
-                    new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), Bytes.EMPTY_BYTES,
-                    Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
-            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
-
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
             TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore).execute(tx,
-                    as, ds, block, chain);
+                    as, ds, dummyBlock, kernel.getBlockchain());
 
             if (result.getCode().isAcceptable()) {
                 // commit state updates
@@ -407,6 +404,16 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     private ByteArray createKey(byte[] acc, long nonce) {
         return ByteArray.of(Bytes.merge(acc, Bytes.of(nonce)));
+    }
+
+    private SemuxBlock createDummyBlock() {
+        Blockchain chain = kernel.getBlockchain();
+        Block prevBlock = chain.getLatestBlock();
+        BlockHeader blockHeader = new BlockHeader(
+                prevBlock.getNumber() + 1,
+                new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), Bytes.EMPTY_BYTES,
+                Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
+        return new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
     }
 
     /**

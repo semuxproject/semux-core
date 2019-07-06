@@ -755,85 +755,62 @@ public class SemuxBft implements BftManager {
     protected Block proposeBlock() {
         long t1 = TimeUtil.currentTimeMillis();
 
-        // construct block
+        // construct block template
         BlockHeader parent = chain.getBlockHeader(height - 1);
         long number = height;
         byte[] prevHash = parent.getHash();
         long timestamp = TimeUtil.currentTimeMillis();
-        /*
-         * in case the previous block timestamp is drifted too munch, adjust this block
-         * timestamp to avoid invalid blocks (triggered by timestamp rule).
-         *
-         * See https://github.com/semuxproject/semux-core/issues/1
-         */
         timestamp = timestamp > parent.getTimestamp() ? timestamp : parent.getTimestamp() + 1;
-
         byte[] data = chain.constructBlockData();
-
-        // fetch pending transactions
-        final List<PendingManager.PendingTransaction> pending = pendingMgr
-                .getPendingTransactions(config.poolBlockGasLimit());
-        final List<Transaction> pendingTxs = new ArrayList<>();
-        final List<TransactionResult> pendingResults = new ArrayList<>();
-
-        // for any VM requests, actually need to execute them
-        AccountState as = accountState.track();
-        DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
         BlockHeader tempHeader = new BlockHeader(height, coinbase.toAddress(), prevHash, timestamp, new byte[0],
                 new byte[0], new byte[0], data);
 
+        // fetch pending transactions
+        final List<PendingManager.PendingTransaction> pendingTxs = pendingMgr
+                .getPendingTransactions(config.poolBlockGasLimit());
+        final List<Transaction> includedTxs = new ArrayList<>();
+        final List<TransactionResult> includedResults = new ArrayList<>();
+
+        AccountState as = accountState.track();
+        DelegateState ds = delegateState.track();
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
         SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
         // only propose gas used up to configured block gas limit
-        long remainingBlockGas = semuxBlock.getGasLimit();
-        long myRemainingBlockGas = config.poolBlockGasLimit();
-
-        for (PendingManager.PendingTransaction pendingTx : pending) {
+        long myBlockGasLimit = config.poolBlockGasLimit();
+        long totalGasUsed = 0;
+        for (PendingManager.PendingTransaction pendingTx : pendingTxs) {
             Transaction tx = pendingTx.transaction;
-            if (tx.isVMTransaction()) {
-                // Note: transactions that exceed the remaining block gas limit are ignored;
-                // however,
-                // this doesn't mean they're invalid because the gas usage will be less
-                // than gas limit.
-                if (tx.getGas() <= myRemainingBlockGas) {
-                    // FIXME: transaction executor does not know the remaining gas in block
-                    TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain);
 
-                    // only include transaction that's acceptable
-                    if (result.getCode().isAcceptable()) {
-                        pendingResults.add(result);
-                        pendingTxs.add(tx);
-
-                        myRemainingBlockGas -= result.getGasUsed();
-                    }
+            // re-evaluate the transaction
+            AccountState asTrack = as.track(); // use another level of track to allow rollback
+            DelegateState dsTrack = ds.track();
+            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, chain);
+            if (result.getCode().isAcceptable()) {
+                long gasUsed = tx.isVMTransaction() ? result.getGasUsed() : config.spec().nonVMTransactionGasCost();
+                if (totalGasUsed + gasUsed > myBlockGasLimit) {
+                    break; // stop including blocks
                 }
-            } else {
-                // FIXME: this is wrong because the results from pending manager may be wrong!!!
-                if (config.spec().nonVMTransactionGasCost() <= myRemainingBlockGas
-                        && pendingTx.result.getCode().isAcceptable()) {
-                    TransactionResult result = pendingTx.result;
 
-                    if (result.getCode().isAcceptable()) {
-                        pendingResults.add(pendingTx.result);
-                        pendingTxs.add(pendingTx.transaction);
-                        myRemainingBlockGas -= config.spec().nonVMTransactionGasCost();
-                    }
-                }
+                includedTxs.add(tx);
+                includedResults.add(result);
+                totalGasUsed += gasUsed;
+                asTrack.commit();
+                dsTrack.commit();
             }
         }
 
         // compute roots
-        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pendingTxs);
-        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pendingResults);
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(includedTxs);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(includedResults);
         byte[] stateRoot = Bytes.EMPTY_HASH;
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);
-        Block block = new Block(header, pendingTxs, pendingResults);
+        Block block = new Block(header, includedTxs, includedResults);
 
         long t2 = TimeUtil.currentTimeMillis();
-        logger.debug("Block creation: # txs = {}, time = {} ms", pendingTxs.size(), t2 - t1);
+        logger.debug("Block creation: # txs = {}, time = {} ms", includedTxs.size(), t2 - t1);
 
         return block;
     }

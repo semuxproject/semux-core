@@ -19,7 +19,7 @@ public class ProposalMessage extends Message {
 
         this.proposal = proposal;
 
-        // FIXME: consider wrapping by simple codec
+        // TODO: consider wrapping by simple codec
         this.body = proposal.toBytes();
     }
 

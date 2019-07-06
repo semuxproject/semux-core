@@ -19,7 +19,7 @@ public class NewViewMessage extends Message {
 
         this.proof = proof;
 
-        // FIXME: consider wrapping by simple codec
+        // TODO: consider wrapping by simple codec
         this.body = proof.toBytes();
     }
 

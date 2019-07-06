@@ -19,7 +19,7 @@ public class VoteMessage extends Message {
 
         this.vote = vote;
 
-        // FIXME: consider wrapping by simple codec
+        // TODO: consider wrapping by simple codec
         this.body = vote.toBytes();
     }
 
