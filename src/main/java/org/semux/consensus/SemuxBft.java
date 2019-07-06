@@ -432,7 +432,7 @@ public class SemuxBft implements BftManager {
 
             // [2] add the block to chain
             logger.info(block.toString());
-            applyBlock(block);
+            chain.importBlock(block, false);
         } else {
             sync(height + 1);
         }
@@ -761,7 +761,7 @@ public class SemuxBft implements BftManager {
         byte[] prevHash = parent.getHash();
         long timestamp = TimeUtil.currentTimeMillis();
         timestamp = timestamp > parent.getTimestamp() ? timestamp : parent.getTimestamp() + 1;
-        byte[] data = chain.constructBlockData();
+        byte[] data = chain.constructBlockHeaderDataField();
         BlockHeader tempHeader = new BlockHeader(height, coinbase.toAddress(), prevHash, timestamp, new byte[0],
                 new byte[0], new byte[0], data);
 
@@ -873,8 +873,7 @@ public class SemuxBft implements BftManager {
 
         // [3] evaluate transactions
         // When we are applying or validating block, we do not track transactions
-        // against our own local limit, only
-        // when proposing
+        // against our own local limit, only when proposing
         List<TransactionResult> results = exec.execute(transactions, as, ds,
                 new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain, 0);
         block.setResults(results);
@@ -911,70 +910,6 @@ public class SemuxBft implements BftManager {
                 .collect(Collectors.toList());
 
         return unvalidatedTransactions;
-    }
-
-    /**
-     * Apply a block to the chain.
-     *
-     * @param block
-     */
-    protected void applyBlock(Block block) {
-
-        long t1 = TimeUtil.currentTimeMillis();
-
-        BlockHeader header = block.getHeader();
-        List<Transaction> transactions = block.getTransactions();
-        long number = header.getNumber();
-
-        if (number != chain.getLatestBlockNumber() + 1) {
-            throw new SemuxBftException("Applying wrong block: number = " + number);
-        }
-
-        // [1] check block header, skipped
-
-        // [2] check transactions and results, skipped
-
-        AccountState as = chain.getAccountState().track();
-        DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
-
-        // [3] evaluate all transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain, 0);
-        if (!block.validateResults(header, results)) {
-            logger.warn("Invalid transactions");
-            return;
-        }
-
-        // [4] evaluate votes, skipped
-
-        // [5] apply block reward and tx fees
-        Amount reward = Block.getBlockReward(block, config);
-
-        if (reward.gt0()) {
-            as.adjustAvailable(block.getCoinbase(), reward);
-        }
-
-        // [6] commit the updates
-        as.commit();
-        ds.commit();
-
-        WriteLock lock = kernel.getStateLock().writeLock();
-        lock.lock();
-        try {
-            // [7] flush state to disk
-            chain.getAccountState().commit();
-            chain.getDelegateState().commit();
-
-            // [8] add block to chain
-            chain.addBlock(block);
-        } finally {
-            lock.unlock();
-        }
-
-        long t2 = TimeUtil.currentTimeMillis();
-        logger.debug("Block apply: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
-
     }
 
     public enum State {

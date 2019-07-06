@@ -428,22 +428,27 @@ public class SemuxSync implements SyncManager {
 
         // Validate and apply block to the chain
         if (pair != null) {
-            // If fastSync is true - skip vote validation
-            if (validateApplyBlock(pair.getKey(), !fastSync)) {
+            Block block = pair.getKey();
+            boolean validateVotes = !fastSync; // If fastSync is true, skip vote validation
+
+            if (chain.importBlock(block, validateVotes)) {
+                // update current height
+                current.set(block.getNumber() + 1);
+
                 synchronized (lock) {
-                    if (toDownload.remove(pair.getKey().getNumber())) {
+                    if (toDownload.remove(block.getNumber())) {
                         growToDownloadQueue();
                     }
-                    toComplete.remove(pair.getKey().getNumber());
-                    if (pair.getKey().getNumber() == lastBlockInSet) {
-                        logger.info("{}", pair.getKey()); // Log last block in set
+                    toComplete.remove(block.getNumber());
+                    if (block.getNumber() == lastBlockInSet) {
+                        logger.info("{}", block); // Log last block in set
                         fastSync = false;
                     } else if (!fastSync) {
-                        logger.info("{}", pair.getKey()); // Log all blocks
+                        logger.info("{}", block); // Log all blocks
                     }
                 }
             } else {
-                handleInvalidBlock(pair.getKey(), pair.getValue());
+                handleInvalidBlock(block, pair.getValue());
             }
         }
     }
@@ -469,12 +474,13 @@ public class SemuxSync implements SyncManager {
                         }
                     } else if (p.getKey().getNumber() == lastBlockInSet) {
                         iterator.remove();
-                        // Validate votes for last block in set
-                        if (validateBlockVotes(p.getKey()) && p.getKey().getHeader().validate()) {
-                            toFinalize.put(p.getKey().getNumber(), p);
-                            toComplete.remove(p.getKey().getNumber());
+
+                        Block block = p.getKey();// Validate votes for last block in set
+                        if (chain.importBlock(block, true)) {
+                            toFinalize.put(block.getNumber(), p);
+                            toComplete.remove(block.getNumber());
                         } else {
-                            handleInvalidBlock(p.getKey(), p.getValue());
+                            handleInvalidBlock(block, p.getValue());
                             return;
                         }
                     } else {
@@ -504,172 +510,6 @@ public class SemuxSync implements SyncManager {
         }
         // disconnect if the peer sends us invalid block
         channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);
-    }
-
-    /**
-     * Check if a block is valid, and apply to the chain if yes. Votes are validated
-     * only if validateVotes is true.
-     *
-     * @param block
-     * @param validateVotes
-     * @return
-     */
-    protected boolean validateApplyBlock(Block block, boolean validateVotes) {
-        AccountState as = chain.getAccountState().track();
-        DelegateState ds = chain.getDelegateState().track();
-        return validateBlock(block, as, ds, validateVotes) && applyBlock(block, as, ds);
-    }
-
-    protected boolean validateApplyBlock(Block block) {
-        return validateApplyBlock(block, true);
-    }
-
-    /**
-     * Validate the block. Votes are validated only if validateVotes is true.
-     *
-     * @param block
-     * @param asSnapshot
-     * @param dsSnapshot
-     * @param validateVotes
-     * @return
-     */
-    protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot,
-            boolean validateVotes) {
-        BlockHeader header = block.getHeader();
-        List<Transaction> transactions = block.getTransactions();
-
-        // [1] check block header
-        Block latest = chain.getLatestBlock();
-        if (!block.validateHeader(header, latest.getHeader())) {
-            logger.error("Invalid block header");
-            return false;
-        }
-
-        // validate checkpoint
-        if (config.checkpoints().containsKey(header.getNumber()) &&
-                !Arrays.equals(header.getHash(), config.checkpoints().get(header.getNumber()))) {
-            logger.error("Checkpoint validation failed, checkpoint is {} => {}, getting {}", header.getNumber(),
-                    Hex.encode0x(config.checkpoints().get(header.getNumber())),
-                    Hex.encode0x(header.getHash()));
-            return false;
-        }
-
-        // blocks should never be forged by coinbase magic account
-        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
-            logger.error("A block forged by the coinbase magic account is not allowed");
-            return false;
-        }
-
-        // [2] check transactions and results
-        if (!block.validateTransactions(header, transactions, config.network())) {
-            logger.error("Invalid block transactions");
-            return false;
-        }
-        if (!block.validateResults(header, block.getResults())) {
-            logger.error("Invalid results");
-            return false;
-        }
-
-        if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
-            logger.error("Duplicated transaction hash is not allowed");
-            return false;
-        }
-
-        // [3] evaluate transactions
-        TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
-        List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
-                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain, 0);
-        block.setResults(results);
-
-        if (!block.validateResults(header, results)) {
-            logger.error("Invalid transactions");
-            return false;
-        }
-
-        // [4] evaluate votes
-        if (validateVotes) {
-            return validateBlockVotes(block);
-        }
-        return true;
-    }
-
-    protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
-        return validateBlock(block, asSnapshot, dsSnapshot, true);
-    }
-
-    protected boolean validateBlockVotes(Block block) {
-        int maxValidators = config.spec().getNumberOfValidators(block.getNumber());
-
-        List<String> validatorList = chain.getValidators();
-
-        if (validatorList.size() > maxValidators) {
-            validatorList = validatorList.subList(0, maxValidators);
-        }
-        Set<String> validators = new HashSet<>(validatorList);
-
-        int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
-
-        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
-                block.getHash());
-        byte[] encoded = vote.getEncoded();
-
-        // check validity of votes
-        if (block.getVotes().stream().anyMatch(sig -> !validators.contains(Hex.encode(sig.getAddress())))) {
-            logger.warn("Block votes are invalid");
-            return false;
-        }
-
-        if (!Key.isVerifyBatchSupported()) {
-            if (!block.getVotes().stream()
-                    .allMatch(sig -> Key.verify(encoded, sig))) {
-                logger.warn("Block votes are invalid");
-                return false;
-            }
-        } else {
-            if (!Key.verifyBatch(Collections.nCopies(block.getVotes().size(), encoded), block.getVotes())) {
-                logger.warn("Block votes are invalid");
-                return false;
-            }
-        }
-
-        // at least two thirds voters
-        if (block.getVotes().stream()
-                .map(sig -> new ByteArray(sig.getA()))
-                .collect(Collectors.toSet()).size() < twoThirds) {
-            logger.warn("Not enough votes, needs 2/3+ twoThirds = {}, block = {}", twoThirds, block);
-            return false;
-        }
-
-        return true;
-    }
-
-    protected boolean applyBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
-        // [5] apply block reward and tx fees
-        Amount reward = Block.getBlockReward(block, config);
-
-        if (reward.gt0()) {
-            asSnapshot.adjustAvailable(block.getCoinbase(), reward);
-        }
-
-        // [6] commit the updates
-        asSnapshot.commit();
-        dsSnapshot.commit();
-
-        WriteLock writeLock = kernel.getStateLock().writeLock();
-        writeLock.lock();
-        try {
-            // [7] flush state to disk
-            chain.getAccountState().commit();
-            chain.getDelegateState().commit();
-
-            // [8] add block to chain
-            chain.addBlock(block);
-        } finally {
-            writeLock.unlock();
-        }
-
-        current.set(block.getNumber() + 1);
-        return true;
     }
 
     @Override

@@ -7,6 +7,7 @@
 package org.semux.core;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.state.AccountState;
@@ -212,5 +213,28 @@ public interface Blockchain {
      */
     boolean isForkActivated(Fork fork);
 
-    byte[] constructBlockData();
+    /**
+     * Returns the date field for the next block, based on fork configuration.
+     * 
+     * @return
+     */
+    byte[] constructBlockHeaderDataField();
+
+    /**
+     * Returns the state lock.
+     *
+     * @return
+     */
+    ReentrantReadWriteLock getStateLock();
+
+    /**
+     * Imports a new block.
+     *
+     * @param block
+     *            the block to import
+     * @param validateVotes
+     *            whether to validate the block votes
+     * @return
+     */
+    boolean importBlock(Block block, boolean validateVotes);
 }
