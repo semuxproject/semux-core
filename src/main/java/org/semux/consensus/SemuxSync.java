@@ -578,7 +578,7 @@ public class SemuxSync implements SyncManager {
         // [3] evaluate transactions
         TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
         List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
-                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain);
+                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain, 0);
         block.setResults(results);
 
         if (!block.validateResults(header, results)) {

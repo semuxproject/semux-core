@@ -782,10 +782,13 @@ public class SemuxBft implements BftManager {
         for (PendingManager.PendingTransaction pendingTx : pendingTxs) {
             Transaction tx = pendingTx.transaction;
 
+            // FIXME: the vm transaction executor check block gas limit based on gas not
+            // gasUsed
+
             // re-evaluate the transaction
             AccountState asTrack = as.track(); // use another level of track to allow rollback
             DelegateState dsTrack = ds.track();
-            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, chain);
+            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, chain, 0);
             if (result.getCode().isAcceptable()) {
                 long gasUsed = tx.isVMTransaction() ? result.getGasUsed() : config.spec().nonVMTransactionGasCost();
                 if (totalGasUsed + gasUsed > myBlockGasLimit) {
@@ -817,7 +820,6 @@ public class SemuxBft implements BftManager {
 
     /**
      * Check if a block proposal is success.
-     *
      */
     protected boolean validateBlockProposal(BlockHeader header, List<Transaction> transactions) {
         Block block = new Block(header, transactions);
@@ -874,7 +876,7 @@ public class SemuxBft implements BftManager {
         // against our own local limit, only
         // when proposing
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain);
+                new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain, 0);
         block.setResults(results);
 
         if (!block.validateResults(header, results)) {
@@ -938,7 +940,7 @@ public class SemuxBft implements BftManager {
 
         // [3] evaluate all transactions
         List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain);
+                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain, 0);
         if (!block.validateResults(header, results)) {
             logger.warn("Invalid transactions");
             return;

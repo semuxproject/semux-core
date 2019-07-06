@@ -229,7 +229,7 @@ public class Block {
      * @param results
      * @return
      */
-    public static boolean validateResults(BlockHeader header, List<TransactionResult> results) {
+    public boolean validateResults(BlockHeader header, List<TransactionResult> results) {
         // validate results
         for (TransactionResult result : results) {
             if (result.getCode().isRejected()) {

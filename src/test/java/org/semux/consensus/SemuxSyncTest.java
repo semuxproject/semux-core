@@ -326,7 +326,7 @@ public class SemuxSyncTest {
         TestUtils.setInternalState(sync, "toProcess", toProcess, SemuxSync.class);
         AtomicLong target = TestUtils.getInternalState(sync, "target", SemuxSync.class);
         target.set(validatorInterval - 1); // when the remaining number of blocks to sync < validatorInterval fastSync
-                                           // is not activated
+        // is not activated
 
         Block block = kernelRule.createBlock(Collections.emptyList());
         Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_REJECT, block.getNumber(), block.getView(),

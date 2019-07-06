@@ -632,7 +632,6 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String to = key.toAddressString();
         String fee = "5432100";
         String nonce = null;
-        Boolean validateNonce = null;
         String data = Hex.encode(Bytes.of("test_transfer"));
 
         DoTransactionResponse response = api.transfer(from, to, value, fee, nonce, data);

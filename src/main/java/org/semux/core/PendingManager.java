@@ -47,7 +47,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * block proposing phase.
  *
  * TODO: sort transaction queue by fee, and other metrics
- *
  */
 public class PendingManager implements Runnable, BlockchainListener {
 
@@ -355,7 +354,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
             TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore).execute(tx,
-                    as, ds, dummyBlock, kernel.getBlockchain());
+                    as, ds, dummyBlock, kernel.getBlockchain(), 0);
 
             if (result.getCode().isAcceptable()) {
                 // commit state updates
