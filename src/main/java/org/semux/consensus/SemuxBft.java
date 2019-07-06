@@ -876,6 +876,7 @@ public class SemuxBft implements BftManager {
             validBlocks.put(ByteArray.of(block.getHash()), block);
             return true;
         } catch (Exception e) {
+            logger.error("Unexpected exception during block proposal validation", e);
             return false;
         }
     }

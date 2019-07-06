@@ -728,6 +728,7 @@ public class BlockchainImpl implements Blockchain {
 
             return true;
         } catch (Exception e) {
+            logger.error("Unexpected exception during block validation", e);
             return false;
         }
     }

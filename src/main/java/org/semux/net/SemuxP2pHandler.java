@@ -159,7 +159,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
                 // doesn't enable new handshake protocol.
             }
         } else {
-            System.out.println("Sending v1 message");
             if (channel.isOutbound()) {
                 msgQueue.sendMessage(new org.semux.net.msg.p2p.handshake.v1.HelloMessage(
                         config.network(), config.networkVersion(), client.getPeerId(),
