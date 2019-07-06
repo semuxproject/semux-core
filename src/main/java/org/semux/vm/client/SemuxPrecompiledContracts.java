@@ -33,8 +33,6 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
     private static final Pair<Boolean, byte[]> success = Pair.of(true, ArrayUtils.EMPTY_BYTE_ARRAY);
     private static final Pair<Boolean, byte[]> failure = Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
 
-    // TODO: add unit test
-
     @Override
     public PrecompiledContract getContractForAddress(DataWord address) {
 
