@@ -46,8 +46,6 @@ public class Peer {
 
     /**
      * The supported capabilities.
-     *
-     * TODO: use CapabilityList once we fully remove handshake v1.
      */
     private final String[] capabilities;
 

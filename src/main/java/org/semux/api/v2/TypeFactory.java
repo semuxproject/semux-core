@@ -173,8 +173,6 @@ public class TypeFactory {
                 .internalTransactions(result.getInternalTransactions().stream()
                         .map(TypeFactory::internalTransactionType).collect(Collectors.toList()))
                 .returnData(Hex.encode0x(result.getReturnData()));
-
-        // TODO: add block number
     }
 
     private static LogInfoType logInfoType(LogInfo log) {
