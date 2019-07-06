@@ -234,7 +234,14 @@ public interface Blockchain {
      *            the block to import
      * @param validateVotes
      *            whether to validate the block votes
-     * @return
+     * @return true if the block is successfully imported; otherwise, false
      */
     boolean importBlock(Block block, boolean validateVotes);
+
+    /**
+     * Validate the block votes only.
+     *
+     * @return true if the votes are valid, otherwise false
+     */
+    boolean validateBlockVotes(Block block);
 }

@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
 import org.ethereum.vm.client.BlockStore;
@@ -25,7 +24,6 @@ import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.consensus.SemuxBft.Event.Type;
 import org.semux.consensus.exception.SemuxBftException;
-import org.semux.core.Amount;
 import org.semux.core.BftManager;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;

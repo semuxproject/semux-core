@@ -727,7 +727,8 @@ public class BlockchainImpl implements Blockchain {
         return true;
     }
 
-    protected boolean validateBlockVotes(Block block) {
+    @Override
+    public boolean validateBlockVotes(Block block) {
         int maxValidators = config.spec().getNumberOfValidators(block.getNumber());
 
         List<String> validatorList = this.getValidators();

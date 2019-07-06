@@ -13,16 +13,13 @@ import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
@@ -33,26 +30,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.config.Config;
-import org.semux.config.Constants;
-import org.semux.core.Amount;
 import org.semux.core.Block;
-import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.SyncManager;
-import org.semux.core.Transaction;
-import org.semux.core.TransactionExecutor;
-import org.semux.core.TransactionResult;
-import org.semux.core.state.AccountState;
-import org.semux.core.state.DelegateState;
-import org.semux.crypto.Hex;
-import org.semux.crypto.Key;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
@@ -60,9 +46,7 @@ import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.BlockPartsMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
-import org.semux.util.ByteArray;
 import org.semux.util.TimeUtil;
-import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -475,8 +459,8 @@ public class SemuxSync implements SyncManager {
                     } else if (p.getKey().getNumber() == lastBlockInSet) {
                         iterator.remove();
 
-                        Block block = p.getKey();// Validate votes for last block in set
-                        if (chain.importBlock(block, true)) {
+                        Block block = p.getKey(); // Validate votes for last block in set
+                        if (chain.validateBlockVotes(block)) {
                             toFinalize.put(block.getNumber(), p);
                             toComplete.remove(block.getNumber());
                         } else {
