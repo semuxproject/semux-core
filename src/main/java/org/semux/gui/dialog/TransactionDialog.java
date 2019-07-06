@@ -42,6 +42,7 @@ public class TransactionDialog extends JDialog {
         JLabel lblData = new JLabel(GuiMessages.get("Data") + ":");
 
         JLabel lblSucceeded = new JLabel(GuiMessages.get("Success"));
+        JLabel lblGasPrice = new JLabel(GuiMessages.get("GasPrice"));
         JLabel lblGasProvided = new JLabel(GuiMessages.get("GasProvided"));
         JLabel lblGasUsed = new JLabel(GuiMessages.get("GasUsed"));
         JLabel lblOutput = new JLabel(GuiMessages.get("Output"));
@@ -69,6 +70,9 @@ public class TransactionDialog extends JDialog {
         nonce.setName("nonceText");
         JLabel timestamp = new JLabel(SwingUtil.formatTimestamp(tx.getTimestamp()));
         timestamp.setName("timestampText");
+
+        JLabel gasPrice = new JLabel(SwingUtil.formatAmount(tx.getGasPrice()));
+        gasPrice.setName("gasPriceText");
 
         JLabel gasProvided = new JLabel(SwingUtil.formatNumber(tx.getGas()));
         gasProvided.setName("gasProvidedText");
@@ -99,8 +103,9 @@ public class TransactionDialog extends JDialog {
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                         .addComponent(lblOutput)
                         .addComponent(lblGasUsed)
-                        .addComponent(lblGasProvided)
                         .addComponent(lblSucceeded)
+                        .addComponent(lblGasProvided)
+                        .addComponent(lblGasPrice)
                         .addComponent(lblData)
                         .addComponent(lblTimestamp)
                         .addComponent(lblNonce)
@@ -121,8 +126,9 @@ public class TransactionDialog extends JDialog {
                         .addComponent(nonce)
                         .addComponent(timestamp)
                         .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(success)
+                        .addComponent(gasPrice)
                         .addComponent(gasProvided)
+                        .addComponent(success)
                         .addComponent(gasUsed)
                         .addComponent(outputScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(19, Short.MAX_VALUE))
@@ -168,12 +174,16 @@ public class TransactionDialog extends JDialog {
                         .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblSucceeded)
-                        .addComponent(success))
+                        .addComponent(lblGasPrice)
+                        .addComponent(gasPrice))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                            .addComponent(lblGasProvided)
-                            .addComponent(gasProvided))
+                        .addComponent(lblGasProvided)
+                        .addComponent(gasProvided))
+                    .addPreferredGap(ComponentPlacement.UNRELATED)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(lblSucceeded)
+                        .addComponent(success))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                             .addComponent(lblGasUsed)

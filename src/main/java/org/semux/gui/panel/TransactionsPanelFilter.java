@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -200,7 +201,7 @@ public class TransactionsPanelFilter {
             T existing = getSelectedValue();
             @SuppressWarnings("unchecked")
             T newValue = (T) (anObject instanceof ComboBoxItem ? ((ComboBoxItem<T>) anObject).getValue() : anObject);
-            if (existing != newValue && (existing == null || !existing.equals(newValue))) {
+            if (!Objects.equals(existing, newValue)) {
                 super.setSelectedItem(anObject);
                 List<TransactionsPanel.StatusTransaction> filteredTransactions = getFilteredTransactions();
                 tableModel.setData(filteredTransactions);
