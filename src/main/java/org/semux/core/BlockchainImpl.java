@@ -669,62 +669,67 @@ public class BlockchainImpl implements Blockchain {
      */
     protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot,
             boolean validateVotes) {
-        BlockHeader header = block.getHeader();
-        List<Transaction> transactions = block.getTransactions();
+        try {
+            BlockHeader header = block.getHeader();
+            List<Transaction> transactions = block.getTransactions();
 
-        // [1] check block header
-        Block latest = this.getLatestBlock();
-        if (!block.validateHeader(header, latest.getHeader())) {
-            logger.error("Invalid block header");
+            // [1] check block header
+            Block latest = this.getLatestBlock();
+            if (!block.validateHeader(header, latest.getHeader())) {
+                logger.error("Invalid block header");
+                return false;
+            }
+
+            // validate checkpoint
+            if (config.checkpoints().containsKey(header.getNumber()) &&
+                    !Arrays.equals(header.getHash(), config.checkpoints().get(header.getNumber()))) {
+                logger.error("Checkpoint validation failed, checkpoint is {} => {}, getting {}", header.getNumber(),
+                        Hex.encode0x(config.checkpoints().get(header.getNumber())),
+                        Hex.encode0x(header.getHash()));
+                return false;
+            }
+
+            // blocks should never be forged by coinbase magic account
+            if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
+                logger.error("A block forged by the coinbase magic account is not allowed");
+                return false;
+            }
+
+            // [2] check transactions and results
+            if (!block.validateTransactions(header, transactions, config.network())) {
+                logger.error("Invalid block transactions");
+                return false;
+            }
+            if (!block.validateResults(header, block.getResults())) {
+                logger.error("Invalid results");
+                return false;
+            }
+
+            if (transactions.stream().anyMatch(tx -> this.hasTransaction(tx.getHash()))) {
+                logger.error("Duplicated transaction hash is not allowed");
+                return false;
+            }
+
+            // [3] evaluate transactions
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
+            List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
+                    new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this, 0);
+            block.setResults(results);
+
+            if (!block.validateResults(header, results)) {
+                logger.error("Invalid transactions");
+                return false;
+            }
+
+            // [4] evaluate votes
+            if (validateVotes) {
+                return validateBlockVotes(block);
+            }
+
+            return true;
+        } catch (Exception e) {
             return false;
         }
-
-        // validate checkpoint
-        if (config.checkpoints().containsKey(header.getNumber()) &&
-                !Arrays.equals(header.getHash(), config.checkpoints().get(header.getNumber()))) {
-            logger.error("Checkpoint validation failed, checkpoint is {} => {}, getting {}", header.getNumber(),
-                    Hex.encode0x(config.checkpoints().get(header.getNumber())),
-                    Hex.encode0x(header.getHash()));
-            return false;
-        }
-
-        // blocks should never be forged by coinbase magic account
-        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
-            logger.error("A block forged by the coinbase magic account is not allowed");
-            return false;
-        }
-
-        // [2] check transactions and results
-        if (!block.validateTransactions(header, transactions, config.network())) {
-            logger.error("Invalid block transactions");
-            return false;
-        }
-        if (!block.validateResults(header, block.getResults())) {
-            logger.error("Invalid results");
-            return false;
-        }
-
-        if (transactions.stream().anyMatch(tx -> this.hasTransaction(tx.getHash()))) {
-            logger.error("Duplicated transaction hash is not allowed");
-            return false;
-        }
-
-        // [3] evaluate transactions
-        TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
-        List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
-                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this, 0);
-        block.setResults(results);
-
-        if (!block.validateResults(header, results)) {
-            logger.error("Invalid transactions");
-            return false;
-        }
-
-        // [4] evaluate votes
-        if (validateVotes) {
-            return validateBlockVotes(block);
-        }
-        return true;
     }
 
     @Override

@@ -810,75 +810,74 @@ public class SemuxBft implements BftManager {
     }
 
     /**
-     * Check if a block proposal is success.
+     * Check if a block proposal is valid. TODO: too much redundant code with
+     * {@link org.semux.core.BlockchainImpl#validateBlock(Block, AccountState, DelegateState, boolean)}
+     * .
      */
     protected boolean validateBlockProposal(BlockHeader header, List<Transaction> transactions) {
-        Block block = new Block(header, transactions);
-        return validateBlockProposal(block);
-    }
+        try {
+            Block block = new Block(header, transactions);
+            long t1 = TimeUtil.currentTimeMillis();
 
-    protected boolean validateBlockProposal(Block block) {
-        BlockHeader header = block.getHeader();
-        List<Transaction> transactions = block.getTransactions();
+            // [1] check block header
+            Block latest = chain.getLatestBlock();
+            if (!block.validateHeader(header, latest.getHeader())) {
+                logger.warn("Invalid block header");
+                return false;
+            }
 
-        long t1 = TimeUtil.currentTimeMillis();
+            if (header.getTimestamp() - TimeUtil.currentTimeMillis() > config.bftMaxBlockTimeDrift()) {
+                logger.warn("A block in the future is not allowed");
+                return false;
+            }
 
-        // [1] check block header
-        Block latest = chain.getLatestBlock();
-        if (!block.validateHeader(header, latest.getHeader())) {
-            logger.warn("Invalid block header");
+            if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
+                logger.warn("A block forged by the coinbase magic account is not allowed");
+                return false;
+            }
+
+            if (!Arrays.equals(header.getCoinbase(), proposal.getSignature().getAddress())) {
+                logger.warn("The coinbase should always equal to the proposer's address");
+                return false;
+            }
+
+            // [2] check transactions and results (skipped)
+            List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
+
+            if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
+                logger.warn("Invalid block transactions");
+                return false;
+            }
+
+            if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
+                logger.warn("Duplicated transaction hash is not allowed");
+                return false;
+            }
+
+            AccountState as = accountState.track();
+            DelegateState ds = delegateState.track();
+            TransactionExecutor exec = new TransactionExecutor(config, blockStore);
+
+            // [3] evaluate transactions
+            // When we are applying or validating block, we do not track transactions
+            // against our own local limit, only when proposing
+            List<TransactionResult> results = exec.execute(transactions, as, ds,
+                    new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain, 0);
+            block.setResults(results);
+
+            if (!block.validateResults(header, results)) {
+                logger.warn("Invalid transactions");
+                return false;
+            }
+
+            long t2 = TimeUtil.currentTimeMillis();
+            logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
+
+            validBlocks.put(ByteArray.of(block.getHash()), block);
+            return true;
+        } catch (Exception e) {
             return false;
         }
-
-        if (header.getTimestamp() - TimeUtil.currentTimeMillis() > config.bftMaxBlockTimeDrift()) {
-            logger.warn("A block in the future is not allowed");
-            return false;
-        }
-
-        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
-            logger.warn("A block forged by the coinbase magic account is not allowed");
-            return false;
-        }
-
-        if (!Arrays.equals(header.getCoinbase(), proposal.getSignature().getAddress())) {
-            logger.warn("The coinbase should always equal to the proposer's address");
-            return false;
-        }
-
-        // [2] check transactions and results (skipped)
-        List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
-
-        if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
-            logger.warn("Invalid block transactions");
-            return false;
-        }
-
-        if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
-            logger.warn("Duplicated transaction hash is not allowed");
-            return false;
-        }
-
-        AccountState as = accountState.track();
-        DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
-
-        // [3] evaluate transactions
-        // When we are applying or validating block, we do not track transactions
-        // against our own local limit, only when proposing
-        List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain, 0);
-        block.setResults(results);
-
-        if (!block.validateResults(header, results)) {
-            logger.warn("Invalid transactions");
-            return false;
-        }
-
-        long t2 = TimeUtil.currentTimeMillis();
-        logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
-
-        validBlocks.put(ByteArray.of(block.getHash()), block);
-        return true;
     }
 
     /**
