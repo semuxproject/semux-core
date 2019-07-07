@@ -16,7 +16,7 @@ import java.util.Set;
 import org.semux.Network;
 import org.semux.core.Amount;
 import org.semux.core.Fork;
-import org.semux.net.CapabilityList;
+import org.semux.net.CapabilityTreeSet;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 
@@ -95,7 +95,7 @@ public interface Config {
      * 
      * @return
      */
-    CapabilityList getClientCapabilities();
+    CapabilityTreeSet getClientCapabilities();
 
     // =========================
     // P2P

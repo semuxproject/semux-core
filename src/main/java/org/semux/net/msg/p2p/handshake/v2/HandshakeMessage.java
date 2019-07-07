@@ -13,7 +13,6 @@ import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.net.CapabilityList;
 import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageCode;
@@ -30,7 +29,7 @@ public abstract class HandshakeMessage extends Message {
     protected final int port;
 
     protected final String clientId;
-    protected final CapabilityList capabilities;
+    protected final String[] capabilities;
 
     protected final long latestBlockNumber;
 
@@ -40,7 +39,7 @@ public abstract class HandshakeMessage extends Message {
 
     public HandshakeMessage(MessageCode code, Class<?> responseMessageClass,
             Network network, short networkVersion, String peerId, int port,
-            String clientId, CapabilityList capabilities, long latestBlockNumber,
+            String clientId, String[] capabilities, long latestBlockNumber,
             byte[] secret, Key coinbase) {
         super(code, responseMessageClass);
 
@@ -74,7 +73,7 @@ public abstract class HandshakeMessage extends Message {
         for (int i = 0, size = dec.readInt(); i < size; i++) {
             capabilities.add(dec.readString());
         }
-        this.capabilities = CapabilityList.of(capabilities.toArray(new String[0]));
+        this.capabilities = capabilities.toArray(new String[0]);
         this.latestBlockNumber = dec.readLong();
         this.secret = dec.readBytes();
         this.timestamp = dec.readLong();
@@ -91,8 +90,8 @@ public abstract class HandshakeMessage extends Message {
         enc.writeString(peerId);
         enc.writeInt(port);
         enc.writeString(clientId);
-        enc.writeInt(capabilities.size());
-        for (String capability : capabilities.toArray()) {
+        enc.writeInt(capabilities.length);
+        for (String capability : capabilities) {
             enc.writeString(capability);
         }
         enc.writeLong(latestBlockNumber);

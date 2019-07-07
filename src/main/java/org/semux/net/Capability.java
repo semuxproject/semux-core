@@ -16,25 +16,32 @@ import org.semux.net.msg.ReasonCode;
  */
 public enum Capability {
 
+    // NOTE: legacy issues
+    // 1) Different names have been used historically;
+    // 2) Old handshake messages first converts String to Capability, and then to
+    // Capability set;
+    // 3) Unknown capability will lead to INVALID_HANDSHAKE;
+    // 4) Unsorted capability set will lead to INVALID_HANDSHAKE.
+
     /**
-     * A mandatory capability for all clients.
+     * Mandatory for all network.
+     */
+    SEMUX,
+
+    /**
+     * Mandatory for testnet, due to a regression bug. TODO: remove this
      */
     SEM,
 
     /**
-     * This client supports the CORE protocol.
+     * This client supports the FAST_SYNC protocol.
      */
-    CORE,
+    FAST_SYNC,
 
     /**
      * This client supports the LIGHT protocol.
      */
-    LIGHT,
-
-    /**
-     * The client supports FAST_SYNC protocol.
-     */
-    FAST_SYNC;
+    LIGHT;
 
     public static Capability of(String name) {
         try {

@@ -14,7 +14,7 @@ import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
 import org.semux.crypto.Key;
-import org.semux.net.CapabilityList;
+import org.semux.net.CapabilityTreeSet;
 import org.semux.net.Peer;
 import org.semux.util.Bytes;
 
@@ -27,7 +27,8 @@ public class WorldMessageTest {
         Key key = new Key();
         String peerId = key.toAddressString();
         WorldMessage msg = new WorldMessage(config.network(), config.networkVersion(), peerId, 5161,
-                config.getClientId(), config.getClientCapabilities(), 2, Bytes.random(InitMessage.SECRET_LENGTH), key);
+                config.getClientId(), config.getClientCapabilities().toArray(), 2,
+                Bytes.random(InitMessage.SECRET_LENGTH), key);
         assertTrue(msg.validate(config));
 
         msg = new WorldMessage(msg.getBody());
@@ -41,7 +42,7 @@ public class WorldMessageTest {
         assertEquals(ip, peer.getIp());
         assertEquals(config.p2pListenPort(), peer.getPort());
         assertEquals(config.getClientId(), peer.getClientId());
-        assertEquals(config.getClientCapabilities(), CapabilityList.of(peer.getCapabilities()));
+        assertEquals(config.getClientCapabilities(), CapabilityTreeSet.of(peer.getCapabilities()));
         assertEquals(2, peer.getLatestBlockNumber());
     }
 }

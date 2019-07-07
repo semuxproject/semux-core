@@ -6,32 +6,32 @@
  */
 package org.semux.net;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * An immutable set of capabilities.
+ * An immutable set of capabilities. This set is sorted to guarantee
+ * deterministic encoding.
  */
-public class CapabilityList {
+public class CapabilityTreeSet {
 
-    private final List<Capability> capabilities;
+    private final TreeSet<Capability> capabilities;
 
-    private CapabilityList(Collection<Capability> capabilities) {
-        /* Use TreeSet to maintain capability order, for deterministic hashcode */
-        this.capabilities = new ArrayList<>(capabilities);
+    private CapabilityTreeSet(Collection<Capability> capabilities) {
+        this.capabilities = new TreeSet<>(capabilities);
     }
 
     /**
      * Creates an empty set.
      */
-    public static CapabilityList emptyList() {
-        return new CapabilityList(Collections.emptyList());
+    public static CapabilityTreeSet emptyList() {
+        return new CapabilityTreeSet(Collections.emptyList());
     }
 
     /**
@@ -40,8 +40,8 @@ public class CapabilityList {
      * @param capabilities
      *            the specified capabilities
      */
-    public static CapabilityList of(Capability... capabilities) {
-        return new CapabilityList(Stream.of(capabilities).filter(Objects::nonNull).collect(Collectors.toList()));
+    public static CapabilityTreeSet of(Capability... capabilities) {
+        return new CapabilityTreeSet(Stream.of(capabilities).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     /**
@@ -51,13 +51,13 @@ public class CapabilityList {
      *            the specified capabilities
      * @ImplNode unknown capabilities are ignored
      */
-    public static CapabilityList of(String... capabilities) {
-        return new CapabilityList(
+    public static CapabilityTreeSet of(String... capabilities) {
+        return new CapabilityTreeSet(
                 Stream.of(capabilities).map(Capability::of).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     /**
-     * Checks whether the capability is supported by the ${@link CapabilityList}.
+     * Checks whether the capability is supported by the ${@link CapabilityTreeSet}.
      *
      * @param capability
      *            the capability to be checked.
@@ -90,8 +90,8 @@ public class CapabilityList {
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof CapabilityList
-                && Arrays.equals(toArray(), ((CapabilityList) object).toArray());
+        return object instanceof CapabilityTreeSet
+                && Arrays.equals(toArray(), ((CapabilityTreeSet) object).toArray());
     }
 
     @Override

@@ -69,14 +69,14 @@ public class Peer {
      * @param latestBlockNumber
      */
     public Peer(Network network, short networkVersion, String peerId, String ip, int port, String clientId,
-            CapabilityList capabilities, long latestBlockNumber) {
+            String[] capabilities, long latestBlockNumber) {
         this.network = network;
         this.ip = ip;
         this.port = port;
         this.peerId = peerId;
         this.networkVersion = networkVersion;
         this.clientId = clientId;
-        this.capabilities = capabilities.toArray();
+        this.capabilities = capabilities;
         this.latestBlockNumber = latestBlockNumber;
     }
 

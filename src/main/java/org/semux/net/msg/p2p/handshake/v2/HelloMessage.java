@@ -6,15 +6,17 @@
  */
 package org.semux.net.msg.p2p.handshake.v2;
 
+import java.util.Arrays;
+
 import org.semux.Network;
+import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.net.CapabilityList;
 import org.semux.net.msg.MessageCode;
 
 public class HelloMessage extends HandshakeMessage {
 
     public HelloMessage(Network network, short networkVersion, String peerId, int port,
-            String clientId, CapabilityList capabilities, long latestBlockNumber,
+            String clientId, String[] capabilities, long latestBlockNumber,
             byte[] secret, Key coinbase) {
         super(MessageCode.HANDSHAKE_HELLO, WorldMessage.class, network, networkVersion, peerId, port, clientId,
                 capabilities, latestBlockNumber, secret, coinbase);
@@ -27,13 +29,15 @@ public class HelloMessage extends HandshakeMessage {
     @Override
     public String toString() {
         return "HelloMessage{" +
-                "network=" + network +
+                "peer=" + network +
                 ", networkVersion=" + networkVersion +
                 ", peerId='" + peerId + '\'' +
                 ", port=" + port +
                 ", clientId='" + clientId + '\'' +
-                ", capabilities=" + capabilities +
+                ", capabilities=" + Arrays.toString(capabilities) +
                 ", latestBlockNumber=" + latestBlockNumber +
+                ", secret=" + Hex.encode(secret) +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

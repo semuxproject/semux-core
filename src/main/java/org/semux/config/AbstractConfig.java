@@ -30,7 +30,8 @@ import org.semux.config.exception.ConfigException;
 import org.semux.core.Amount;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hash;
-import org.semux.net.CapabilityList;
+import org.semux.net.Capability;
+import org.semux.net.CapabilityTreeSet;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.MessageCode;
 import org.semux.util.BigIntegerUtil;
@@ -313,8 +314,13 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
-    public CapabilityList getClientCapabilities() {
-        return Constants.CLIENT_CAPABILITIES;
+    public CapabilityTreeSet getClientCapabilities() {
+        // TODO: replace with SEMUX eventually
+        if (this.network == Network.TESTNET) {
+            return CapabilityTreeSet.of(Capability.SEM);
+        }
+
+        return CapabilityTreeSet.of(Capability.SEMUX);
     }
 
     @Override

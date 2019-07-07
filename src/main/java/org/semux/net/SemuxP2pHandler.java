@@ -140,6 +140,8 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             return true;
         }
 
+        // To developer: set 0 to test old handshake, or set 1 to test new handshake.
+
         return Math.random() < 0.5;
     }
 
@@ -168,7 +170,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
                 Message helloMessage = new org.semux.net.msg.p2p.handshake.v1.HelloMessage(
                         config.network(), config.networkVersion(), client.getPeerId(),
                         client.getIp(), client.getPort(),
-                        config.getClientId(), config.getClientCapabilities(),
+                        config.getClientId(),
                         chain.getLatestBlockNumber(),
                         client.getCoinbase());
                 msgQueue.sendMessage(helloMessage);
@@ -306,7 +308,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         msgQueue.sendMessage(new org.semux.net.msg.p2p.handshake.v1.WorldMessage(
                 config.network(), config.networkVersion(), client.getPeerId(),
                 client.getIp(), client.getPort(),
-                config.getClientId(), config.getClientCapabilities(),
+                config.getClientId(),
                 chain.getLatestBlockNumber(),
                 client.getCoinbase()));
 
@@ -383,7 +385,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         // send the HELLO message
         this.msgQueue.sendMessage(new HelloMessage(config.network(), config.networkVersion(), client.getPeerId(),
-                client.getPort(), config.getClientId(), config.getClientCapabilities(),
+                client.getPort(), config.getClientId(), config.getClientCapabilities().toArray(),
                 chain.getLatestBlockNumber(),
                 secret, client.getCoinbase()));
     }
@@ -410,7 +412,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         // send the WORLD message
         this.msgQueue.sendMessage(new WorldMessage(config.network(), config.networkVersion(), client.getPeerId(),
-                client.getPort(), config.getClientId(), config.getClientCapabilities(),
+                client.getPort(), config.getClientId(), config.getClientCapabilities().toArray(),
                 chain.getLatestBlockNumber(),
                 secret, client.getCoinbase()));
 
