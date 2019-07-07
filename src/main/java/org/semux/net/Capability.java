@@ -29,11 +29,6 @@ public enum Capability {
     SEMUX,
 
     /**
-     * Mandatory for testnet, due to a regression bug. TODO: remove this
-     */
-    SEM,
-
-    /**
      * This client supports the FAST_SYNC protocol.
      */
     FAST_SYNC,

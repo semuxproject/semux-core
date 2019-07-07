@@ -62,9 +62,6 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 AccountState as = semuxTrack.getAccountState();
                 DelegateState ds = semuxTrack.getDelegateState();
                 byte[] from = context.getCaller();
-                if (from == null) {
-                    return failure;
-                }
                 byte[] to = Arrays.copyOfRange(context.getData(), 12, 32);
                 Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 32, 64)));
 
@@ -98,9 +95,6 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 AccountState as = semuxTrack.getAccountState();
                 DelegateState ds = semuxTrack.getDelegateState();
                 byte[] from = context.getCaller();
-                if (from == null) {
-                    return failure;
-                }
                 byte[] to = Arrays.copyOfRange(context.getData(), 12, 32);
                 Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 32, 64)));
 
