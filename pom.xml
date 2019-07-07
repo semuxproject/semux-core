@@ -377,14 +377,16 @@
                                 <chmod file="${dist.base}/linux/config/*" perm="600" />
 
                                 <!-- macos build -->
-                                <!-- use fat jar because .app bundle is not production ready -->
                                 <copy todir="${dist.base}/macos">
-                                    <fileset dir="${dist.base}/linux">
-                                        <exclude name="debug*" />
-                                        <exclude name="database" />
-                                        <exclude name="wallet.data" />
+                                    <fileset dir="${project.basedir}">
+                                        <include name="config/**" />
+                                        <include name="LICENSE*" />
                                     </fileset>
                                 </copy>
+                                <copy file="${project.basedir}/src/main/resources/org/semux/gui/splash.png" todir="${dist.base}/macos/resources" />
+                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/macos/semux.jar" />
+                                <copy file="${project.basedir}/scripts/semux-cli.sh" tofile="${dist.base}/macos/semux-cli.sh" />
+                                <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/macos/semux-gui.sh" />
                                 <chmod file="${dist.base}/macos/semux.jar" perm="755" />
                                 <chmod file="${dist.base}/macos/semux*.sh" perm="755" />
                                 <chmod dir="${dist.base}/macos/config" perm="700" />
