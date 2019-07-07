@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
 
 import org.junit.Rule;
@@ -39,9 +40,9 @@ public class TransactionBuilderTest {
                 .withType(TransactionType.DELEGATE)
                 .withValue("6")
                 .withNonce("7")
-                .withFee("8", false)
+                .withFee("8")
                 .buildUnsigned();
-        assertEquals(SEM.of(5), tx.getValue());
+        assertEquals(NANO_SEM.of(6), tx.getValue());
         assertEquals(7L, tx.getNonce());
     }
 }

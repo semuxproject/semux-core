@@ -6,6 +6,8 @@
  */
 package org.semux.api.v2;
 
+import static org.semux.core.TransactionType.CALL;
+import static org.semux.core.TransactionType.CREATE;
 import static org.semux.core.TransactionType.DELEGATE;
 
 import java.util.Arrays;
@@ -134,7 +136,9 @@ public class TypeFactory {
             org.semux.core.TransactionType transactionType) {
         return new TransactionLimitsType()
                 .maxTransactionDataSize(kernel.getConfig().spec().maxTransactionDataSize(transactionType))
-                .minTransactionFee(encodeAmount(kernel.getConfig().spec().minTransactionFee()))
+                .minTransactionFee(encodeAmount(
+                        transactionType.equals(CREATE) || transactionType.equals(CALL) ? Amount.ZERO
+                                : kernel.getConfig().spec().minTransactionFee()))
                 .minDelegateBurnAmount(encodeAmount(
                         transactionType.equals(DELEGATE) ? kernel.getConfig().spec().minDelegateBurnAmount() : null));
     }
@@ -156,9 +160,6 @@ public class TypeFactory {
     }
 
     public static TransactionResultType transactionResultType(Transaction tx, TransactionResult result, long number) {
-        // gas price is in nano sem, not wei
-        Amount fee = tx.isVMTransaction() ? Amount.mul(result.getGasPrice(), result.getGasUsed()) : tx.getFee();
-
         return new TransactionResultType()
                 .blockNumber(Long.toString(number))
                 .code(result.getCode().name())
@@ -166,7 +167,7 @@ public class TypeFactory {
                 .gas(Long.toString(result.getGas()))
                 .gasUsed(String.valueOf(result.getGasUsed()))
                 .gasPrice(encodeAmount(result.getGasPrice()))
-                .fee(encodeAmount(fee))
+                .fee(encodeAmount(tx.getFee()))
                 .code(result.getCode().name())
                 .internalTransactions(result.getInternalTransactions().stream()
                         .map(TypeFactory::internalTransactionType).collect(Collectors.toList()))

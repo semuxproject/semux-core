@@ -45,7 +45,9 @@ import static org.semux.TestUtils.createBlock;
 import static org.semux.TestUtils.createTransaction;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.TransactionType.CALL;
 import static org.semux.core.TransactionType.COINBASE;
+import static org.semux.core.TransactionType.CREATE;
 import static org.semux.core.TransactionType.TRANSFER;
 import static org.semux.core.TransactionType.UNVOTE;
 import static org.semux.core.TransactionType.VOTE;
@@ -485,7 +487,9 @@ public class SemuxApiTest extends SemuxApiTestBase {
             assertTrue(response.isSuccess());
             assertEquals(config.spec().maxTransactionDataSize(type),
                     response.getResult().getMaxTransactionDataSize().intValue());
-            assertEquals(config.spec().minTransactionFee().getNano(),
+            assertEquals(
+                    type.equals(CALL) || type.equals(CREATE) ? Amount.ZERO.getNano()
+                            : config.spec().minTransactionFee().getNano(),
                     Long.parseLong(response.getResult().getMinTransactionFee()));
 
             if (type.equals(org.semux.core.TransactionType.DELEGATE)) {
@@ -611,17 +615,17 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String signature = response.getResult();
         VerifyMessageResponse verifyMessageResponse = api.verifyMessage(address, message, signature);
         assertTrue(verifyMessageResponse.isSuccess());
-        assertTrue(verifyMessageResponse.isValidSignature());
+        assertTrue(verifyMessageResponse.isValid());
 
         // verify no messing with fromaddress
         verifyMessageResponse = api.verifyMessage(addressOther, message, signature);
         assertTrue(verifyMessageResponse.isSuccess());
-        assertFalse(verifyMessageResponse.isValidSignature());
+        assertFalse(verifyMessageResponse.isValid());
 
         // verify no messing with message
         verifyMessageResponse = api.verifyMessage(address, message + "other", signature);
         assertTrue(verifyMessageResponse.isSuccess());
-        assertFalse(verifyMessageResponse.isValidSignature());
+        assertFalse(verifyMessageResponse.isValid());
     }
 
     @Test
@@ -755,10 +759,10 @@ public class SemuxApiTest extends SemuxApiTestBase {
         ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
                 type,
-                fee,
-                nonce,
                 to,
                 value,
+                fee,
+                nonce,
                 timestamp,
                 data,
                 null,
@@ -774,8 +778,8 @@ public class SemuxApiTest extends SemuxApiTestBase {
     public void composeRawTransactionDelegateTest() {
         String network = "TESTNET";
         String type = "DELEGATE";
-        String to = "";
-        String value = "0";
+        String to = null;
+        String value = null;
         String fee = String.valueOf(config.spec().minTransactionFee().getNano());
         String nonce = "123";
         String timestamp = "1523028482000";
@@ -784,10 +788,10 @@ public class SemuxApiTest extends SemuxApiTestBase {
         ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
                 type,
-                fee,
-                nonce,
                 to,
                 value,
+                fee,
+                nonce,
                 timestamp,
                 data,
                 null,
@@ -813,10 +817,10 @@ public class SemuxApiTest extends SemuxApiTestBase {
         ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
                 type,
-                fee,
-                nonce,
                 to,
                 value,
+                fee,
+                nonce,
                 timestamp,
                 data,
                 null,
@@ -833,7 +837,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String network = "TESTNET";
         String type = "CREATE";
         String to = null;
-        String value = null; // should be able to set value here
+        String value = "0";
         String fee = null;
         String nonce = "123";
         String timestamp = "1523028482000";
@@ -844,18 +848,18 @@ public class SemuxApiTest extends SemuxApiTestBase {
         ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
                 type,
-                fee,
-                nonce,
                 to,
                 value,
+                fee,
+                nonce,
                 timestamp,
                 data,
-                gasPrice,
-                gas);
+                null,
+                null);
 
         assertTrue(resp.isSuccess());
         assertEquals(
-                "0x0105140000000000000000000000000000000000000000000000000000000000000000004c4b40000000000000007b000001629b9257d00673656d75783100000000000186a00000000000000001",
+                "0x010514000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b000001629b9257d00673656d75783100000000000000000000000000000000",
                 resp.getResult());
     }
 
@@ -875,18 +879,18 @@ public class SemuxApiTest extends SemuxApiTestBase {
         ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
                 type,
-                fee,
-                nonce,
                 to,
                 value,
+                fee,
+                nonce,
                 timestamp,
                 data,
-                gasPrice,
-                gas);
+                gas,
+                gasPrice);
 
         assertTrue(resp.isSuccess());
         assertEquals(
-                "0x010614db7cadb25fdcdd546fb0268524107582c3f8999c000000000000006400000000004c4b40000000000000007b000001629b9257d00673656d75783100000000000186a00000000000000001",
+                "0x010614db7cadb25fdcdd546fb0268524107582c3f8999c00000000000000640000000000000000000000000000007b000001629b9257d00673656d75783100000000000186a00000000000000001",
                 resp.getResult());
     }
 

@@ -12,9 +12,11 @@
             ],
             "properties": {
                 "success": {
+                    "description": "Whether this operation was processed successfully",
                     "type": "boolean"
                 },
                 "message": {
+                    "description": "Success/error message",
                     "type": "string"
                 }
             }
@@ -31,29 +33,35 @@
             "type": "object",
             "properties": {
                 "address": {
+                    "description": "The address of this account",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "available": {
+                    "description": "The available balance of this account",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "locked": {
+                    "description": "The locked balance of this account",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "nonce": {
+                    "description": "The nonce of this account",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "transactionCount": {
+                    "description": "The number of transactions received/sent",
                     "type": "integer",
                     "format": "int32"
                 },
                 "pendingTransactionCount": {
+                    "description": "The number of pending transaction from/to this account",
                     "type": "integer",
                     "format": "int32"
                 }
@@ -71,49 +79,59 @@
             "type": "object",
             "properties": {
                 "hash": {
+                    "description": "The block hash",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "number": {
+                    "description": "The block number",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "view": {
+                    "description": "The view number. # of additional BFT rounds to generated this block",
                     "type": "integer",
                     "format": "int32"
                 },
                 "coinbase": {
+                    "description": "The block producer's address",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "parentHash": {
+                    "description": "The hash of the parent block",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "timestamp": {
-                    "description": "Block timestamp in milliseconds specified by the block forger. There can be a time drift up to 30 seconds.",
+                    "description": "Block timestamp in milliseconds specified by the block producer.",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "transactionsRoot": {
+                    "description": "The Merkle root hash of the transactions",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "resultsRoot": {
+                    "description": "The Merkle root hash of the results",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "stateRoot": {
+                    "description": "The state root hash. Not enabled yet!",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "data": {
+                    "description": "The extra data of this block",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]*$"
                 },
                 "transactions": {
+                    "description": "A list of transaction in the block",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/TransactionType"
@@ -130,6 +148,7 @@
                 {
                     "properties": {
                         "result": {
+                            "description": "The address of the newly created account",
                             "type": "string",
                             "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                         }
@@ -141,7 +160,7 @@
             "type": "object",
             "properties": {
                 "address": {
-                    "description": "Delegate SEM address",
+                    "description": "Delegate address",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                 },
@@ -162,7 +181,7 @@
                     "pattern": "^\\d+$"
                 },
                 "blocksForged": {
-                    "description": "Total forged blocks including primary rounds & backup rounds",
+                    "description": "The number of blocks produced by this delegate",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
@@ -194,6 +213,7 @@
                 {
                     "properties": {
                         "result": {
+                            "description": "The transaction hash",
                             "type": "string",
                             "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                         }
@@ -218,9 +238,6 @@
         },
         "DeleteAccountResponse": {
             "type": "object",
-            "required": [
-                "success"
-            ],
             "allOf": [
                 {
                     "$ref": "#/definitions/ApiHandlerResponse"
@@ -285,11 +302,10 @@
             "type": "object",
             "properties": {
                 "delegate": {
-                    "type": "object",
                     "$ref": "#/definitions/DelegateType"
                 },
                 "votes": {
-                    "description": "Votes from the account",
+                    "description": "Total votes from this account to the delegate",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
@@ -383,6 +399,7 @@
                 {
                     "properties": {
                         "result": {
+                            "description": "The number of the latest block",
                             "type": "string",
                             "format": "int64",
                             "pattern": "^\\d+$"
@@ -541,6 +558,7 @@
                 {
                     "properties": {
                         "result": {
+                            "description": "Total votes in nanoSEM",
                             "type": "string",
                             "format": "int64",
                             "pattern": "^\\d+$"
@@ -577,6 +595,7 @@
             "type": "object",
             "properties": {
                 "network": {
+                    "description": "The connected network",
                     "type": "string",
                     "enum": [
                         "MAINNET",
@@ -585,32 +604,39 @@
                     ]
                 },
                 "capabilities": {
+                    "description": "The features supported",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "clientId": {
+                    "description": "The client identifier string",
                     "type": "string"
                 },
                 "coinbase": {
+                    "description": "The address used for establishing connections to the network",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "latestBlockNumber": {
+                    "description": "The number of the last block",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "latestBlockHash": {
+                    "description": "The hash of the last block",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "activePeers": {
+                    "description": "The number of actively connected peers",
                     "type": "integer",
                     "format": "int32"
                 },
                 "pendingTransactions": {
+                    "description": "The number of transactions in pending pool",
                     "type": "integer",
                     "format": "int32"
                 }
@@ -628,8 +654,8 @@
                 {
                     "properties": {
                         "result": {
-                            "type": "array",
                             "description": "A list of account addresses",
+                            "type": "array",
                             "items": {
                                 "description": "Account address",
                                 "type": "string",
@@ -644,34 +670,42 @@
             "type": "object",
             "properties": {
                 "ip": {
+                    "description": "The IP address",
                     "type": "string",
                     "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}$"
                 },
                 "port": {
+                    "description": "The port number",
                     "type": "integer",
                     "format": "int32"
                 },
                 "networkVersion": {
+                    "description": "The network version",
                     "type": "integer",
                     "format": "int32"
                 },
                 "clientId": {
+                    "description": "The client the peer is using",
                     "type": "string"
                 },
                 "peerId": {
+                    "description": "The id of the peer",
                     "type": "string"
                 },
                 "latestBlockNumber": {
+                    "description": "The latest block number of the peer",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "latency": {
+                    "description": "Latency between this node and the peer",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "capabilities": {
+                    "description": "The features supported by the peer",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -725,10 +759,12 @@
             "type": "object",
             "properties": {
                 "hash": {
+                    "description": "The transaction hash",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "type": {
+                    "description": "The transaction type",
                     "type": "string",
                     "enum": [
                         "COINBASE",
@@ -757,18 +793,19 @@
                     "pattern": "^\\d+$"
                 },
                 "fee": {
-                    "description": "Transaction fee in nano SEM",
+                    "description": "Transaction fee in nano SEM. For CREATE/CALL, this field is zero; use gas instead",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "nonce": {
+                    "description": "The nonce of the sender",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "timestamp": {
-                    "description": "Transaction timestamp in milliseconds specified by the transaction creator. There can be a time drift up to 2 hours.",
+                    "description": "Transaction timestamp in milliseconds specified by the sender. There can be a time drift up to 2 hours.",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
@@ -784,6 +821,7 @@
             "type": "object",
             "properties": {
                 "blockNumber": {
+                    "description": "The number of block that included the transaction",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
@@ -793,6 +831,7 @@
                     "type": "string"
                 },
                 "logs": {
+                    "description": "Logs produced when executing this transaction",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/LogInfoType"
@@ -804,30 +843,31 @@
                     "pattern": "^(0x)?[0-9a-fA-F]*$"
                 },
                 "gas": {
-                    "description": "Return the gas limit",
+                    "description": "The gas limit set by the sender",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "gasPrice": {
-                    "description": "Return the gas Price",
+                    "description": "The gas Price set by the sender",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "gasUsed": {
-                    "description": "Return the gas consumed",
+                    "description": "The gas consumed. For non-VM transactions, this field is zero",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "fee": {
-                    "description": "Return the transaction fee in nano SEM. For VM transaction, gasPrice * gasUsed",
+                    "description": "The transaction fee in nano SEM. For VM transactions, this field is zero",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "internalTransactions": {
+                    "description": "Internal transactions generated when executing this transaction",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/InternalTransactionType"
@@ -869,30 +909,31 @@
                     "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                 },
                 "nonce": {
+                    "description": "The sender's nonce",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "gas": {
-                    "description": "Return the gas limit",
+                    "description": "The gas limit",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "gasPrice": {
-                    "description": "Return the gas Price",
+                    "description": "The gas Price",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "value": {
-                    "description": "Transaction value in nano SEM",
+                    "description": "The value being passed, in nano SEM",
                     "type": "string",
                     "format": "int64",
                     "pattern": "^\\d+$"
                 },
                 "data": {
-                    "description": "Transaction data encoded in hexadecimal string",
+                    "description": "The data being passed, in hexadecimal string",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]*$"
                 }
@@ -902,17 +943,17 @@
             "type": "object",
             "properties": {
                 "address": {
-                    "description": "Address encoded in hexadecimal string",
+                    "description": "Contract address",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]{64}$"
                 },
                 "data": {
-                    "description": "Log info data encoded in hexadecimal string",
+                    "description": "Log data encoded in hexadecimal string",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]*$"
                 },
                 "topics": {
-                    "description": "Topics encoded in hexadecimal string",
+                    "description": "Log topics encoded in hexadecimal string",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -931,7 +972,7 @@
                 },
                 {
                     "properties": {
-                        "validSignature": {
+                        "valid": {
                             "description": "Whether the signature is valid",
                             "type": "boolean"
                         }
@@ -978,12 +1019,8 @@
                     "$ref": "#/definitions/ApiHandlerResponse"
                 },
                 {
-                    "required": [
-                        "result"
-                    ],
                     "properties": {
                         "result": {
-                            "type": "object",
                             "$ref": "#/definitions/SyncingProgressType"
                         }
                     }
@@ -1019,11 +1056,52 @@
                     "pattern": "^\\d+$"
                 }
             }
+        },
+        "CallResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "description": "The return data in hex",
+                            "type": "string",
+                            "pattern": "^(0x)?[0-9a-fA-F]*$"
+                        }
+                    }
+                }
+            ]
+        },
+        "EstimateGasResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "description": "The estimated gas usage",
+                            "type": "string",
+                            "format": "int64",
+                            "pattern": "^\\d+$"
+                        }
+                    }
+                }
+            ]
         }
     },
     "info": {
         "description": "Semux is an experimental high-performance blockchain platform that powers decentralized application.",
-        "version": "2.2.0",
+        "version": "2.3.0",
         "title": "Semux API",
         "contact": {
             "name": "Semux Foundation",
@@ -2176,7 +2254,7 @@
                     {
                         "name": "from",
                         "in": "query",
-                        "description": "Sender's address. The address must exist in the wallet.data of this Semux node.",
+                        "description": "Sender's address. The account must exist in the wallet of this node.",
                         "required": true,
                         "type": "string",
                         "pattern": "^(0x)?[0-9a-fA-F]{40}$"
@@ -2192,7 +2270,7 @@
                     {
                         "name": "value",
                         "in": "query",
-                        "description": "Amount of SEM to transfer in nano SEM",
+                        "description": "Amount of value to transfer in nano SEM",
                         "required": true,
                         "type": "string",
                         "format": "int64",
@@ -2267,18 +2345,18 @@
                         "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
-                        "name": "nonce",
+                        "name": "value",
                         "in": "query",
-                        "description": "Transaction nonce, default to sender's nonce if omitted",
+                        "description": "Amount of SEM to transfer in nano SEM",
                         "required": false,
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
                     },
                     {
-                        "name": "value",
+                        "name": "nonce",
                         "in": "query",
-                        "description": "Amount of SEM to transfer in nano SEM",
+                        "description": "Transaction nonce, default to sender's nonce if omitted",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -2293,18 +2371,18 @@
                         "pattern": "^(0x)?[0-9a-fA-F]+$"
                     },
                     {
-                        "name": "gasPrice",
+                        "name": "gas",
                         "in": "query",
-                        "description": "The gas price",
+                        "description": "The gas limit for the call",
                         "required": true,
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
                     },
                     {
-                        "name": "gas",
+                        "name": "gasPrice",
                         "in": "query",
-                        "description": "The gas limit for the call",
+                        "description": "The gas price",
                         "required": true,
                         "type": "string",
                         "format": "int64",
@@ -2363,8 +2441,8 @@
                     {
                         "name": "value",
                         "in": "query",
-                        "description": "Amount of SEM to transfer in nano SEM",
-                        "required": true,
+                        "description": "Amount of value to transfer in nano SEM",
+                        "required": false,
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
@@ -2387,15 +2465,6 @@
                         "pattern": "^(0x)?[0-9a-fA-F]+$"
                     },
                     {
-                        "name": "gasPrice",
-                        "in": "query",
-                        "description": "The gas price",
-                        "required": true,
-                        "type": "string",
-                        "format": "int64",
-                        "pattern": "^\\d+$"
-                    },
-                    {
                         "name": "gas",
                         "in": "query",
                         "description": "The gas limit for the call",
@@ -2405,12 +2474,13 @@
                         "pattern": "^\\d+$"
                     },
                     {
-                        "name": "local",
+                        "name": "gasPrice",
                         "in": "query",
-                        "description": "Specifies whether this is a local (free) call, or a transaction",
-                        "required": false,
-                        "default": false,
-                        "type": "boolean"
+                        "description": "The gas price in nano SEM",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
                     }
                 ],
                 "responses": {
@@ -2609,14 +2679,6 @@
                         "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                     },
                     {
-                        "name": "data",
-                        "in": "query",
-                        "description": "Delegate name in hexadecimal encoded UTF-8 string, 16 bytes of data at maximum",
-                        "required": true,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]+$"
-                    },
-                    {
                         "name": "fee",
                         "in": "query",
                         "description": "Transaction fee in nano SEM, default to minimum fee if omitted",
@@ -2633,6 +2695,14 @@
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "description": "Delegate name in hexadecimal encoded UTF-8 string, 16 bytes of data at maximum",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
                     }
                 ],
                 "responses": {
@@ -2698,6 +2768,194 @@
                 ]
             }
         },
+        "/call": {
+            "get": {
+                "tags": [
+                    "semux"
+                ],
+                "summary": "Make a local call",
+                "description": "Executes a new message call immediately without creating a transaction on the block chain.",
+                "operationId": "localCall",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "Sender's address. The address must exist in the wallet.data of this Semux node.",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "Recipient's address (the contract address)",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    },
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "Amount of value to transfer in nano SEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "nonce",
+                        "in": "query",
+                        "description": "Transaction nonce, default to sender's nonce if omitted",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "description": "Transaction data encoded in hexadecimal string",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name": "gas",
+                        "in": "query",
+                        "description": "The gas limit for the call",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "gasPrice",
+                        "in": "query",
+                        "description": "The gas price in nanoSEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/CallResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/estimate-gas": {
+            "get": {
+                "tags": [
+                    "semux"
+                ],
+                "summary": "Estimate gas",
+                "description": "Estimate the gas usage of a transaction.",
+                "operationId": "estimateGas",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "Sender's address. The address must exist in the wallet.data of this Semux node.",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "Recipient's address (the contract address)",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    },
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "Amount of value to transfer in nano SEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "nonce",
+                        "in": "query",
+                        "description": "Transaction nonce, default to sender's nonce if omitted",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "description": "Transaction data encoded in hexadecimal string",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name": "gas",
+                        "in": "query",
+                        "description": "The gas limit for the call",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "gasPrice",
+                        "in": "query",
+                        "description": "The gas price in SEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/EstimateGasResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
         "/compose-raw-transaction": {
             "get": {
                 "tags": [
@@ -2738,10 +2996,27 @@
                         ]
                     },
                     {
+                        "name": "to",
+                        "in": "query",
+                        "description": "Recipient's address",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    },
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "Amount of value to transfer in nano SEM",
+                        "required": true,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
                         "name": "fee",
                         "in": "query",
-                        "description": "Transaction fee in nano",
-                        "required": true,
+                        "description": "Transaction fee in nano SEM, default to minimum fee if omitted",
+                        "required": false,
                         "type": "string",
                         "format": "int64",
                         "pattern": "^\\d+$"
@@ -2749,24 +3024,7 @@
                     {
                         "name": "nonce",
                         "in": "query",
-                        "description": "Transaction nonce",
-                        "required": true,
-                        "type": "string",
-                        "format": "int64",
-                        "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "to",
-                        "in": "query",
-                        "description": "Recipient's address",
-                        "required": false,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
-                    },
-                    {
-                        "name": "value",
-                        "in": "query",
-                        "description": "Transaction value in nano SEM",
+                        "description": "Transaction nonce, default to sender's nonce if omitted",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -2791,18 +3049,18 @@
                         "pattern": "^(0x)?[0-9a-fA-F]+$"
                     },
                     {
+                        "name": "gas",
+                        "in": "query",
+                        "description": "The gas limit for the call",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
                       "name": "gasPrice",
                       "in": "query",
                       "description": "The gas price",
-                      "required": false,
-                      "type": "string",
-                      "format": "int64",
-                      "pattern": "^\\d+$"
-                    },
-                    {
-                      "name": "gas",
-                      "in": "query",
-                      "description": "The gas limit for the call",
                       "required": false,
                       "type": "string",
                       "format": "int64",

@@ -315,11 +315,6 @@ public abstract class AbstractConfig implements Config, ChainSpec {
 
     @Override
     public CapabilityTreeSet getClientCapabilities() {
-        // TODO: replace with SEMUX eventually
-        if (this.network == Network.TESTNET) {
-            return CapabilityTreeSet.of(Capability.SEM);
-        }
-
         return CapabilityTreeSet.of(Capability.SEMUX);
     }
 
