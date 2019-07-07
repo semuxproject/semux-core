@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.vm.DataWord;
-import org.ethereum.vm.chainspec.ByzantiumPrecompiledContracts;
+import org.ethereum.vm.chainspec.ConstantinoplePrecompiledContracts;
 import org.ethereum.vm.chainspec.PrecompiledContract;
 import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.client.Repository;
@@ -22,7 +22,7 @@ import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 
-public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
+public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContracts {
 
     private static final Vote vote = new Vote();
     private static final Unvote unvote = new Unvote();
