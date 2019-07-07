@@ -203,8 +203,9 @@ public class NodeManager {
             Long lastTouch = lastConnect.getIfPresent(node);
             long now = TimeUtil.currentTimeMillis();
 
-            if (!client.getNode().equals(node)
-                    && !activeAddresses.contains(node.toAddress())
+            if (!client.getNode().equals(node) // self
+                    && !(node.getIp() == client.getIp() && node.getPort() == client.getPort()) // self
+                    && !activeAddresses.contains(node.toAddress()) // connected
                     && (lastTouch == null || lastTouch + RECONNECT_WAIT < now)) {
 
                 SemuxChannelInitializer ci = new SemuxChannelInitializer(kernel, node);
