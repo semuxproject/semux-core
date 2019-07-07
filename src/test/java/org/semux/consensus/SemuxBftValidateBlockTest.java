@@ -40,9 +40,7 @@ public class SemuxBftValidateBlockTest {
         return Arrays.asList(new Object[][] {
                 {
                         "block in the future",
-                        (Callable<?>) () -> {
-                            return null;
-                        },
+                        (Callable<?>) () -> null,
                         (Supplier<Blockchain>) () -> {
                             Blockchain blockchain = mock(Blockchain.class);
                             when(blockchain.getLatestBlock()).thenReturn(mock(Block.class));

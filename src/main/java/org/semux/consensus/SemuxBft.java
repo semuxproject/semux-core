@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.stream.Collectors;
 
 import org.ethereum.vm.client.BlockStore;
@@ -25,7 +24,6 @@ import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.consensus.SemuxBft.Event.Type;
 import org.semux.consensus.exception.SemuxBftException;
-import org.semux.core.Amount;
 import org.semux.core.BftManager;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -35,7 +33,6 @@ import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
-import org.semux.core.TransactionType;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hash;
@@ -433,7 +430,7 @@ public class SemuxBft implements BftManager {
 
             // [2] add the block to chain
             logger.info(block.toString());
-            applyBlock(block);
+            chain.importBlock(block, false);
         } else {
             sync(height + 1);
         }
@@ -756,157 +753,132 @@ public class SemuxBft implements BftManager {
     protected Block proposeBlock() {
         long t1 = TimeUtil.currentTimeMillis();
 
-        // construct block
+        // construct block template
         BlockHeader parent = chain.getBlockHeader(height - 1);
         long number = height;
         byte[] prevHash = parent.getHash();
         long timestamp = TimeUtil.currentTimeMillis();
-        /*
-         * in case the previous block timestamp is drifted too munch, adjust this block
-         * timestamp to avoid invalid blocks (triggered by timestamp rule).
-         *
-         * See https://github.com/semuxproject/semux-core/issues/1
-         */
         timestamp = timestamp > parent.getTimestamp() ? timestamp : parent.getTimestamp() + 1;
-
-        byte[] data = chain.constructBlockData();
-
-        // fetch pending transactions
-        final List<PendingManager.PendingTransaction> pending = pendingMgr
-                .getPendingTransactions(config.spec().maxBlockTransactionsSize());
-        final List<Transaction> pendingTxs = new ArrayList<>();
-        final List<TransactionResult> pendingResults = new ArrayList<>();
-
-        // for any VM requests, actually need to execute them
-        AccountState as = accountState.track();
-        DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
+        byte[] data = chain.constructBlockHeaderDataField();
         BlockHeader tempHeader = new BlockHeader(height, coinbase.toAddress(), prevHash, timestamp, new byte[0],
                 new byte[0], new byte[0], data);
 
-        // only propose gas used up to configured block gas limit
-        long remainingBlockGas = config.poolBlockGasLimit();
+        // fetch pending transactions
+        final List<PendingManager.PendingTransaction> pendingTxs = pendingMgr
+                .getPendingTransactions(config.poolBlockGasLimit());
+        final List<Transaction> includedTxs = new ArrayList<>();
+        final List<TransactionResult> includedResults = new ArrayList<>();
+
+        AccountState as = accountState.track();
+        DelegateState ds = delegateState.track();
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
         SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
-        for (PendingManager.PendingTransaction pendingTx : pending) {
+        // only propose gas used up to configured block gas limit
+        long remainingBlockGas = config.poolBlockGasLimit();
+        for (PendingManager.PendingTransaction pendingTx : pendingTxs) {
             Transaction tx = pendingTx.transaction;
-            boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
-            if (isVMTransaction) {
-                // transactions that exceed the remaining block gas limit are ignored
-                if (tx.getGas() <= remainingBlockGas) {
-                    TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain);
+            long gas = tx.isVMTransaction() ? tx.getGas() : config.spec().nonVMTransactionGasCost();
+            if (gas > remainingBlockGas) {
+                break;
+            }
 
-                    // only include transaction that's acceptable
-                    if (result.getCode().isAcceptable()) {
-                        pendingResults.add(result);
-                        pendingTxs.add(tx);
-
-                        remainingBlockGas -= result.getGasUsed();
-                    }
-                }
-            } else {
-                if (config.spec().nonVMTransactionGasCost() <= remainingBlockGas
-                        && pendingTx.result.getCode().isAcceptable()) {
-                    pendingResults.add(pendingTx.result);
-                    pendingTxs.add(pendingTx.transaction);
-                    remainingBlockGas -= config.spec().nonVMTransactionGasCost();
-                }
+            // re-evaluate the transaction
+            TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain, 0);
+            if (result.getCode().isAcceptable()) {
+                long gasUsed = tx.isVMTransaction() ? result.getGasUsed() : config.spec().nonVMTransactionGasCost();
+                includedTxs.add(tx);
+                includedResults.add(result);
+                remainingBlockGas -= gasUsed;
             }
         }
 
         // compute roots
-        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(pendingTxs);
-        byte[] resultsRoot = MerkleUtil.computeResultsRoot(pendingResults);
+        byte[] transactionsRoot = MerkleUtil.computeTransactionsRoot(includedTxs);
+        byte[] resultsRoot = MerkleUtil.computeResultsRoot(includedResults);
         byte[] stateRoot = Bytes.EMPTY_HASH;
 
         BlockHeader header = new BlockHeader(number, coinbase.toAddress(), prevHash, timestamp, transactionsRoot,
                 resultsRoot, stateRoot, data);
-        Block block = new Block(header, pendingTxs, pendingResults);
+        Block block = new Block(header, includedTxs, includedResults);
 
         long t2 = TimeUtil.currentTimeMillis();
-        logger.debug("Block creation: # txs = {}, time = {} ms", pendingTxs.size(), t2 - t1);
+        logger.debug("Block creation: # txs = {}, time = {} ms", includedTxs.size(), t2 - t1);
 
         return block;
     }
 
     /**
-     * Check if a block proposal is success.
-     *
+     * Check if a block proposal is valid. TODO: too much redundant code with
+     * {@link org.semux.core.BlockchainImpl#validateBlock(Block, AccountState, DelegateState, boolean)}
+     * .
      */
     protected boolean validateBlockProposal(BlockHeader header, List<Transaction> transactions) {
-        Block block = new Block(header, transactions);
-        return validateBlockProposal(block);
-    }
+        try {
+            Block block = new Block(header, transactions);
+            long t1 = TimeUtil.currentTimeMillis();
 
-    protected boolean validateBlockProposal(Block block) {
-        BlockHeader header = block.getHeader();
-        List<Transaction> transactions = block.getTransactions();
+            // [1] check block header
+            Block latest = chain.getLatestBlock();
+            if (!block.validateHeader(header, latest.getHeader())) {
+                logger.warn("Invalid block header");
+                return false;
+            }
 
-        long t1 = TimeUtil.currentTimeMillis();
+            if (header.getTimestamp() - TimeUtil.currentTimeMillis() > config.bftMaxBlockTimeDrift()) {
+                logger.warn("A block in the future is not allowed");
+                return false;
+            }
 
-        // [1] check block header
-        Block latest = chain.getLatestBlock();
-        if (!block.validateHeader(latest.getHeader(), header)) {
-            logger.warn("Invalid block header");
+            if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
+                logger.warn("A block forged by the coinbase magic account is not allowed");
+                return false;
+            }
+
+            if (!Arrays.equals(header.getCoinbase(), proposal.getSignature().getAddress())) {
+                logger.warn("The coinbase should always equal to the proposer's address");
+                return false;
+            }
+
+            // [2] check transactions and results (skipped)
+            List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
+
+            if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
+                logger.warn("Invalid block transactions");
+                return false;
+            }
+
+            if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
+                logger.warn("Duplicated transaction hash is not allowed");
+                return false;
+            }
+
+            AccountState as = accountState.track();
+            DelegateState ds = delegateState.track();
+            TransactionExecutor exec = new TransactionExecutor(config, blockStore);
+
+            // [3] evaluate transactions
+            // When we are applying or validating block, we do not track transactions
+            // against our own local limit, only when proposing
+            List<TransactionResult> results = exec.execute(transactions, as, ds,
+                    new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain, 0);
+            block.setResults(results);
+
+            if (!block.validateResults(header, results)) {
+                logger.warn("Invalid transactions");
+                return false;
+            }
+
+            long t2 = TimeUtil.currentTimeMillis();
+            logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
+
+            validBlocks.put(ByteArray.of(block.getHash()), block);
+            return true;
+        } catch (Exception e) {
+            logger.error("Unexpected exception during block proposal validation", e);
             return false;
         }
-
-        if (header.getTimestamp() - TimeUtil.currentTimeMillis() > config.bftMaxBlockTimeDrift()) {
-            logger.warn("A block in the future is not allowed");
-            return false;
-        }
-
-        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
-            logger.warn("A block forged by the coinbase magic account is not allowed");
-            return false;
-        }
-
-        if (!Arrays.equals(header.getCoinbase(), proposal.getSignature().getAddress())) {
-            logger.warn("The coinbase should always equal to the proposer's address");
-            return false;
-        }
-
-        // [2] check transactions and results (skipped)
-        List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
-
-        if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
-            logger.warn("Invalid block transactions");
-            return false;
-        }
-
-        if (transactions.stream().mapToInt(Transaction::size).sum() > config.spec().maxBlockTransactionsSize()) {
-            logger.warn("Block transactions size exceeds maximum");
-            return false;
-        }
-
-        if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
-            logger.warn("Duplicated transaction hash is not allowed");
-            return false;
-        }
-
-        AccountState as = accountState.track();
-        DelegateState ds = delegateState.track();
-        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
-
-        // [3] evaluate transactions
-        // When we are applying or validating block, we do not track transactions
-        // against our own local limit, only
-        // when proposing
-        List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain);
-        block.setResults(results);
-
-        if (!block.validateResults(header, results)) {
-            logger.warn("Invalid transactions");
-            return false;
-        }
-
-        long t2 = TimeUtil.currentTimeMillis();
-        logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
-
-        validBlocks.put(ByteArray.of(block.getHash()), block);
-        return true;
     }
 
     /**
@@ -929,70 +901,6 @@ public class SemuxBft implements BftManager {
                 .collect(Collectors.toList());
 
         return unvalidatedTransactions;
-    }
-
-    /**
-     * Apply a block to the chain.
-     *
-     * @param block
-     */
-    protected void applyBlock(Block block) {
-
-        long t1 = TimeUtil.currentTimeMillis();
-
-        BlockHeader header = block.getHeader();
-        List<Transaction> transactions = block.getTransactions();
-        long number = header.getNumber();
-
-        if (number != chain.getLatestBlockNumber() + 1) {
-            throw new SemuxBftException("Applying wrong block: number = " + number);
-        }
-
-        // [1] check block header, skipped
-
-        // [2] check transactions and results, skipped
-
-        AccountState as = chain.getAccountState().track();
-        DelegateState ds = chain.getDelegateState().track();
-        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
-
-        // [3] evaluate all transactions
-        List<TransactionResult> results = exec.execute(transactions, as, ds,
-                new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), chain);
-        if (!block.validateResults(header, results)) {
-            logger.debug("Invalid transactions");
-            return;
-        }
-
-        // [4] evaluate votes, skipped
-
-        // [5] apply block reward and tx fees
-        Amount reward = Block.getBlockReward(block, config);
-
-        if (reward.gt0()) {
-            as.adjustAvailable(block.getCoinbase(), reward);
-        }
-
-        // [6] commit the updates
-        as.commit();
-        ds.commit();
-
-        WriteLock lock = kernel.getStateLock().writeLock();
-        lock.lock();
-        try {
-            // [7] flush state to disk
-            chain.getAccountState().commit();
-            chain.getDelegateState().commit();
-
-            // [8] add block to chain
-            chain.addBlock(block);
-        } finally {
-            lock.unlock();
-        }
-
-        long t2 = TimeUtil.currentTimeMillis();
-        logger.debug("Block apply: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
-
     }
 
     public enum State {

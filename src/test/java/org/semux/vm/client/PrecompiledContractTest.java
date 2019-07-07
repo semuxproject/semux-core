@@ -89,7 +89,7 @@ public class PrecompiledContractTest {
                 .decode("60806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806302aa9be2146100515780635f74bbde1461009e575b600080fd5b34801561005d57600080fd5b5061009c600480360381019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803590602001909291905050506100eb565b005b3480156100aa57600080fd5b506100e9600480360381019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190505050610165565b005b606573ffffffffffffffffffffffffffffffffffffffff168282604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001828152602001925050506000604051808303816000865af1915050151561016157600080fd5b5050565b606473ffffffffffffffffffffffffffffffffffffffff168282604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001828152602001925050506000604051808303816000865af191505015156101db57600080fd5b50505600a165627a7a723058205e1325476a012c885717ccd0ad038a0d8d6c20f2e5afcb1b475d3eac5313c9500029");
         as.setCode(to, contract);
 
-        SemuxBlock bh = new SemuxBlock(
+        SemuxBlock block = new SemuxBlock(
                 new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
                         Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
                 config.spec().maxBlockGasLimit());
@@ -111,7 +111,7 @@ public class PrecompiledContractTest {
             dataGasCost += (b == 0 ? 4 : 68);
         }
 
-        TransactionResult result = exec.execute(tx, as, ds, bh, chain);
+        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(21_000 + 21_000 + dataGasCost + 1088, result.getGasUsed());
         assertEquals(SEM.of(1000).getNano() - result.getGasUsed() * gasPrice.getNano(),
@@ -128,7 +128,7 @@ public class PrecompiledContractTest {
         tx = new Transaction(network, type, to, value, Amount.ZERO, nonce + 1, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
-        result = exec.execute(tx, as, ds, bh, chain);
+        result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(SEM.of(1000).getNano(), as.getAccount(to).getAvailable().getNano());
         assertEquals(0, as.getAccount(to).getLocked().getNano());

@@ -109,20 +109,20 @@ public class VmTransactionTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // execute and commit
-        result = exec.execute(tx, as, ds, block, chain);
+        result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isSuccess());
 
         // miner're reward is not yet given
@@ -157,20 +157,20 @@ public class VmTransactionTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // execute and commit
-        result = exec.execute(tx, as, ds, block, chain);
+        result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isSuccess());
 
         byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
@@ -204,7 +204,7 @@ public class VmTransactionTest {
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
-        TransactionResult result = exec.execute(tx, as, ds, block, chain);
+        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(SEM.of(1000).getNano()
                 - value.getNano()
@@ -238,7 +238,7 @@ public class VmTransactionTest {
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
-        TransactionResult result = exec.execute(tx, as, ds, block, chain);
+        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isFailure());
         // value transfer reverted
         assertEquals(SEM.of(1000).getNano() - tx.getGasPrice().getNano() * result.getGasUsed(),

@@ -30,8 +30,8 @@ public class SemuxPrecompiledContracts extends ByzantiumPrecompiledContracts {
     private static final DataWord voteAddr = DataWord.of(100);
     private static final DataWord unvoteAddr = DataWord.of(101);
 
-    private static final Pair<Boolean, byte[]> success = Pair.of(true, ArrayUtils.EMPTY_BYTE_ARRAY);
-    private static final Pair<Boolean, byte[]> failure = Pair.of(false, ArrayUtils.EMPTY_BYTE_ARRAY);
+    private static final Pair<Boolean, byte[]> success = new Pair<>(true, ArrayUtils.EMPTY_BYTE_ARRAY);
+    private static final Pair<Boolean, byte[]> failure = new Pair<>(false, ArrayUtils.EMPTY_BYTE_ARRAY);
 
     @Override
     public PrecompiledContract getContractForAddress(DataWord address) {

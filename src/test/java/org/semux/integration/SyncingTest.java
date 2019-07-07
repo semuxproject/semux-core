@@ -140,7 +140,7 @@ public class SyncingTest {
         for (int i = 1; i <= targetHeight(); i++) {
             Block block = kernel4.getBlockchain().getBlock(i);
             Block previousBlock = kernel4.getBlockchain().getBlock(i - 1);
-            assertTrue(block.validateHeader(previousBlock.getHeader(), block.getHeader()));
+            assertTrue(block.validateHeader(block.getHeader(), previousBlock.getHeader()));
             assertTrue(block.validateTransactions(previousBlock.getHeader(), block.getTransactions(),
                     kernel4.getConfig().network()));
             assertTrue(block.validateResults(previousBlock.getHeader(), block.getResults()));

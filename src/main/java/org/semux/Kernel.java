@@ -76,7 +76,6 @@ public class Kernel {
 
     protected State state = State.STOPPED;
 
-    protected final ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
     protected Config config;
     protected Genesis genesis;
 
@@ -362,7 +361,7 @@ public class Kernel {
         client.close();
 
         // make sure no thread is reading/writing the state
-        ReentrantReadWriteLock.WriteLock lock = stateLock.writeLock();
+        ReentrantReadWriteLock.WriteLock lock = chain.getStateLock().writeLock();
         lock.lock();
         try {
             for (DatabaseName name : DatabaseName.values()) {
@@ -454,15 +453,6 @@ public class Kernel {
      */
     public Config getConfig() {
         return config;
-    }
-
-    /**
-     * Returns the state lock.
-     * 
-     * @return
-     */
-    public ReentrantReadWriteLock getStateLock() {
-        return stateLock;
     }
 
     /**

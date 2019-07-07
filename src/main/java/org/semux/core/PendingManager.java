@@ -41,8 +41,12 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * Pending manager maintains all unconfirmed transactions, either from kernel or
  * network. All transactions are evaluated and propagated to peers if success.
  *
- * TODO: sort transaction queue by fee, and other metrics
+ * Note that: the transaction results in pending manager are not reliable for VM
+ * transactions because these are evaluated against a dummy block. Nevertheless,
+ * transactions included by the pending manager are eligible for inclusion in
+ * block proposing phase.
  *
+ * TODO: sort transaction queue by fee, and other metrics
  */
 public class PendingManager implements Runnable, BlockchainListener {
 
@@ -69,6 +73,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     private final BlockStore blockStore;
     private AccountState pendingAS;
     private DelegateState pendingDS;
+    private SemuxBlock dummyBlock;
 
     /**
      * Transaction queue.
@@ -103,6 +108,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         this.pendingAS = kernel.getBlockchain().getAccountState().track();
         this.pendingDS = kernel.getBlockchain().getDelegateState().track();
+        this.dummyBlock = createDummyBlock();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
@@ -205,26 +211,21 @@ public class PendingManager implements Runnable, BlockchainListener {
     /**
      * Returns pending transactions, limited by the given total size in bytes.
      *
-     * @param byteLimit
+     *
      * @return
      */
-    public synchronized List<PendingTransaction> getPendingTransactions(int byteLimit) {
-        if (byteLimit < 0) {
-            throw new IllegalArgumentException("Limit can't be negative");
-        }
-
+    public synchronized List<PendingTransaction> getPendingTransactions(long blockGasLimit) {
         List<PendingTransaction> txs = new ArrayList<>();
         Iterator<PendingTransaction> it = transactions.iterator();
 
-        int size = 0;
-        while (it.hasNext()) {
+        while (it.hasNext() && blockGasLimit > 0) {
             PendingTransaction tx = it.next();
 
-            size += tx.transaction.size();
-            if (size > byteLimit) {
-                break;
-            } else {
+            long gasUsage = tx.transaction.isVMTransaction() ? tx.result.getGasUsed()
+                    : kernel.getConfig().spec().nonVMTransactionGasCost();
+            if (blockGasLimit > gasUsage) {
                 txs.add(tx);
+                blockGasLimit -= gasUsage;
             }
         }
 
@@ -237,7 +238,7 @@ public class PendingManager implements Runnable, BlockchainListener {
      * @return
      */
     public synchronized List<PendingTransaction> getPendingTransactions() {
-        return getPendingTransactions(Integer.MAX_VALUE);
+        return getPendingTransactions(Long.MAX_VALUE);
     }
 
     /**
@@ -249,6 +250,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         // reset state
         pendingAS = kernel.getBlockchain().getAccountState().track();
         pendingDS = kernel.getBlockchain().getDelegateState().track();
+        dummyBlock = createDummyBlock();
 
         // clear transaction pool
         List<PendingTransaction> txs = new ArrayList<>(transactions);
@@ -314,14 +316,13 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         int cnt = 0;
         long now = TimeUtil.currentTimeMillis();
-        boolean isVMTransaction = tx.getType() == TransactionType.CALL || tx.getType() == TransactionType.CREATE;
 
         // reject VM transactions that come in before fork
-        if (isVMTransaction && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
+        if (tx.isVMTransaction() && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
         }
         // reject VM transaction with low gas price
-        if (isVMTransaction && tx.getGasPrice().lt(kernel.getConfig().poolMinGasPrice())) {
+        if (tx.isVMTransaction() && tx.getGasPrice().lt(kernel.getConfig().poolMinGasPrice())) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_FEE);
         }
 
@@ -349,22 +350,11 @@ public class PendingManager implements Runnable, BlockchainListener {
         // delayed for the next event loop of PendingManager.
         while (tx != null && tx.getNonce() == getNonce(tx.getFrom())) {
 
-            // TODO: introduce block state (open, closed, signed, imported)
-
-            // create a dummy block (Note: VM transaction results may depends on the block)
-            Blockchain chain = kernel.getBlockchain();
-            Block prevBlock = chain.getLatestBlock();
-            BlockHeader blockHeader = new BlockHeader(
-                    prevBlock.getNumber() + 1,
-                    new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), new byte[0],
-                    new byte[0], new byte[0], new byte[0]);
-            SemuxBlock block = new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
-
             // execute transactions
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
             TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore).execute(tx,
-                    as, ds, block, chain);
+                    as, ds, dummyBlock, kernel.getBlockchain(), 0);
 
             if (result.getCode().isAcceptable()) {
                 // commit state updates
@@ -413,6 +403,16 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     private ByteArray createKey(byte[] acc, long nonce) {
         return ByteArray.of(Bytes.merge(acc, Bytes.of(nonce)));
+    }
+
+    private SemuxBlock createDummyBlock() {
+        Blockchain chain = kernel.getBlockchain();
+        Block prevBlock = chain.getLatestBlock();
+        BlockHeader blockHeader = new BlockHeader(
+                prevBlock.getNumber() + 1,
+                new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), Bytes.EMPTY_BYTES,
+                Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
+        return new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
     }
 
     /**

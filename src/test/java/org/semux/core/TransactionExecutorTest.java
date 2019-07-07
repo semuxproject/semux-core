@@ -61,7 +61,7 @@ public class TransactionExecutorTest {
 
     private TransactionResult executeAndCommit(TransactionExecutor exec, Transaction tx, AccountState as,
             DelegateState ds, SemuxBlock bh) {
-        TransactionResult res = exec.execute(tx, as, ds, bh, chain);
+        TransactionResult res = exec.execute(tx, as, ds, bh, chain, 0);
         as.commit();
         ds.commit();
 
@@ -86,14 +86,14 @@ public class TransactionExecutorTest {
         assertTrue(tx.validate(network));
 
         // insufficient available
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
         Amount available = SEM.of(1000);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
-        result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(available, as.getAccount(key.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getAvailable());
@@ -123,12 +123,12 @@ public class TransactionExecutorTest {
 
         // register delegate (to != EMPTY_ADDRESS, random name)
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(delegate);
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
         // register delegate (to == EMPTY_ADDRESS, random name)
         tx = new Transaction(network, type, Bytes.EMPTY_ADDRESS, value, fee, nonce, timestamp, data).sign(delegate);
-        result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
         // register delegate (to == EMPTY_ADDRESS, normal name) and commit
@@ -162,7 +162,7 @@ public class TransactionExecutorTest {
 
         // vote for non-existing delegate
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
@@ -196,13 +196,13 @@ public class TransactionExecutorTest {
 
         // unvote (never voted before)
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
         assertEquals(INSUFFICIENT_LOCKED, result.code);
         ds.vote(voter.toAddress(), delegate.toAddress(), value);
 
         // unvote (locked = 0)
-        result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
         assertEquals(INSUFFICIENT_LOCKED, result.code);
 
@@ -236,7 +236,7 @@ public class TransactionExecutorTest {
         // unvote (never voted before)
         Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(voter);
 
-        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain);
+        TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
         assertEquals(INSUFFICIENT_AVAILABLE, result.code);
     }

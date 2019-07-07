@@ -39,6 +39,7 @@ import org.semux.vm.client.SemuxTransaction;
 public class TransactionExecutor {
 
     private static final boolean[] valid = new boolean[256];
+
     static {
         for (byte b : Bytes.of("abcdefghijklmnopqrstuvwxyz0123456789_")) {
             valid[b & 0xff] = true;
@@ -89,13 +90,17 @@ public class TransactionExecutor {
      *            account state
      * @param ds
      *            delegate state
+     * @param block
+     *            the block context
+     * @param gasUsedInBlock
+     *            the amount of gas that has been consumed by previous transaction
+     *            in the block
      * @return
      */
     public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds,
-            SemuxBlock block, Blockchain chain) {
+            SemuxBlock block, Blockchain chain, long gasUsedInBlock) {
         List<TransactionResult> results = new ArrayList<>();
 
-        long gasUsedInBlock = 0;
         for (Transaction tx : txs) {
             TransactionResult result = new TransactionResult();
             results.add(result);
@@ -118,16 +123,12 @@ public class TransactionExecutor {
                 continue;
             }
 
-            boolean isVMTransaction = type == TransactionType.CREATE || type == TransactionType.CALL;
-
-            // check fee (call and create use gas instead)
-            if (isVMTransaction) {
+            // check fee (CREATE and CALL use gas instead)
+            if (tx.isVMTransaction()) {
                 // applying a very strict check to avoid mistakes
                 boolean valid = fee.equals(Amount.ZERO)
                         && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
-                        && tx.getGasPrice().getNano() >= 1 && tx.getGasPrice().getNano() <= Integer.MAX_VALUE; // a
-                                                                                                               // theoretical
-                                                                                                               // limit
+                        && tx.getGasPrice().getNano() >= 1 && tx.getGasPrice().getNano() <= Integer.MAX_VALUE;
                 if (!valid) {
                     result.setCode(Code.INVALID_FEE);
                     continue;
@@ -143,6 +144,17 @@ public class TransactionExecutor {
             if (data.length > config.spec().maxTransactionDataSize(type)) {
                 result.setCode(Code.INVALID_DATA);
                 continue;
+            }
+
+            // check remaining gas
+            if (!tx.isVMTransaction()) {
+                if (config.spec().nonVMTransactionGasCost() + gasUsedInBlock > block.getGasLimit()) {
+                    result.setCode(Code.INVALID);
+                    continue;
+                }
+
+                // Note: although we count gas usage for non-vm-transactions, the gas usage
+                // is not recorded in the TransactionResult.
             }
 
             switch (type) {
@@ -222,8 +234,13 @@ public class TransactionExecutor {
 
                 // the VM transaction executor will check balance and gas cost.
                 // do proper refunds afterwards.
-
                 executeVmTransaction(result, tx, as, ds, block, gasUsedInBlock);
+
+                // Note: we're assuming the VM will not make changes to the account
+                // and delegate state if the transaction is INVALID; the storage changes
+                // will be discarded if is FAILURE.
+                //
+                // TODO: add unit test for this
                 break;
             default:
                 // unsupported transaction type
@@ -232,12 +249,12 @@ public class TransactionExecutor {
             }
 
             if (result.getCode().isAcceptable()) {
-                if (!isVMTransaction) {
+                if (!tx.isVMTransaction()) {
                     // CREATEs and CALLs manages the nonce inside the VM
                     as.increaseNonce(from);
                 }
 
-                if (isVMTransaction) {
+                if (tx.isVMTransaction()) {
                     gasUsedInBlock += result.getGasUsed();
                 } else {
                     gasUsedInBlock += config.spec().nonVMTransactionGasCost();
@@ -292,10 +309,15 @@ public class TransactionExecutor {
      *            delegate state
      * @param chain
      *            the blockchain instance
+     * @param block
+     *            the block context
+     * @param gasUsedInBlock
+     *            the amount of gas that has been consumed by previous transaction
+     *            in the block
      * @return
      */
     public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, SemuxBlock block,
-            Blockchain chain) {
-        return execute(Collections.singletonList(tx), as, ds, block, chain).get(0);
+            Blockchain chain, long gasUsedInBlock) {
+        return execute(Collections.singletonList(tx), as, ds, block, chain, gasUsedInBlock).get(0);
     }
 }

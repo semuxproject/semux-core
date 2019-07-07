@@ -125,6 +125,10 @@ public class Transaction {
         this(network, type, toAddress, value, fee, nonce, timestamp, data, 0, Amount.ZERO);
     }
 
+    public boolean isVMTransaction() {
+        return type == TransactionType.CREATE || type == TransactionType.CALL;
+    }
+
     /**
      * Sign this transaction.
      *

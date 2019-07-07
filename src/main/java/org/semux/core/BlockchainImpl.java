@@ -13,17 +13,22 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.client.BlockStore;
 import org.semux.config.Config;
 import org.semux.config.Constants;
+import org.semux.consensus.Vote;
+import org.semux.consensus.VoteType;
 import org.semux.core.Genesis.Premine;
 import org.semux.core.event.BlockchainDatabaseUpgradingEvent;
 import org.semux.core.exception.BlockchainException;
@@ -33,6 +38,7 @@ import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.core.state.DelegateStateImpl;
 import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
@@ -40,6 +46,7 @@ import org.semux.db.LeveldbDatabase;
 import org.semux.db.Migration;
 import org.semux.event.PubSub;
 import org.semux.event.PubSubFactory;
+import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
@@ -97,7 +104,8 @@ public class BlockchainImpl implements Blockchain {
     protected static final byte TYPE_BLOCK_RESULTS = 0x02;
     protected static final byte TYPE_BLOCK_VOTES = 0x03;
 
-    private BlockStore blockStore = new SemuxBlockStore(this);
+    private final BlockStore blockStore = new SemuxBlockStore(this);
+    private final ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
 
     protected enum StatsType {
         FORGED, HIT, MISSED
@@ -620,7 +628,7 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public byte[] constructBlockData() {
+    public byte[] constructBlockHeaderDataField() {
         Set<Fork> set = new HashSet<>();
         if (config.forkUniformDistributionEnabled()
                 && !forks.isActivated(UNIFORM_DISTRIBUTION)
@@ -636,6 +644,168 @@ public class BlockchainImpl implements Blockchain {
 
         return set.isEmpty() ? new byte[0]
                 : BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(set.toArray(new Fork[0]))).toBytes();
+    }
+
+    @Override
+    public ReentrantReadWriteLock getStateLock() {
+        return stateLock;
+    }
+
+    @Override
+    public boolean importBlock(Block block, boolean validateVotes) {
+        AccountState as = this.getAccountState().track();
+        DelegateState ds = this.getDelegateState().track();
+        return validateBlock(block, as, ds, validateVotes) && applyBlock(block, as, ds);
+    }
+
+    /**
+     * Validate the block. Votes are validated only if validateVotes is true.
+     *
+     * @param block
+     * @param asSnapshot
+     * @param dsSnapshot
+     * @param validateVotes
+     * @return
+     */
+    protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot,
+            boolean validateVotes) {
+        try {
+            BlockHeader header = block.getHeader();
+            List<Transaction> transactions = block.getTransactions();
+
+            // [1] check block header
+            Block latest = this.getLatestBlock();
+            if (!block.validateHeader(header, latest.getHeader())) {
+                logger.error("Invalid block header");
+                return false;
+            }
+
+            // validate checkpoint
+            if (config.checkpoints().containsKey(header.getNumber()) &&
+                    !Arrays.equals(header.getHash(), config.checkpoints().get(header.getNumber()))) {
+                logger.error("Checkpoint validation failed, checkpoint is {} => {}, getting {}", header.getNumber(),
+                        Hex.encode0x(config.checkpoints().get(header.getNumber())),
+                        Hex.encode0x(header.getHash()));
+                return false;
+            }
+
+            // blocks should never be forged by coinbase magic account
+            if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
+                logger.error("A block forged by the coinbase magic account is not allowed");
+                return false;
+            }
+
+            // [2] check transactions and results
+            if (!block.validateTransactions(header, transactions, config.network())) {
+                logger.error("Invalid block transactions");
+                return false;
+            }
+            if (!block.validateResults(header, block.getResults())) {
+                logger.error("Invalid results");
+                return false;
+            }
+
+            if (transactions.stream().anyMatch(tx -> this.hasTransaction(tx.getHash()))) {
+                logger.error("Duplicated transaction hash is not allowed");
+                return false;
+            }
+
+            // [3] evaluate transactions
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
+            List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
+                    new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this, 0);
+            block.setResults(results);
+
+            if (!block.validateResults(header, results)) {
+                logger.error("Invalid transactions");
+                return false;
+            }
+
+            // [4] evaluate votes
+            if (validateVotes) {
+                return validateBlockVotes(block);
+            }
+
+            return true;
+        } catch (Exception e) {
+            logger.error("Unexpected exception during block validation", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean validateBlockVotes(Block block) {
+        int maxValidators = config.spec().getNumberOfValidators(block.getNumber());
+
+        List<String> validatorList = this.getValidators();
+
+        if (validatorList.size() > maxValidators) {
+            validatorList = validatorList.subList(0, maxValidators);
+        }
+        Set<String> validators = new HashSet<>(validatorList);
+
+        int twoThirds = (int) Math.ceil(validators.size() * 2.0 / 3.0);
+
+        Vote vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
+                block.getHash());
+        byte[] encoded = vote.getEncoded();
+
+        // check validity of votes
+        if (block.getVotes().stream().anyMatch(sig -> !validators.contains(Hex.encode(sig.getAddress())))) {
+            logger.warn("Block votes are invalid");
+            return false;
+        }
+
+        if (!Key.isVerifyBatchSupported()) {
+            if (!block.getVotes().stream()
+                    .allMatch(sig -> Key.verify(encoded, sig))) {
+                logger.warn("Block votes are invalid");
+                return false;
+            }
+        } else {
+            if (!Key.verifyBatch(Collections.nCopies(block.getVotes().size(), encoded), block.getVotes())) {
+                logger.warn("Block votes are invalid");
+                return false;
+            }
+        }
+
+        // at least two thirds voters
+        if (block.getVotes().stream()
+                .map(sig -> new ByteArray(sig.getA()))
+                .collect(Collectors.toSet()).size() < twoThirds) {
+            logger.warn("Not enough votes, needs 2/3+ twoThirds = {}, block = {}", twoThirds, block);
+            return false;
+        }
+
+        return true;
+    }
+
+    protected boolean applyBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
+        // [5] apply block reward and tx fees
+        Amount reward = Block.getBlockReward(block, config);
+
+        if (reward.gt0()) {
+            asSnapshot.adjustAvailable(block.getCoinbase(), reward);
+        }
+
+        // [6] commit the updates
+        asSnapshot.commit();
+        dsSnapshot.commit();
+
+        ReentrantReadWriteLock.WriteLock writeLock = this.stateLock.writeLock();
+        writeLock.lock();
+        try {
+            // [7] flush state to disk
+            this.getAccountState().commit();
+            this.getDelegateState().commit();
+
+            // [8] add block to chain
+            this.addBlock(block);
+        } finally {
+            writeLock.unlock();
+        }
+
+        return true;
     }
 
     /**
@@ -700,9 +870,8 @@ public class BlockchainImpl implements Blockchain {
 
     /**
      * A temporary blockchain for database migration. This class implements a
-     * lightweight version of
-     * ${@link org.semux.consensus.SemuxBft#applyBlock(Block)} to migrate blocks
-     * from an existing database to the latest schema.
+     * lightweight version of ${@link org.semux.core.Blockchain#importBlock(Block)}
+     * to migrate blocks from an existing database to the latest schema.
      */
     private class MigrationBlockchain extends BlockchainImpl {
         private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
@@ -713,7 +882,7 @@ public class BlockchainImpl implements Blockchain {
             // [0] execute transactions against local state
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
             transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
-                    new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this);
+                    new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this, 0);
 
             // [1] apply block reward and tx fees
             Amount reward = Block.getBlockReward(block, config);

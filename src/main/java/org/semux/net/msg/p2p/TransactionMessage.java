@@ -23,7 +23,7 @@ public class TransactionMessage extends Message {
 
         this.transaction = transaction;
 
-        // FIXME: consider wrapping by simple codec
+        // TODO: consider wrapping by simple codec
         this.body = transaction.toBytes();
     }
 

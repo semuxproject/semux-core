@@ -100,7 +100,7 @@ public class InternalTransactionTest {
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
-        TransactionResult result = exec.execute(tx, as, ds, bh, chain);
+        TransactionResult result = exec.execute(tx, as, ds, bh, chain, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(SEM.of(1000).getNano() - SEM.of(5).getNano(), as.getAccount(to).getAvailable().getNano());
         assertEquals(SEM.of(5).getNano(),
