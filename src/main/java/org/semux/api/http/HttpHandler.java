@@ -183,7 +183,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         } else if (STATIC_FILE_PATTERN.matcher(path).matches()) {
             if (path.startsWith("/swagger-ui/")) {
                 lastContentFuture = writeStaticFile(ctx,
-                        "/META-INF/resources/webjars/swagger-ui/3.19.4" + path.substring(11));
+                        "/META-INF/resources/webjars/swagger-ui/3.22.2" + path.substring(11));
             } else {
                 lastContentFuture = writeStaticFile(ctx, "/org/semux/api" + path);
             }
