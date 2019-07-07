@@ -98,7 +98,7 @@ public class MessageQueue {
      * @param code
      */
     public void disconnect(ReasonCode code) {
-        logger.debug("Disconnect: reason = {}", code);
+        logger.debug("Actively closing the connection: reason = {}", code);
 
         // avoid repeating close requests
         if (isClosed.compareAndSet(false, true)) {

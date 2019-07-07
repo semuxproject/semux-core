@@ -50,7 +50,7 @@ public class NodeManager {
 
     private static final long MAX_QUEUE_SIZE = 1024;
     private static final int LRU_CACHE_SIZE = 1024;
-    private static final long RECONNECT_WAIT = 2L * 60L * 1000L;
+    private static final long RECONNECT_WAIT = 60L * 1000L;
 
     private final Kernel kernel;
     private final Config config;
@@ -90,8 +90,8 @@ public class NodeManager {
         if (!isRunning) {
             addNodes(config.p2pSeedNodes());
 
-            // every 0.5 seconds
-            connectFuture = exec.scheduleAtFixedRate(this::doConnect, 100, 500, TimeUnit.MILLISECONDS);
+            // every 0.5 seconds, delayed by 1 seconds (kernel boot up)
+            connectFuture = exec.scheduleAtFixedRate(this::doConnect, 1000, 500, TimeUnit.MILLISECONDS);
             // every 100 seconds, delayed by 5 seconds (public IP lookup)
             fetchFuture = exec.scheduleAtFixedRate(this::doFetch, 5, 100, TimeUnit.SECONDS);
 
