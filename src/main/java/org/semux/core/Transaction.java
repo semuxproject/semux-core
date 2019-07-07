@@ -18,6 +18,7 @@ import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
+import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 
@@ -161,6 +162,8 @@ public class Transaction {
                 && networkId == network.id()
                 && type != null
                 && to != null && to.length == Key.ADDRESS_LEN
+                && (type != TransactionType.CREATE && type != TransactionType.DELEGATE
+                        || Arrays.equals(to, EMPTY_ADDRESS))
                 && value.gte0()
                 && fee.gte0()
                 && nonce >= 0

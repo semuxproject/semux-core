@@ -6,10 +6,10 @@
  */
 package org.semux.vm.client;
 
-import org.ethereum.vm.chainspec.ByzantiumSpec;
+import org.ethereum.vm.chainspec.ConstantinopleSpec;
 import org.ethereum.vm.chainspec.PrecompiledContracts;
 
-public class SemuxSpec extends ByzantiumSpec {
+public class SemuxSpec extends ConstantinopleSpec {
 
     private static final PrecompiledContracts precompiledContracts = new SemuxPrecompiledContracts();
 

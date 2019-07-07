@@ -182,6 +182,59 @@ public class VmTransactionTest {
         assertEquals(ZERO, as.getAccount(block.getCoinbase()).getAvailable());
     }
 
+    // pragma solidity ^0.5.7;
+    //
+    // contract SimpleStorage {
+    // uint storedData;
+    // function set(uint x) public {
+    // storedData = x;
+    // }
+    // function get() public view returns (uint retVal) {
+    // return storedData;
+    // }
+    // }
+    @Test
+    public void testCreateAndCall() {
+        Key key = new Key();
+
+        TransactionType type = TransactionType.CREATE;
+        byte[] from = key.toAddress();
+        byte[] to = Bytes.EMPTY_ADDRESS;
+        Amount value = NANO_SEM.of(0);
+        long nonce = as.getAccount(from).getNonce();
+        long timestamp = TimeUtil.currentTimeMillis();
+
+        // set the contract to a simple program
+        String code = "0x608060405234801561001057600080fd5b5060c68061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806360fe47b11460375780636d4ce63c146062575b600080fd5b606060048036036020811015604b57600080fd5b8101908080359060200190929190505050607e565b005b60686088565b6040518082815260200191505060405180910390f35b8060008190555050565b6000805490509056fea265627a7a7230582040d9036c93b76f14f0505e24ea49d3ca539f2d82eb0acc12f279fd28094a429364736f6c63430005090032";
+        byte[] data = HexUtil.fromHexString(code);
+
+        long gas = 1000000;
+        Amount gasPrice = NANO_SEM.of(1);
+
+        Amount available = SEM.of(1000);
+        as.adjustAvailable(key.toAddress(), available);
+
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+        assertTrue(tx.validate(network));
+
+        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
+        assertTrue(result.getCode().isSuccess());
+
+        byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
+
+        type = TransactionType.CALL;
+        to = newContractAddress;
+        nonce += 1;
+        data = Hex.decode0x("0x60fe47b10000000000000000000000000000000000000000000000000000000000000009");
+        tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+        assertTrue(tx.validate(network));
+
+        result = exec.execute(tx, as, ds, block, chain, 0);
+        assertTrue(result.getCode().isSuccess());
+    }
+
     @Test
     public void testTransferToContract() {
         Key key = new Key();
