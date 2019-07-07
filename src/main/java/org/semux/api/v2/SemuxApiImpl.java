@@ -33,10 +33,12 @@ import org.semux.Kernel;
 import org.semux.api.util.TransactionBuilder;
 import org.semux.api.v2.model.AddNodeResponse;
 import org.semux.api.v2.model.ApiHandlerResponse;
+import org.semux.api.v2.model.CallResponse;
 import org.semux.api.v2.model.ComposeRawTransactionResponse;
 import org.semux.api.v2.model.CreateAccountResponse;
 import org.semux.api.v2.model.DeleteAccountResponse;
 import org.semux.api.v2.model.DoTransactionResponse;
+import org.semux.api.v2.model.EstimateGasResponse;
 import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
@@ -83,10 +85,14 @@ import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public final class SemuxApiImpl implements SemuxApi {
+
+    private static final Logger logger = LoggerFactory.getLogger(SemuxApiImpl.class);
 
     private static final Charset CHARSET = UTF_8;
 
@@ -145,8 +151,8 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response composeRawTransaction(String network, String type, String fee, String nonce, String to,
-            String value, String timestamp, String data, String gasPrice, String gas) {
+    public Response composeRawTransaction(String network, String type, String to, String value, String fee,
+            String nonce, String timestamp, String data, String gas, String gasPrice) {
 
         ComposeRawTransactionResponse resp = new ComposeRawTransactionResponse();
 
@@ -156,17 +162,12 @@ public final class SemuxApiImpl implements SemuxApi {
                     .withType(type)
                     .withTo(to)
                     .withValue(value)
-                    .withFee(fee, true)
+                    .withFee(fee)
                     .withNonce(nonce)
                     .withTimestamp(timestamp)
-                    .withData(data);
-            if (gasPrice != null) {
-                transactionBuilder.withGasPrice(gasPrice);
-            }
-            if (gas != null) {
-                transactionBuilder.withGas(gas);
-            }
-
+                    .withData(data)
+                    .withGas(gas)
+                    .withGasPrice(gasPrice);
             Transaction transaction = transactionBuilder.buildUnsigned();
             resp.setResult(Hex.encode0x(transaction.getEncoded()));
 
@@ -266,22 +267,10 @@ public final class SemuxApiImpl implements SemuxApi {
         }
     }
 
-    @Override
-    public Response getAccountTransactions(String address, String from, String to) {
-        GetAccountTransactionsResponse resp = new GetAccountTransactionsResponse();
+    private Response getTransactions(boolean pending, String address, String from, String to) {
         byte[] addressBytes;
         int fromInt;
         int toInt;
-
-        if (!isSet(address)) {
-            return badRequest("Parameter `address` is required");
-        }
-        if (!isSet(from)) {
-            return badRequest("Parameter `from` is required");
-        }
-        if (!isSet(to)) {
-            return badRequest("Parameter `to` is required");
-        }
 
         try {
             addressBytes = Hex.decode0x(address);
@@ -289,46 +278,8 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest("Parameter `address` is not a valid hexadecimal string");
         }
 
-        try {
-            fromInt = Integer.parseInt(from);
-        } catch (NumberFormatException ex) {
-            return badRequest("Parameter `from` is not a valid integer");
-        }
-
-        try {
-            toInt = Integer.parseInt(to);
-        } catch (NumberFormatException ex) {
-            return badRequest("Parameter `to` is not a valid integer");
-        }
-
-        resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
-                .map(tx -> TypeFactory.transactionType(tx))
-                .collect(Collectors.toList()));
-
-        return success(resp);
-    }
-
-    @Override
-    public Response getAccountPendingTransactions(String address, String from, String to) {
-        GetAccountPendingTransactionsResponse resp = new GetAccountPendingTransactionsResponse();
-        byte[] addressBytes;
-        int fromInt;
-        int toInt;
-
-        if (!isSet(address)) {
-            return badRequest("Parameter `address` is required");
-        }
-        if (!isSet(from)) {
-            return badRequest("Parameter `from` is required");
-        }
-        if (!isSet(to)) {
-            return badRequest("Parameter `to` is required");
-        }
-
-        try {
-            addressBytes = Hex.decode0x(address);
-        } catch (CryptoException ex) {
-            return badRequest("Parameter `address` is not a valid hexadecimal string");
+        if (addressBytes.length != 20) {
+            return badRequest("Parameter `address` length is invalid");
         }
 
         try {
@@ -347,16 +298,35 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest("Parameter `to` must be greater than `from`");
         }
 
-        resp.setResult(kernel.getPendingManager()
-                .getPendingTransactions().parallelStream()
-                .map(pendingTransaction -> pendingTransaction.transaction)
-                .filter(tx -> Arrays.equals(tx.getFrom(), addressBytes) || Arrays.equals(tx.getTo(), addressBytes))
-                .skip(fromInt)
-                .limit(toInt - fromInt)
-                .map(TypeFactory::transactionType)
-                .collect(Collectors.toList()));
+        if (pending) {
+            GetAccountPendingTransactionsResponse resp = new GetAccountPendingTransactionsResponse();
+            resp.setResult(kernel.getPendingManager()
+                    .getPendingTransactions().parallelStream()
+                    .map(pendingTransaction -> pendingTransaction.transaction)
+                    .filter(tx -> Arrays.equals(tx.getFrom(), addressBytes) || Arrays.equals(tx.getTo(), addressBytes))
+                    .skip(fromInt)
+                    .limit(toInt - fromInt)
+                    .map(TypeFactory::transactionType)
+                    .collect(Collectors.toList()));
+            return success(resp);
+        } else {
+            GetAccountTransactionsResponse resp = new GetAccountTransactionsResponse();
+            resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
+                    .map(tx -> TypeFactory.transactionType(tx))
+                    .collect(Collectors.toList()));
 
-        return success(resp);
+            return success(resp);
+        }
+    }
+
+    @Override
+    public Response getAccountTransactions(String address, String from, String to) {
+        return getTransactions(false, address, from, to);
+    }
+
+    @Override
+    public Response getAccountPendingTransactions(String address, String from, String to) {
+        return getTransactions(true, address, from, to);
     }
 
     @Override
@@ -551,10 +521,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             return success(resp);
         } catch (NullPointerException | IllegalArgumentException e) {
-            return badRequest(String.format("Invalid transaction type. (must be one of %s)",
-                    Arrays.stream(TransactionType.values())
-                            .map(TransactionType::toString)
-                            .collect(Collectors.joining(","))));
+            return badRequest(String.format("Invalid transaction type"));
         }
     }
 
@@ -763,29 +730,31 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response create(String from, String data, String gasPrice, String gas, String nonce, String value) {
-        return doTransaction(TransactionType.CREATE, from, null, value, "0", nonce, data, gasPrice,
-                gas);
+    public Response create(String from, String data, String gas, String gasPrice, String value, String nonce) {
+        return doTransaction(TransactionType.CREATE, from, null, value, null, nonce, data, gas, gasPrice);
     }
 
     @Override
-    public Response call(String from, String to, String value, String gasPrice, String gas,
-            String nonce, String data, Boolean local) {
-        if (Boolean.TRUE.equals(local)) {
-            return callLocal(to, data);
-        } else {
-            return doTransaction(TransactionType.CALL, from, to, value, "0", nonce, data, gasPrice,
-                    gas);
-        }
+    public Response call(String from, String to, String gas, String gasPrice, String value, String nonce, String data) {
+        return doTransaction(TransactionType.CALL, from, to, value, "0", nonce, data, gas, gasPrice);
     }
 
-    @Override
-    public Response callLocal(String to, String data) {
+    private TransactionReceipt executeTransactionLocally(String to, String from, String value, String nonce,
+            String data, String gas, String gasPrice) {
         TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
                 .withType("CALL")
                 .withTo(to)
-                .withNonce("0")
+                .withFrom(from)
+                .withValue(value)
+                .withNonce(nonce)
                 .withData(data);
+
+        if (gas == null) {
+            transactionBuilder.withGas(Long.toString(kernel.getConfig().spec().maxBlockGasLimit()));
+        }
+        if (gasPrice == null) {
+            transactionBuilder.withGasPrice("1");
+        }
 
         SemuxTransaction transaction = new SemuxTransaction(transactionBuilder.buildUnsigned());
         SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(),
@@ -801,11 +770,31 @@ public final class SemuxApiImpl implements SemuxApi {
                 kernel.getConfig().spec().vmSpec(), invokeFactory, gasUsedInBlock, true);
         TransactionReceipt receipt = executor.run();
 
-        DoTransactionResponse resp = new DoTransactionResponse();
-        resp.setResult(Hex.encode0x(receipt.getReturnData()));
-        if (!receipt.isSuccess()) {
-            return badRequest("Error calling method");
+        return receipt;
+    }
+
+    @Override
+    public Response localCall(String to, String from, String value, String nonce, String data, String gas,
+            String gasPrice) {
+        TransactionReceipt receipt = executeTransactionLocally(to, from, value, nonce, data, gas, gasPrice);
+        CallResponse resp = new CallResponse();
+        if (receipt == null || !receipt.isSuccess()) {
+            return badRequest("Failed to call");
         } else {
+            resp.setResult(Hex.encode0x(receipt.getReturnData()));
+            return success(resp);
+        }
+    }
+
+    @Override
+    public Response estimateGas(String to, String from, String value, String nonce, String data, String gas,
+            String gasPrice) {
+        TransactionReceipt receipt = executeTransactionLocally(to, from, value, nonce, data, gas, gasPrice);
+        EstimateGasResponse resp = new EstimateGasResponse();
+        if (receipt == null || !receipt.isSuccess()) {
+            return badRequest("Failed to estimate the gas usage");
+        } else {
+            resp.setResult(Long.toString(receipt.getGasUsed()));
             return success(resp);
         }
     }
@@ -850,7 +839,7 @@ public final class SemuxApiImpl implements SemuxApi {
             isValidSignature = false;
         }
 
-        resp.setValidSignature(isValidSignature);
+        resp.setValid(isValidSignature);
 
         return success(resp);
     }
@@ -904,6 +893,7 @@ public final class SemuxApiImpl implements SemuxApi {
         resp.setSuccess(false);
         resp.setMessage(message);
 
+        logger.info("Bad request: {}", message);
         return Response.status(BAD_REQUEST).entity(resp).build();
     }
 
@@ -943,22 +933,17 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     private Transaction getTransaction(TransactionType type, String from, String to, String value, String fee,
-            String nonce, String data, String gasPrice, String gas) {
+            String nonce, String data, String gas, String gasPrice) {
         TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
                 .withType(type)
                 .withFrom(from)
                 .withTo(to)
-                .withFee(fee, true)
                 .withValue(value)
-                .withData(data);
-
-        if (type == TransactionType.CREATE || type == TransactionType.CALL) {
-            transactionBuilder.withGasPrice(gasPrice).withGas(gas);
-        }
-
-        if (nonce != null) {
-            transactionBuilder.withNonce(nonce);
-        }
+                .withFee(fee)
+                .withNonce(nonce)
+                .withData(data)
+                .withGas(gas)
+                .withGasPrice(gasPrice);
 
         Transaction tx = transactionBuilder.buildSigned();
 
@@ -977,11 +962,11 @@ public final class SemuxApiImpl implements SemuxApi {
      * @param data
      * @return
      */
-    private Response doTransaction(TransactionType type, String from, String to, String value, String fee, String nonce,
-            String data, String gasPrice, String gas) {
+    private Response doTransaction(TransactionType type, String from, String to, String value, String fee,
+            String nonce, String data, String gas, String gasPrice) {
         DoTransactionResponse resp = new DoTransactionResponse();
         try {
-            Transaction tx = getTransaction(type, from, to, value, fee, nonce, data, gasPrice, gas);
+            Transaction tx = getTransaction(type, from, to, value, fee, nonce, data, gas, gasPrice);
 
             PendingManager.ProcessingResult result = kernel.getPendingManager().addTransactionSync(tx);
             if (result.error != null) {
