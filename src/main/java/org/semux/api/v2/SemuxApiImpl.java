@@ -278,7 +278,7 @@ public final class SemuxApiImpl implements SemuxApi {
             return badRequest("Parameter `address` is not a valid hexadecimal string");
         }
 
-        if (addressBytes.length != 20) {
+        if (addressBytes.length != Key.ADDRESS_LEN) {
             return badRequest("Parameter `address` length is invalid");
         }
 
