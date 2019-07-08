@@ -31,6 +31,8 @@
         <Logger name="io.swagger" level="ERROR" />
         <Logger name="oshi" level="INFO" />
 
+        <Logger name="org.ethereum.vm" level="ERROR" />
+
         <Root level="INFO">
             <AppenderRef ref="Async" />
         </Root>

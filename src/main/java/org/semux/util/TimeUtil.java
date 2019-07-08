@@ -103,6 +103,10 @@ public class TimeUtil {
         return timeOffsetFromNtp;
     }
 
+    public static void shutdownNtpUpdater() {
+        ntpUpdateTimer.shutdownNow();
+    }
+
     private TimeUtil() {
     }
 }
