@@ -124,7 +124,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // =========================
     // Transaction pool
     // =========================
-    protected int poolBlockGasLimit = 5_000_000;
+    protected int poolBlockGasLimit = 10_000_000;
     protected Amount poolMinGasPrice = NANO_SEM.of(10); // 10 NanoSEM = 10 Gwei
     protected long poolMaxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
 
@@ -157,7 +157,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
 
     @Override
     public long maxBlockGasLimit() {
-        return maxBlockGasLimit;
+        if (this.network() == Network.MAINNET) {
+            return maxBlockGasLimit;
+        } else {
+            return maxBlockGasLimit * 5;
+        }
     }
 
     @Override
@@ -480,7 +484,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
 
     @Override
     public int poolBlockGasLimit() {
-        return poolBlockGasLimit;
+        if (this.network() == Network.MAINNET) {
+            return poolBlockGasLimit;
+        } else {
+            return poolBlockGasLimit * 5;
+        }
     }
 
     @Override
