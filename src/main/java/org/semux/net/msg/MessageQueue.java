@@ -102,9 +102,7 @@ public class MessageQueue {
 
         // avoid repeating close requests
         if (isClosed.compareAndSet(false, true)) {
-            ctx.writeAndFlush(new DisconnectMessage(code)).addListener((ChannelFutureListener) future -> {
-                ctx.close();
-            });
+            ctx.writeAndFlush(new DisconnectMessage(code)).addListener((ChannelFutureListener) future -> ctx.close());
         }
     }
 

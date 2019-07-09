@@ -265,7 +265,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             GetAccountTransactionsResponse resp = new GetAccountTransactionsResponse();
             resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
-                    .map(tx -> TypeFactory.transactionType(tx))
+                    .map(TypeFactory::transactionType)
                     .collect(Collectors.toList()));
             return success(resp);
         } catch (IllegalArgumentException ex) {
@@ -459,7 +459,7 @@ public final class SemuxApiImpl implements SemuxApi {
             resp.setResult(TypeFactory.transactionLimitsType(kernel, TransactionType.valueOf(type)));
             return success(resp);
         } catch (NullPointerException | IllegalArgumentException e) {
-            return badRequest(String.format("Invalid transaction type"));
+            return badRequest(String.format("Invalid transaction type `%s`", type));
         }
     }
 
@@ -478,7 +478,7 @@ public final class SemuxApiImpl implements SemuxApi {
             resp.setResult(TypeFactory.transactionResultType(tx, result, number));
             return success(resp);
         } catch (NullPointerException | IllegalArgumentException e) {
-            return badRequest(String.format("Invalid transaction type"));
+            return badRequest(e.getMessage());
         }
     }
 
@@ -663,7 +663,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 kernel.getBlockchain().getDelegateState());
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
         BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
-        long gasUsedInBlock = 0l;
+        long gasUsedInBlock = 0;
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,

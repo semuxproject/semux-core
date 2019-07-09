@@ -104,7 +104,8 @@ public class VMPerformance {
             }
 
             if (i == 0) {
-                blockGasUsed = blockchain.getBlock(number).getResults().stream().mapToLong(r -> r.getGasUsed()).sum();
+                blockGasUsed = blockchain.getBlock(number).getResults().stream()
+                        .mapToLong(TransactionResult::getGasUsed).sum();
             }
         }
         long t2 = TimeUtil.currentTimeMillis();

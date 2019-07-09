@@ -87,7 +87,7 @@ public class InternalTransactionTest {
         as.setCode(to, contract);
 
         SemuxBlock bh = new SemuxBlock(
-                new BlockHeader(123l, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
+                new BlockHeader(123, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
                         Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
                 config.spec().maxBlockGasLimit());
         as.adjustAvailable(from, SEM.of(1000));
