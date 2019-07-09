@@ -423,9 +423,9 @@ public class Block {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeInt(transactions.size());
-        for (int i = 0; i < transactions.size(); i++) {
+        for (Transaction transaction : transactions) {
             int index = enc.getWriteIndex();
-            enc.writeBytes(transactions.get(i).toBytes());
+            enc.writeBytes(transaction.toBytes());
             indices.add(index);
         }
 
@@ -446,9 +446,9 @@ public class Block {
 
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeInt(results.size());
-        for (int i = 0; i < results.size(); i++) {
+        for (TransactionResult result : results) {
             int index = enc.getWriteIndex();
-            enc.writeBytes(results.get(i).toBytes());
+            enc.writeBytes(result.toBytes());
             indices.add(index);
         }
 

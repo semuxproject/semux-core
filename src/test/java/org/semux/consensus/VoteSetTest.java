@@ -51,7 +51,7 @@ public class VoteSetTest {
                 new Key(),
                 new Key(),
         };
-        List<String> validators = Stream.of(keys).map(k -> k.toAddressString()).collect(Collectors.toList());
+        List<String> validators = Stream.of(keys).map(Key::toAddressString).collect(Collectors.toList());
 
         VoteSet s = new VoteSet(VoteType.PRECOMMIT, 100, 3, validators);
         s.addVote(Vote.newReject(VoteType.PRECOMMIT, 100, 3).sign(keys[0]));

@@ -204,7 +204,7 @@ public class NodeManager {
             long now = TimeUtil.currentTimeMillis();
 
             if (!client.getNode().equals(node) // self
-                    && !(node.getIp() == client.getIp() && node.getPort() == client.getPort()) // self
+                    && !(Objects.equals(node.getIp(), client.getIp()) && node.getPort() == client.getPort()) // self
                     && !activeAddresses.contains(node.toAddress()) // connected
                     && (lastTouch == null || lastTouch + RECONNECT_WAIT < now)) {
 

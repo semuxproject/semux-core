@@ -87,8 +87,9 @@ public class TransactionBuilder {
 
     public TransactionBuilder withType(String type) {
         if (type != null) {
-            this.type = TransactionType.valueOf(type);
-            if (this.type == null) {
+            try {
+                this.type = TransactionType.valueOf(type);
+            } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Parameter `type` is invalid");
             }
         }
@@ -97,8 +98,9 @@ public class TransactionBuilder {
 
     public TransactionBuilder withNetwork(String network) {
         if (network != null) {
-            this.network = Network.valueOf(network);
-            if (this.network == null) {
+            try {
+                this.network = Network.valueOf(network);
+            } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Parameter `network` is invalid");
             }
         }
