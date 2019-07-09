@@ -870,8 +870,9 @@ public class BlockchainImpl implements Blockchain {
 
     /**
      * A temporary blockchain for database migration. This class implements a
-     * lightweight version of ${@link org.semux.core.Blockchain#importBlock(Block)}
-     * to migrate blocks from an existing database to the latest schema.
+     * lightweight version of
+     * ${@link org.semux.core.Blockchain#importBlock(Block,boolean)} to migrate
+     * blocks from an existing database to the latest schema.
      */
     private class MigrationBlockchain extends BlockchainImpl {
         private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
