@@ -67,6 +67,8 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
+import org.ethereum.vm.util.HashUtil;
+import org.ethereum.vm.util.HexUtil;
 import org.junit.Test;
 import org.semux.Network;
 import org.semux.TestUtils;
@@ -458,7 +460,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void getTransactionReceiptTest() {
         Key from = new Key(), to = new Key();
-        Transaction tx = createTransaction(config, from, to, Amount.Unit.SEM.of(1));
+        Transaction tx = createTransaction(config, CREATE, from, to, Amount.Unit.SEM.of(1), 1);
         TransactionResult res = new TransactionResult();
         Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
                 Collections.singletonList(res));
@@ -477,6 +479,8 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertTrue(response.getResult().getLogs().isEmpty());
         assertTrue(response.getResult().getInternalTransactions().isEmpty());
         assertEquals("0x", response.getResult().getReturnData());
+        String address = Hex.encode0x(HashUtil.calcNewAddress(from.toAddress(), 1));
+        assertEquals(address, response.getResult().getContractAddress());
     }
 
     @Test

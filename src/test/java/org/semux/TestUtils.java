@@ -59,8 +59,12 @@ public class TestUtils {
     }
 
     public static Transaction createTransaction(Config config, Key from, Key to, Amount value, long nonce) {
+        return createTransaction(config, TransactionType.TRANSFER, from, to, value, 0);
+    }
+
+    public static Transaction createTransaction(Config config, TransactionType type, Key from, Key to, Amount value,
+            long nonce) {
         Network network = config.network();
-        TransactionType type = TransactionType.TRANSFER;
         Amount fee = config.spec().minTransactionFee();
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = {};
