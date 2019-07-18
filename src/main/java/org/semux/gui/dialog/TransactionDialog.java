@@ -31,6 +31,7 @@ public class TransactionDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private JFrame parent;
     private Transaction tx;
     private TransactionResult result;
 
@@ -38,6 +39,7 @@ public class TransactionDialog extends JDialog implements ActionListener {
         super(null, GuiMessages.get("Transaction"), ModalityType.MODELESS);
         setName("TransactionDialog");
 
+        this.parent = parent;
         this.tx = tx;
         this.result = result;
 
@@ -187,8 +189,10 @@ public class TransactionDialog extends JDialog implements ActionListener {
 
         switch (action) {
         case SHOW_TRANSACTION_RESULT:
-            TransactionResultDialog dialog = new TransactionResultDialog(null, tx, result);
-            dialog.setVisible(true);
+            if (result != null) {
+                TransactionResultDialog dialog = new TransactionResultDialog(parent, tx, result);
+                dialog.setVisible(true);
+            }
             break;
         default:
             throw new UnreachableException();
