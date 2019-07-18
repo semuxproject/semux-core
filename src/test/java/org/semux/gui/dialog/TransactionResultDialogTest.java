@@ -6,16 +6,19 @@
  */
 package org.semux.gui.dialog;
 
+import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.Unit.SEM;
-import static org.semux.core.TransactionType.TRANSFER;
+import static org.semux.core.TransactionType.CREATE;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collections;
 
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.ethereum.vm.LogInfo;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,14 +26,15 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.core.Amount;
 import org.semux.core.Transaction;
-import org.semux.crypto.Hex;
+import org.semux.core.TransactionResult;
 import org.semux.crypto.Key;
-import org.semux.gui.SwingUtil;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
+import org.semux.util.Bytes;
+import org.semux.vm.client.SemuxInternalTransaction;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
+public class TransactionResultDialogTest extends AssertJSwingJUnitTestCase {
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);
@@ -39,7 +43,7 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
     WalletModel walletModel;
 
     @Test
-    public void testDisplayTransferTransaction() {
+    public void testTransactionResult() {
         kernelRule1.getKernel().start();
 
         Key from = new Key();
@@ -49,26 +53,28 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         long nonce = 0L;
         long now = Instant.now().toEpochMilli();
         byte[] data = "some data".getBytes();
-        Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().network(), TRANSFER, to.toAddress(), value,
-                fee, nonce, now, data).sign(from);
+        long gas = 10_000;
+        Amount gasPrice = NANO_SEM.of(10);
+        Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().network(), CREATE, to.toAddress(), value,
+                fee, nonce, now, data, gas, gasPrice).sign(from);
 
-        TransactionDialogTestApplication application = GuiActionRunner
-                .execute(() -> new TransactionDialogTestApplication(walletModel, kernelRule1.getKernel(), tx));
+        TransactionResult result = new TransactionResult();
+        result.setCode(TransactionResult.Code.FAILURE);
+        result.setReturnData("Test".getBytes());
+        result.setGas(gas, gasPrice, 5_000);
+        LogInfo log = new LogInfo(Bytes.random(20), Collections.emptyList(), "log".getBytes());
+        result.setLogs(Collections.singletonList(log));
+        result.setInternalTransactions(Collections.emptyList());
+
+        TransactionResultDialogTestApplication application = GuiActionRunner
+                .execute(() -> new TransactionResultDialogTestApplication(walletModel, kernelRule1.getKernel(), tx,
+                        result));
 
         FrameFixture window = new FrameFixture(robot(), application);
         DialogFixture dialog = window.show().requireVisible().moveToFront()
-                .dialog("TransactionDialog").requireVisible();
+                .dialog("TransactionResultDialog").requireVisible();
 
-        dialog.textBox("hashText").requireVisible().requireText(Hex.encode0x(tx.getHash()));
-        dialog.textBox("fromText").requireVisible().requireText(Hex.encode0x(from.toAddress()));
-        dialog.textBox("toText").requireVisible().requireText(Hex.encode0x(to.toAddress()));
-        dialog.label("valueText").requireVisible().requireText(SwingUtil.formatAmount(value));
-        dialog.label("feeText").requireVisible().requireText(SwingUtil.formatAmount(fee));
-        dialog.label("nonceText").requireVisible().requireText("0");
-        dialog.label("timestampText").requireVisible().requireText(SwingUtil.formatTimestamp(now));
-        dialog.textBox("dataText").requireVisible().requireText(Hex.encode0x(data));
-
-        dialog.button("display").click();
+        dialog.label("blockNumber").requireVisible().requireText(String.valueOf(result.getBlockNumber()));
     }
 
     @Override
