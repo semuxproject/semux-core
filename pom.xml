@@ -252,62 +252,6 @@
                 </configuration>
             </plugin>
 
-            <!-- build windows executable (currently GUI mode only) -->
-            <plugin>
-                <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                <artifactId>launch4j-maven-plugin</artifactId>
-                <version>1.7.25</version>
-                <executions>
-                    <execution>
-                        <id>semux</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>gui</headerType>
-                            <jar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</jar>
-                            <outfile>${project.build.directory}/semux.exe</outfile>
-                            <downloadUrl>http://www.oracle.com/technetwork/java/javase/downloads/index.html</downloadUrl>
-                            <classPath>
-                                <mainClass>org.semux.gui.SemuxGui</mainClass>
-                                <preCp>anything</preCp>
-                            </classPath>
-                            <icon>src/main/resources/org/semux/gui/logo.ico</icon>
-                            <splash>
-                                <!-- this file must be a 24-bit BMP -->
-                                <file>misc/design/splash.bmp</file>
-                                <waitForWindow>true</waitForWindow>
-                                <timeout>600</timeout>
-                                <timeoutErr>true</timeoutErr>
-                            </splash>
-                            <jre>
-                                <minVersion>1.8.0</minVersion>
-                                <jdkPreference>preferJre</jdkPreference>
-                                <maxHeapPercent>80</maxHeapPercent>
-                                <opts>
-                                    <opt>-Dfile.encoding=UTF-8</opt>
-                                </opts>
-                            </jre>
-                            <versionInfo>
-                                <fileVersion>${dist.windowsExecutableVersion}</fileVersion>
-                                <fileDescription>${project.description}</fileDescription>
-                                <txtFileVersion>${project.version}</txtFileVersion>
-                                <copyright>MIT</copyright>
-                                <productVersion>${dist.windowsExecutableVersion}</productVersion>
-                                <txtProductVersion>${project.version}</txtProductVersion>
-                                <productName>semux</productName>
-                                <internalName>semux</internalName>
-                                <originalFilename>semux.exe</originalFilename>
-                            </versionInfo>
-                            <singleInstance>
-                                <mutexName>semux</mutexName>
-                            </singleInstance>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- prepare distribution -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -351,14 +295,17 @@
                                         <include name="config/**" />
                                         <include name="LICENSE*" />
                                     </fileset>
-                                    <fileset dir="${project.basedir}/target">
-                                        <include name="semux.exe" />
-                                    </fileset>
                                 </copy>
-                                <copy file="${project.basedir}/misc/launch4j/semux.l4j.ini" tofile="${dist.base}/windows/semux.l4j.ini" />
+                                <copy file="${project.basedir}/src/main/resources/org/semux/gui/splash.png" todir="${dist.base}/windows/resources" />
+                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/windows/semux.jar" />
+                                <copy file="${project.basedir}/scripts/semux-cli.bat" tofile="${dist.base}/windows/semux-cli.bat" />
+                                <copy file="${project.basedir}/scripts/semux-gui.bat" tofile="${dist.base}/windows/semux-gui.bat" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis" />
+                                <get src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-windows.zip" dest="${dist.base}/windows" />
+                                <unzip src="${dist.base}/windows/jvm-11-windows.zip" dest="${dist.base}/windows" />
+                                <delete file="${dist.base}/windows/jvm-11-windows.zip" />
 
                                 <!-- linux build (executable jar) -->
                                 <copy todir="${dist.base}/linux">
@@ -375,6 +322,10 @@
                                 <chmod file="${dist.base}/linux/semux*.sh" perm="755" />
                                 <chmod dir="${dist.base}/linux/config" perm="700" />
                                 <chmod file="${dist.base}/linux/config/*" perm="600" />
+                                <get src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-linux.tar.gz" dest="${dist.base}/linux" />
+                                <untar compression="gzip" src="${dist.base}/linux/jvm-11-linux.tar.gz" dest="${dist.base}/linux" />
+                                <delete file="${dist.base}/linux/jvm-11-linux.tar.gz" />
+                                <chmod file="${dist.base}/linux/jvm/bin/*" perm="755" />
 
                                 <!-- macos build -->
                                 <copy todir="${dist.base}/macos">
@@ -391,6 +342,10 @@
                                 <chmod file="${dist.base}/macos/semux*.sh" perm="755" />
                                 <chmod dir="${dist.base}/macos/config" perm="700" />
                                 <chmod file="${dist.base}/macos/config/*" perm="600" />
+                                <get src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-macos.tar.gz" dest="${dist.base}/macos" />
+                                <untar compression="gzip" src="${dist.base}/macos/jvm-11-macos.tar.gz" dest="${dist.base}/macos" />
+                                <delete file="${dist.base}/macos/jvm-11-macos.tar.gz" />
+                                <chmod file="${dist.base}/macos/jvm/bin/*" perm="755" />
                             </target>
                         </configuration>
                         <goals>
