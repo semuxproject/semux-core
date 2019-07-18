@@ -28,6 +28,7 @@ import org.semux.config.Config;
 import org.semux.core.BftManager;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
+import org.semux.core.BlockPart;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
@@ -469,7 +470,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
             List<byte[]> partsSerialized = new ArrayList<>();
             Block block = chain.getBlock(number);
-            for (Block.BlockPart part : Block.BlockPart.decode(parts)) {
+            for (BlockPart part : BlockPart.decode(parts)) {
                 switch (part) {
                 case HEADER:
                     partsSerialized.add(block.getEncodedHeader());

@@ -36,6 +36,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.Block;
+import org.semux.core.BlockPart;
 import org.semux.core.Blockchain;
 import org.semux.core.SyncManager;
 import org.semux.net.Channel;
@@ -44,7 +45,7 @@ import org.semux.net.msg.Message;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.BlockPartsMessage;
-import org.semux.net.msg.consensus.GetBlockMessage;
+import org.semux.net.msg.consensus.GetBlockPartsMessage;
 import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,22 +211,37 @@ public class SemuxSync implements SyncManager {
         case BLOCK_PARTS: {
             // try re-construct a block
             BlockPartsMessage blockPartsMsg = (BlockPartsMessage) msg;
-            List<Block.BlockPart> parts = Block.BlockPart.decode(blockPartsMsg.getParts());
+            List<BlockPart> parts = BlockPart.decode(blockPartsMsg.getParts());
             List<byte[]> data = blockPartsMsg.getData();
+
+            // sanity check
             if (parts.size() != data.size()) {
-                logger.debug("Parts id and data do not match");
+                logger.debug("Part set and data do not match");
                 break;
             }
 
-            // We need header, transactions, and votes
-            if (parts.get(0) != Block.BlockPart.HEADER || parts.get(1) != Block.BlockPart.TRANSACTIONS
-                    || parts.get(0) != Block.BlockPart.VOTES) {
-                try {
-                    Block block = Block.fromComponents(data.get(0), data.get(1), null, data.get(2));
-                    addBlock(block, channel);
-                } catch (Exception e) {
-                    logger.debug("Failed to parse a block from components", e);
+            // parse the data
+            byte[] header = null, transactions = null, results = null, votes = null;
+            for (int i = 0; i < parts.size(); i++) {
+                if (parts.get(i) == BlockPart.HEADER) {
+                    header = data.get(i);
+                } else if (parts.get(i) == BlockPart.TRANSACTIONS) {
+                    transactions = data.get(i);
+                } else if (parts.get(i) == BlockPart.RESULTS) {
+                    results = data.get(i);
+                } else if (parts.get(i) == BlockPart.VOTES) {
+                    votes = data.get(i);
+                } else {
+                    // unknown
                 }
+            }
+
+            // import block
+            try {
+                Block block = Block.fromComponents(header, transactions, results, votes);
+                addBlock(block, channel);
+            } catch (Exception e) {
+                logger.debug("Failed to parse a block from components", e);
             }
             break;
         }
@@ -290,8 +306,21 @@ public class SemuxSync implements SyncManager {
 
             // request the block
             if (c.getRemotePeer().getLatestBlockNumber() >= task) {
-                logger.trace("Request block #{} from {}", task, c.getRemoteIp());
-                c.getMessageQueue().sendMessage(new GetBlockMessage(task));
+
+                boolean skipVotes = config.syncSkipVotes()
+                        && fastSync
+                        && (task % config.spec().getValidatorUpdateInterval()) != 0
+                        && task < target.get() - 5 * config.spec().getValidatorUpdateInterval(); // safe guard
+
+                logger.trace("Request block #{} from {}, skipVotes = {}", task, c.getRemoteIp(), skipVotes);
+
+                if (skipVotes) {
+                    c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
+                            BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS)));
+                } else {
+                    c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
+                            BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS, BlockPart.VOTES)));
+                }
 
                 if (toDownload.remove(task)) {
                     growToDownloadQueue();
@@ -478,7 +507,8 @@ public class SemuxSync implements SyncManager {
      */
     protected void handleInvalidBlock(Block block, Channel channel) {
         InetSocketAddress a = channel.getRemoteAddress();
-        logger.info("Invalid block from {}:{}", a.getAddress().getHostAddress(), a.getPort());
+        logger.info("Invalid block, peer = {}:{}, block # = {}", a.getAddress().getHostAddress(), a.getPort(),
+                block.getNumber());
         synchronized (lock) {
             toDownload.add(block.getNumber());
             toComplete.remove(block.getNumber());

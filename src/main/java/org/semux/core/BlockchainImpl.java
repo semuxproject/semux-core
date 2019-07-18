@@ -714,13 +714,10 @@ public class BlockchainImpl implements Blockchain {
                 return false;
             }
 
-            // [2] check transactions and results
+            // [2] check transactions; receipts are not validated because they will be
+            // replaced later
             if (!block.validateTransactions(header, transactions, config.network())) {
                 logger.error("Invalid block transactions");
-                return false;
-            }
-            if (!block.validateResults(header, block.getResults())) {
-                logger.error("Invalid results");
                 return false;
             }
 
@@ -733,12 +730,12 @@ public class BlockchainImpl implements Blockchain {
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
             List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
                     new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this, 0);
-            block.setResults(results);
 
             if (!block.validateResults(header, results)) {
                 logger.error("Invalid transactions");
                 return false;
             }
+            block.setResults(results); // overwrite the results
 
             // [4] evaluate votes
             if (validateVotes) {
@@ -792,7 +789,7 @@ public class BlockchainImpl implements Blockchain {
         if (block.getVotes().stream()
                 .map(sig -> new ByteArray(sig.getA()))
                 .collect(Collectors.toSet()).size() < twoThirds) {
-            logger.warn("Not enough votes, needs 2/3+ twoThirds = {}, block = {}", twoThirds, block);
+            logger.warn("Not enough votes, required (2/3+) = {}, actual = {}", twoThirds, block.getVotes().size());
             return false;
         }
 

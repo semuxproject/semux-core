@@ -101,6 +101,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     protected int syncMaxPendingJobs = 256;
     protected int syncMaxPendingBlocks = 512;
     protected boolean syncDisconnectOnInvalidBlock = false;
+    protected boolean syncSkipVotes = false;
 
     // =========================
     // API
@@ -429,6 +430,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
+    public boolean syncSkipVotes() {
+        return syncSkipVotes;
+    }
+
+    @Override
     public boolean apiEnabled() {
         return apiEnabled;
     }
@@ -610,6 +616,9 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                     break;
                 case "sync.disconnectOnInvalidBlock":
                     syncDisconnectOnInvalidBlock = Boolean.parseBoolean(props.getProperty(name).trim());
+                    break;
+                case "sync.skipVotes":
+                    syncSkipVotes = Boolean.parseBoolean(props.getProperty(name).trim());
                     break;
 
                 case "api.enabled":

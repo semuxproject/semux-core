@@ -253,6 +253,13 @@ public interface Config {
      */
     boolean syncDisconnectOnInvalidBlock();
 
+    /**
+     * Returns whether to skip votes when fastsync is enabled.
+     *
+     * @return
+     */
+    boolean syncSkipVotes();
+
     // =========================
     // API
     // =========================
