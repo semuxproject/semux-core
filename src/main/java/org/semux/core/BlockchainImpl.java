@@ -96,7 +96,7 @@ public class BlockchainImpl implements Blockchain {
     protected static final byte TYPE_BLOCK_COINBASE_BY_NUMBER = 0x07;
     protected static final byte TYPE_TRANSACTION_INDEX_BY_HASH = 0x04;
     protected static final byte TYPE_TRANSACTION_COUNT_BY_ADDRESS = 0x05;
-    protected static final byte TYPE_TRANSACTION_BY_ADDRESS_AND_INDEX = 0x05;
+    protected static final byte TYPE_TRANSACTION_HASH_BY_ADDRESS_AND_INDEX = 0x05;
     protected static final byte TYPE_ACTIVATED_FORKS = 0x06;
     protected static final byte TYPE_DATABASE_VERSION = (byte) 0xff;
 
@@ -541,7 +541,7 @@ public class BlockchainImpl implements Blockchain {
      * @param total
      */
     protected void setTransactionCount(byte[] address, int total) {
-        indexDB.put(Bytes.merge(TYPE_TRANSACTION_BY_ADDRESS_AND_INDEX, address), Bytes.of(total));
+        indexDB.put(Bytes.merge(TYPE_TRANSACTION_COUNT_BY_ADDRESS, address), Bytes.of(total));
     }
 
     /**
@@ -564,7 +564,7 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     protected byte[] getNthTransactionIndexKey(byte[] address, int n) {
-        return Bytes.merge(Bytes.of(TYPE_TRANSACTION_BY_ADDRESS_AND_INDEX), address, Bytes.of(n));
+        return Bytes.merge(Bytes.of(TYPE_TRANSACTION_HASH_BY_ADDRESS_AND_INDEX), address, Bytes.of(n));
     }
 
     /**
