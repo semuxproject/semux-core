@@ -155,7 +155,9 @@ public class TypeFactory {
                 .fee(encodeAmount(tx.getFee()))
                 .nonce(String.valueOf(tx.getNonce()))
                 .timestamp(String.valueOf(tx.getTimestamp()))
-                .data(Hex.encode0x(tx.getData()));
+                .data(Hex.encode0x(tx.getData()))
+                .gas(String.valueOf(tx.getGas()))
+                .gasPrice(encodeAmount(tx.getGasPrice()));
 
         return txType;
     }
