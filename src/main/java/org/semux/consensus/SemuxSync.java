@@ -46,7 +46,6 @@ import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.BlockPartsMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.util.TimeUtil;
-import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +113,6 @@ public class SemuxSync implements SyncManager {
         this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
-        new SemuxBlockStore(chain);
         this.channelMgr = kernel.getChannelManager();
 
         this.DOWNLOAD_TIMEOUT = config.syncDownloadTimeout();

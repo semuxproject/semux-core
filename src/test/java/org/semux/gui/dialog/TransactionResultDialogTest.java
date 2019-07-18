@@ -31,7 +31,6 @@ import org.semux.crypto.Key;
 import org.semux.gui.model.WalletModel;
 import org.semux.rules.KernelRule;
 import org.semux.util.Bytes;
-import org.semux.vm.client.SemuxInternalTransaction;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class TransactionResultDialogTest extends AssertJSwingJUnitTestCase {
