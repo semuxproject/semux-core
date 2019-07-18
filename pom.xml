@@ -219,6 +219,7 @@
                                 <Implementation-Version>${git.commit.id.abbrev}</Implementation-Version>
                                 <X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
                                 <X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+                                <Multi-Release>true</Multi-Release>
                             </manifestEntries>
                         </transformer>
                     </transformers>
@@ -289,6 +290,8 @@
                         <phase>${dist.phase}</phase>
                         <configuration>
                             <target>
+                                <mkdir dir="${dist.base}/cache" />
+
                                 <!-- windows build -->
                                 <copy todir="${dist.base}/windows">
                                     <fileset dir="${project.basedir}">
@@ -303,9 +306,8 @@
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis" />
-                                <get src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-windows.zip" dest="${dist.base}/windows" />
-                                <unzip src="${dist.base}/windows/jvm-11-windows.zip" dest="${dist.base}/windows" />
-                                <delete file="${dist.base}/windows/jvm-11-windows.zip" />
+                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-windows.zip" dest="${dist.base}/cache" />
+                                <unzip src="${dist.base}/cache/jvm-11-windows.zip" dest="${dist.base}/windows" />
 
                                 <!-- linux build (executable jar) -->
                                 <copy todir="${dist.base}/linux">
@@ -322,9 +324,8 @@
                                 <chmod file="${dist.base}/linux/semux*.sh" perm="755" />
                                 <chmod dir="${dist.base}/linux/config" perm="700" />
                                 <chmod file="${dist.base}/linux/config/*" perm="600" />
-                                <get src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-linux.tar.gz" dest="${dist.base}/linux" />
-                                <untar compression="gzip" src="${dist.base}/linux/jvm-11-linux.tar.gz" dest="${dist.base}/linux" />
-                                <delete file="${dist.base}/linux/jvm-11-linux.tar.gz" />
+                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-linux.tar.gz" dest="${dist.base}/cache" />
+                                <untar compression="gzip" src="${dist.base}/cache/jvm-11-linux.tar.gz" dest="${dist.base}/linux" />
                                 <chmod file="${dist.base}/linux/jvm/bin/*" perm="755" />
 
                                 <!-- macos build -->
@@ -342,9 +343,8 @@
                                 <chmod file="${dist.base}/macos/semux*.sh" perm="755" />
                                 <chmod dir="${dist.base}/macos/config" perm="700" />
                                 <chmod file="${dist.base}/macos/config/*" perm="600" />
-                                <get src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-macos.tar.gz" dest="${dist.base}/macos" />
-                                <untar compression="gzip" src="${dist.base}/macos/jvm-11-macos.tar.gz" dest="${dist.base}/macos" />
-                                <delete file="${dist.base}/macos/jvm-11-macos.tar.gz" />
+                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-macos.tar.gz" dest="${dist.base}/cache" />
+                                <untar compression="gzip" src="${dist.base}/cache/jvm-11-macos.tar.gz" dest="${dist.base}/macos" />
                                 <chmod file="${dist.base}/macos/jvm/bin/*" perm="755" />
                             </target>
                         </configuration>
