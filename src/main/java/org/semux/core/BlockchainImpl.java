@@ -91,18 +91,19 @@ public class BlockchainImpl implements Blockchain {
 
     protected static final byte TYPE_LATEST_BLOCK_NUMBER = 0x00;
     protected static final byte TYPE_VALIDATORS = 0x01;
-    protected static final byte TYPE_VALIDATOR_STATS = 0x02;
-    protected static final byte TYPE_BLOCK_HASH = 0x03;
-    protected static final byte TYPE_TRANSACTION_HASH = 0x04;
-    protected static final byte TYPE_ACCOUNT_TRANSACTION = 0x05;
+    protected static final byte TYPE_VALIDATOR_STATS_BY_ADDRESS = 0x02;
+    protected static final byte TYPE_BLOCK_NUMBER_BY_HASH = 0x03;
+    protected static final byte TYPE_BLOCK_COINBASE_BY_NUMBER = 0x07;
+    protected static final byte TYPE_TRANSACTION_INDEX_BY_HASH = 0x04;
+    protected static final byte TYPE_TRANSACTION_COUNT_BY_ADDRESS = 0x05;
+    protected static final byte TYPE_TRANSACTION_BY_ADDRESS_AND_INDEX = 0x05;
     protected static final byte TYPE_ACTIVATED_FORKS = 0x06;
-    protected static final byte TYPE_COINBASE_TRANSACTION_HASH = 0x07;
     protected static final byte TYPE_DATABASE_VERSION = (byte) 0xff;
 
-    protected static final byte TYPE_BLOCK_HEADER = 0x00;
-    protected static final byte TYPE_BLOCK_TRANSACTIONS = 0x01;
-    protected static final byte TYPE_BLOCK_RESULTS = 0x02;
-    protected static final byte TYPE_BLOCK_VOTES = 0x03;
+    protected static final byte TYPE_BLOCK_HEADER_BY_NUMBER = 0x00;
+    protected static final byte TYPE_BLOCK_TRANSACTIONS_BY_NUMBER = 0x01;
+    protected static final byte TYPE_BLOCK_RESULTS_BY_NUMBER = 0x02;
+    protected static final byte TYPE_BLOCK_VOTES_BY_NUMBER = 0x03;
 
     private final BlockStore blockStore = new SemuxBlockStore(this);
     private final ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
@@ -212,16 +213,16 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public long getBlockNumber(byte[] hash) {
-        byte[] number = indexDB.get(Bytes.merge(TYPE_BLOCK_HASH, hash));
+        byte[] number = indexDB.get(Bytes.merge(TYPE_BLOCK_NUMBER_BY_HASH, hash));
         return (number == null) ? -1 : Bytes.toLong(number);
     }
 
     @Override
     public Block getBlock(long number) {
-        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)));
-        byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
-        byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
-        byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)));
+        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER_BY_NUMBER, Bytes.of(number)));
+        byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS_BY_NUMBER, Bytes.of(number)));
+        byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(number)));
+        byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES_BY_NUMBER, Bytes.of(number)));
 
         return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
     }
@@ -234,7 +235,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public BlockHeader getBlockHeader(long number) {
-        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)));
+        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER_BY_NUMBER, Bytes.of(number)));
         return (header == null) ? null : BlockHeader.fromBytes(header);
     }
 
@@ -246,12 +247,12 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public boolean hasBlock(long number) {
-        return blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number))) != null;
+        return blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER_BY_NUMBER, Bytes.of(number))) != null;
     }
 
     @Override
     public Transaction getTransaction(byte[] hash) {
-        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
+        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, hash));
         if (bytes != null) {
             // coinbase transaction
             if (bytes.length > 64) {
@@ -263,7 +264,7 @@ public class BlockchainImpl implements Blockchain {
             int start = dec.readInt();
             dec.readInt();
 
-            byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)));
+            byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS_BY_NUMBER, Bytes.of(number)));
             dec = new SimpleDecoder(transactions, start);
             return Transaction.fromBytes(dec.readBytes());
         }
@@ -275,17 +276,17 @@ public class BlockchainImpl implements Blockchain {
     public Transaction getCoinbaseTransaction(long blockNumber) {
         return blockNumber == 0
                 ? null
-                : getTransaction(indexDB.get(Bytes.merge(TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(blockNumber))));
+                : getTransaction(indexDB.get(Bytes.merge(TYPE_BLOCK_COINBASE_BY_NUMBER, Bytes.of(blockNumber))));
     }
 
     @Override
     public boolean hasTransaction(final byte[] hash) {
-        return indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash)) != null;
+        return indexDB.get(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, hash)) != null;
     }
 
     @Override
     public TransactionResult getTransactionResult(byte[] hash) {
-        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
+        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, hash));
         if (bytes != null) {
             // coinbase transaction
             if (bytes.length > 64) {
@@ -297,7 +298,7 @@ public class BlockchainImpl implements Blockchain {
             dec.readInt();
             int start = dec.readInt();
 
-            byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)));
+            byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(number)));
             dec = new SimpleDecoder(results, start);
             return TransactionResult.fromBytes(dec.readBytes());
         }
@@ -312,7 +313,7 @@ public class BlockchainImpl implements Blockchain {
             return tx.getNonce();
         }
 
-        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_HASH, hash));
+        byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, hash));
         if (bytes != null) {
             SimpleDecoder dec = new SimpleDecoder(bytes);
             return dec.readLong();
@@ -332,12 +333,12 @@ public class BlockchainImpl implements Blockchain {
         }
 
         // [1] update block
-        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER, Bytes.of(number)), block.getEncodedHeader());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS, Bytes.of(number)), block.getEncodedTransactions());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS, Bytes.of(number)), block.getEncodedResults());
-        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES, Bytes.of(number)), block.getEncodedVotes());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_HEADER_BY_NUMBER, Bytes.of(number)), block.getEncodedHeader());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_TRANSACTIONS_BY_NUMBER, Bytes.of(number)), block.getEncodedTransactions());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(number)), block.getEncodedResults());
+        blockDB.put(Bytes.merge(TYPE_BLOCK_VOTES_BY_NUMBER, Bytes.of(number)), block.getEncodedVotes());
 
-        indexDB.put(Bytes.merge(TYPE_BLOCK_HASH, hash), Bytes.of(number));
+        indexDB.put(Bytes.merge(TYPE_BLOCK_NUMBER_BY_HASH, hash), Bytes.of(number));
 
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
@@ -353,7 +354,7 @@ public class BlockchainImpl implements Blockchain {
             enc.writeInt(transactionIndices.getRight().get(i));
             enc.writeInt(resultIndices.getRight().get(i));
 
-            indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), enc.toBytes());
+            indexDB.put(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, tx.getHash()), enc.toBytes());
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
@@ -373,8 +374,8 @@ public class BlockchainImpl implements Blockchain {
                     block.getTimestamp(),
                     Bytes.EMPTY_BYTES);
             tx.sign(Constants.COINBASE_KEY);
-            indexDB.put(Bytes.merge(TYPE_TRANSACTION_HASH, tx.getHash()), tx.toBytes());
-            indexDB.put(Bytes.merge(TYPE_COINBASE_TRANSACTION_HASH, Bytes.of(block.getNumber())), tx.getHash());
+            indexDB.put(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, tx.getHash()), tx.toBytes());
+            indexDB.put(Bytes.merge(TYPE_BLOCK_COINBASE_BY_NUMBER, Bytes.of(block.getNumber())), tx.getHash());
             addTransactionToAccount(tx, block.getCoinbase());
 
             // [5] update validator statistics
@@ -417,7 +418,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public int getTransactionCount(byte[] address) {
-        byte[] cnt = indexDB.get(Bytes.merge(TYPE_ACCOUNT_TRANSACTION, address));
+        byte[] cnt = indexDB.get(Bytes.merge(TYPE_TRANSACTION_COUNT_BY_ADDRESS, address));
         return (cnt == null) ? 0 : Bytes.toInt(cnt);
     }
 
@@ -453,7 +454,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public ValidatorStats getValidatorStats(byte[] address) {
-        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
+        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS_BY_ADDRESS, address);
         byte[] value = indexDB.get(key);
 
         return (value == null) ? new ValidatorStats(0, 0, 0) : ValidatorStats.fromBytes(value);
@@ -493,7 +494,7 @@ public class BlockchainImpl implements Blockchain {
      *            difference
      */
     protected void adjustValidatorStats(byte[] address, StatsType type, long delta) {
-        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS, address);
+        byte[] key = Bytes.merge(TYPE_VALIDATOR_STATS_BY_ADDRESS, address);
         byte[] value = indexDB.get(key);
 
         ValidatorStats stats = (value == null) ? new ValidatorStats(0, 0, 0) : ValidatorStats.fromBytes(value);
@@ -522,7 +523,7 @@ public class BlockchainImpl implements Blockchain {
      * @param total
      */
     protected void setTransactionCount(byte[] address, int total) {
-        indexDB.put(Bytes.merge(TYPE_ACCOUNT_TRANSACTION, address), Bytes.of(total));
+        indexDB.put(Bytes.merge(TYPE_TRANSACTION_BY_ADDRESS_AND_INDEX, address), Bytes.of(total));
     }
 
     /**
@@ -545,7 +546,7 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     protected byte[] getNthTransactionIndexKey(byte[] address, int n) {
-        return Bytes.merge(Bytes.of(TYPE_ACCOUNT_TRANSACTION), address, Bytes.of(n));
+        return Bytes.merge(Bytes.of(TYPE_TRANSACTION_BY_ADDRESS_AND_INDEX), address, Bytes.of(n));
     }
 
     /**
