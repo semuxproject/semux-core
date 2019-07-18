@@ -306,7 +306,7 @@
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="config/*" eol="dos" eof="asis" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="LICENSE*" eol="dos" eof="asis" />
-                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-windows.zip" dest="${dist.base}/cache" />
+                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.1.0/jvm-11-windows.zip" dest="${dist.base}/cache" />
                                 <unzip src="${dist.base}/cache/jvm-11-windows.zip" dest="${dist.base}/windows" />
 
                                 <!-- linux build (executable jar) -->
@@ -324,7 +324,7 @@
                                 <chmod file="${dist.base}/linux/semux*.sh" perm="755" />
                                 <chmod dir="${dist.base}/linux/config" perm="700" />
                                 <chmod file="${dist.base}/linux/config/*" perm="600" />
-                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-linux.tar.gz" dest="${dist.base}/cache" />
+                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.1.0/jvm-11-linux.tar.gz" dest="${dist.base}/cache" />
                                 <untar compression="gzip" src="${dist.base}/cache/jvm-11-linux.tar.gz" dest="${dist.base}/linux" />
                                 <chmod file="${dist.base}/linux/jvm/bin/*" perm="755" />
 
@@ -343,7 +343,7 @@
                                 <chmod file="${dist.base}/macos/semux*.sh" perm="755" />
                                 <chmod dir="${dist.base}/macos/config" perm="700" />
                                 <chmod file="${dist.base}/macos/config/*" perm="600" />
-                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.0.0/jvm-11-macos.tar.gz" dest="${dist.base}/cache" />
+                                <get skipexisting="true" src="https://github.com/semuxproject/jvm/releases/download/v1.1.0/jvm-11-macos.tar.gz" dest="${dist.base}/cache" />
                                 <untar compression="gzip" src="${dist.base}/cache/jvm-11-macos.tar.gz" dest="${dist.base}/macos" />
                                 <chmod file="${dist.base}/macos/jvm/bin/*" perm="755" />
                             </target>
