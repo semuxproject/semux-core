@@ -1,14 +1,8 @@
-#!/bin/sh
+@echo off
 
-# change work directory
-cd "$(dirname "$0")"
+set java_bin=.\jvm\bin\java
 
-# Java binary
-java_bin=./jvm/bin/java
+%java_bin% -cp semux.jar org.semux.JvmOptions --gui > jvm_options.txt
+set /p jvm_options=<jvm_options.txt
 
-# default JVM options
-jvm_options=`${java_bin} -cp semux.jar org.semux.JvmOptions --gui`
-
-# start kernel
-${java_bin} ${jvm_options} -cp semux.jar org.semux.Main --gui "$@"
-
+%java_bin% %jvm_options% -cp semux.jar org.semux.Main --gui %*
