@@ -438,10 +438,10 @@ public class Block {
      * @return
      */
     public byte[] getEncodedResults() {
-        return getEncodedResultsAndIndex().getLeft();
+        return getEncodedResultsAndIndices().getLeft();
     }
 
-    public Pair<byte[], List<Integer>> getEncodedResultsAndIndex() {
+    public Pair<byte[], List<Integer>> getEncodedResultsAndIndices() {
         List<Integer> indices = new ArrayList<>();
 
         SimpleEncoder enc = new SimpleEncoder();
