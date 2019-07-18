@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.ethereum.vm.LogInfo;
+import org.ethereum.vm.util.HashUtil;
 import org.semux.Kernel;
 import org.semux.api.v2.model.AccountType;
 import org.semux.api.v2.model.AccountVoteType;
@@ -171,7 +172,10 @@ public class TypeFactory {
                 .code(result.getCode().name())
                 .internalTransactions(result.getInternalTransactions().stream()
                         .map(TypeFactory::internalTransactionType).collect(Collectors.toList()))
-                .returnData(Hex.encode0x(result.getReturnData()));
+                .returnData(Hex.encode0x(result.getReturnData()))
+                .contractAddress(
+                        tx.getType().equals(CREATE) ? Hex.encode0x(HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce()))
+                                : null);
     }
 
     private static LogInfoType logInfoType(LogInfo log) {
