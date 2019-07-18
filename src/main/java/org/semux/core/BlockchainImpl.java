@@ -250,6 +250,34 @@ public class BlockchainImpl implements Blockchain {
         return blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER_BY_NUMBER, Bytes.of(number))) != null;
     }
 
+    private static class TransactionIndex {
+        long blockNumber;
+        int transactionOffset;
+        int resultOffset;
+
+        public TransactionIndex(long blockNumber, int transactionOffset, int resultOffset) {
+            this.blockNumber = blockNumber;
+            this.transactionOffset = transactionOffset;
+            this.resultOffset = resultOffset;
+        }
+
+        public byte[] toBytes() {
+            SimpleEncoder enc = new SimpleEncoder();
+            enc.writeLong(blockNumber);
+            enc.writeInt(transactionOffset);
+            enc.writeInt(resultOffset);
+            return enc.toBytes();
+        }
+
+        public static TransactionIndex fromBytes(byte[] bytes) {
+            SimpleDecoder dec = new SimpleDecoder(bytes);
+            long number = dec.readLong();
+            int transactionOffset = dec.readInt();
+            int resultOffset = dec.readInt();
+            return new TransactionIndex(number, transactionOffset, resultOffset);
+        }
+    }
+
     @Override
     public Transaction getTransaction(byte[] hash) {
         byte[] bytes = indexDB.get(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, hash));
@@ -259,13 +287,10 @@ public class BlockchainImpl implements Blockchain {
                 return Transaction.fromBytes(bytes);
             }
 
-            SimpleDecoder dec = new SimpleDecoder(bytes);
-            long number = dec.readLong();
-            int start = dec.readInt();
-            dec.readInt();
-
-            byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS_BY_NUMBER, Bytes.of(number)));
-            dec = new SimpleDecoder(transactions, start);
+            TransactionIndex index = TransactionIndex.fromBytes(bytes);
+            byte[] transactions = blockDB
+                    .get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS_BY_NUMBER, Bytes.of(index.blockNumber)));
+            SimpleDecoder dec = new SimpleDecoder(transactions, index.transactionOffset);
             return Transaction.fromBytes(dec.readBytes());
         }
 
@@ -290,16 +315,12 @@ public class BlockchainImpl implements Blockchain {
         if (bytes != null) {
             // coinbase transaction
             if (bytes.length > 64) {
-                return null; // no results for coinbase transaction
+                return new TransactionResult();
             }
 
-            SimpleDecoder dec = new SimpleDecoder(bytes);
-            long number = dec.readLong();
-            dec.readInt();
-            int start = dec.readInt();
-
-            byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(number)));
-            dec = new SimpleDecoder(results, start);
+            TransactionIndex index = TransactionIndex.fromBytes(bytes);
+            byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(index.blockNumber)));
+            SimpleDecoder dec = new SimpleDecoder(results, index.resultOffset);
             return TransactionResult.fromBytes(dec.readBytes());
         }
 
@@ -343,18 +364,15 @@ public class BlockchainImpl implements Blockchain {
         // [2] update transaction indices
         List<Transaction> txs = block.getTransactions();
         Pair<byte[], List<Integer>> transactionIndices = block.getEncodedTransactionsAndIndices();
-        Pair<byte[], List<Integer>> resultIndices = block.getEncodedTransactionsAndIndices();
+        Pair<byte[], List<Integer>> resultIndices = block.getEncodedResultsAndIndices();
         Amount reward = Block.getBlockReward(block, config);
 
         for (int i = 0; i < txs.size(); i++) {
             Transaction tx = txs.get(i);
 
-            SimpleEncoder enc = new SimpleEncoder();
-            enc.writeLong(number);
-            enc.writeInt(transactionIndices.getRight().get(i));
-            enc.writeInt(resultIndices.getRight().get(i));
-
-            indexDB.put(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, tx.getHash()), enc.toBytes());
+            TransactionIndex index = new TransactionIndex(number, transactionIndices.getRight().get(i),
+                    resultIndices.getRight().get(i));
+            indexDB.put(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, tx.getHash()), index.toBytes());
 
             // [3] update transaction_by_account index
             addTransactionToAccount(tx, tx.getFrom());
