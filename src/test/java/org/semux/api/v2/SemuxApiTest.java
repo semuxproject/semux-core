@@ -845,6 +845,8 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String nonce = "123";
         String timestamp = "1523028482000";
         String data = Hex.encode0x("semux1".getBytes());
+        long gas = 100000;
+        Amount gasPrice = NANO_SEM.of(10);
 
         ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,
@@ -855,12 +857,12 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 nonce,
                 timestamp,
                 data,
-                null,
-                null);
+                String.valueOf(gas),
+                String.valueOf(gasPrice.getNano()));
 
         assertTrue(resp.isSuccess());
         assertEquals(
-                "0x010514000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b000001629b9257d00673656d75783100000000000000000000000000000000",
+                "0x010514000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b000001629b9257d00673656d75783100000000000186a0000000000000000a",
                 resp.getResult());
     }
 

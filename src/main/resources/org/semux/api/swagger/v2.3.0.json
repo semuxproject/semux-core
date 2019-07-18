@@ -814,6 +814,18 @@
                     "description": "Transaction data encoded in hexadecimal string",
                     "type": "string",
                     "pattern": "^(0x)?[0-9a-fA-F]*$"
+                },
+                "gas": {
+                    "description": "The gas limit set by the sender",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
+                },
+                "gasPrice": {
+                    "description": "The gas Price set by the sender",
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^\\d+$"
                 }
             }
         },
