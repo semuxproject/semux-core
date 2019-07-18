@@ -1,5 +1,6 @@
 # Semux Core
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fe12db38edf2445aac7094a643b62f8b)](https://app.codacy.com/app/semuxgo/semux-core?utm_source=github.com&utm_medium=referral&utm_content=semuxproject/semux-core&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/semuxproject/semux-core.svg?branch=develop)](https://travis-ci.org/semuxproject/semux-core)
 [![Build status](https://ci.appveyor.com/api/projects/status/dkeif4luqj7fymi7?svg=true)](https://ci.appveyor.com/project/semuxproject/semux-core)
 [![Coverage Status](https://coveralls.io/repos/github/semuxproject/semux-core/badge.svg?branch=master)](https://coveralls.io/github/semuxproject/semux-core?branch=master)
