@@ -246,6 +246,13 @@ public interface Config {
      */
     int syncMaxPendingBlocks();
 
+    /**
+     * Returns whether to disconnect the peer is an invalid block is received.
+     *
+     * @return
+     */
+    boolean syncDisconnectOnInvalidBlock();
+
     // =========================
     // API
     // =========================

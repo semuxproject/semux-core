@@ -486,8 +486,11 @@ public class SemuxSync implements SyncManager {
             toFinalize.remove(block.getNumber(), Pair.of(block, channel));
             toProcess.remove(Pair.of(block, channel));
         }
-        // disconnect if the peer sends us invalid block
-        channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);
+
+        if (config.syncDisconnectOnInvalidBlock()) {
+            // disconnect if the peer sends us invalid block
+            channel.getMessageQueue().disconnect(ReasonCode.BAD_PEER);
+        }
     }
 
     @Override
