@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.semux.TestUtils;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.consensus.SemuxSync;
 import org.semux.consensus.Vote;
 import org.semux.consensus.VoteType;
 import org.semux.crypto.Hex;
@@ -63,8 +62,6 @@ public class BlockchainImportTest {
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), SEM.of(1000));
         Block block1 = kernelRule.createBlock(Collections.singletonList(tx1));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
-        SemuxSync semuxSync = spy(new SemuxSync(kernelRule.getKernel()));
-
         // create a tx with the same hash with tx1 from a different signer in the second
         // block
         Key from2 = new Key();
@@ -129,9 +126,6 @@ public class BlockchainImportTest {
         BlockchainImpl chain = spy(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         doReturn(validators).when(chain).getValidators();
         kernelRule.getKernel().setBlockchain(chain);
-
-        // mock sync manager
-        SemuxSync sync = spy(new SemuxSync(kernelRule.getKernel()));
 
         // prepare block
         Block block = kernelRule.createBlock(Collections.emptyList());

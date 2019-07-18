@@ -71,7 +71,7 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
-    private long gas = 0;
+    private Long gas = null;
     private Amount gasPrice = Amount.ZERO;
 
     public TransactionBuilder(Kernel kernel) {
@@ -279,7 +279,7 @@ public class TransactionBuilder {
         Long gas = this.gas;
         if (gas == null) {
             if (type != TransactionType.CALL && type != TransactionType.CREATE) {
-                gasPrice = Amount.ZERO;
+                gas = 0L;
             } else {
                 throw new IllegalArgumentException("Parameter `gas` is required");
             }

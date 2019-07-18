@@ -68,7 +68,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 
 import org.ethereum.vm.util.HashUtil;
-import org.ethereum.vm.util.HexUtil;
 import org.junit.Test;
 import org.semux.Network;
 import org.semux.TestUtils;
@@ -846,8 +845,6 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String nonce = "123";
         String timestamp = "1523028482000";
         String data = Hex.encode0x("semux1".getBytes());
-        String gas = "100000";
-        String gasPrice = "1";
 
         ComposeRawTransactionResponse resp = api.composeRawTransaction(
                 network,

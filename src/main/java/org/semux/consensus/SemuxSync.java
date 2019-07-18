@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.config.Config;
 import org.semux.core.Block;
@@ -47,7 +46,6 @@ import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.BlockPartsMessage;
 import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.util.TimeUtil;
-import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,11 +82,9 @@ public class SemuxSync implements SyncManager {
 
     private static final Random random = new Random();
 
-    private Kernel kernel;
     private Config config;
 
     private Blockchain chain;
-    private BlockStore blockStore;
     private ChannelManager channelMgr;
 
     // task queues
@@ -114,11 +110,9 @@ public class SemuxSync implements SyncManager {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public SemuxSync(Kernel kernel) {
-        this.kernel = kernel;
         this.config = kernel.getConfig();
 
         this.chain = kernel.getBlockchain();
-        this.blockStore = new SemuxBlockStore(chain);
         this.channelMgr = kernel.getChannelManager();
 
         this.DOWNLOAD_TIMEOUT = config.syncDownloadTimeout();

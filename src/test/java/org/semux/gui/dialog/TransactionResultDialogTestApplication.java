@@ -13,20 +13,19 @@ import org.semux.gui.BaseTestApplication;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.model.WalletModel;
 
-public class TransactionDialogTestApplication extends BaseTestApplication {
+public class TransactionResultDialogTestApplication extends BaseTestApplication {
 
     private static final long serialVersionUID = 1L;
 
     SemuxGui gui;
 
-    TransactionDialog transactionDialog;
+    TransactionResultDialog dialog;
 
-    TransactionDialogTestApplication(WalletModel walletModel, KernelMock kernelMock,
-            Transaction tx) {
+    TransactionResultDialogTestApplication(WalletModel walletModel, KernelMock kernelMock,
+            Transaction tx, TransactionResult result) {
         super();
         gui = new SemuxGui(walletModel, kernelMock);
-        TransactionResult result = new TransactionResult(TransactionResult.Code.SUCCESS);
-        transactionDialog = new TransactionDialog(this, tx, result);
-        transactionDialog.setVisible(true);
+        dialog = new TransactionResultDialog(this, tx, result);
+        dialog.setVisible(true);
     }
 }
