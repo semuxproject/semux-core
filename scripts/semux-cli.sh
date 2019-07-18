@@ -3,8 +3,11 @@
 # change work directory
 cd "$(dirname "$0")"
 
+# Java binary
+java_bin=./jvm/bin/java
+
 # default JVM options
-jvm_options=`java -cp semux.jar org.semux.JvmOptions --cli`
+jvm_options=`${java_bin} -cp semux.jar org.semux.JvmOptions --cli`
 
 # start kernel
-java ${jvm_options} -cp semux.jar org.semux.Main --cli "$@"
+${java_bin} ${jvm_options} -cp semux.jar org.semux.Main --cli "$@"
