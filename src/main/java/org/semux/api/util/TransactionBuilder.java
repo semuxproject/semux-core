@@ -71,7 +71,7 @@ public class TransactionBuilder {
      */
     private byte[] data;
 
-    private long gas = 0;
+    private Long gas = null;
     private Amount gasPrice = Amount.ZERO;
 
     public TransactionBuilder(Kernel kernel) {
