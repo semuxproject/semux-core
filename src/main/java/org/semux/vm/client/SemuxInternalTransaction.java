@@ -6,8 +6,6 @@
  */
 package org.semux.vm.client;
 
-import java.util.Arrays;
-
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.program.InternalTransaction;
 import org.semux.core.Amount;
@@ -110,7 +108,7 @@ public class SemuxInternalTransaction {
                 ", to=" + Hex.encode(to) +
                 ", nonce=" + nonce +
                 ", value=" + value +
-                ", data=" + Arrays.toString(data) +
+                ", data=" + Hex.encode(data) +
                 ", gas=" + gas +
                 ", gasPrice=" + gasPrice +
                 '}';
