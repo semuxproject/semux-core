@@ -93,7 +93,7 @@ public class KernelRule extends TemporaryFolder {
         // wallet
         Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"), config.network());
         wallet.unlock(password);
-        wallet.setHdSeed(Bytes.random(32));
+        wallet.initializeHdWallet(" "); // FIXME
         for (Key key : keys) {
             wallet.addAccount(key);
         }

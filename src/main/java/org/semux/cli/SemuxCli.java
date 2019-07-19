@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SemuxCli extends Launcher {
 
-    public static final boolean HD_WALLET_ENABLED = false;
+    public static final boolean HD_WALLET_ENABLED = true;
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxCli.class);
 
@@ -165,13 +165,6 @@ public class SemuxCli extends Launcher {
             return;
         }
 
-        // in case HD wallet is enabled, make sure the seed is properly initialized.
-        if (HD_WALLET_ENABLED) {
-            if (!wallet.isHdWalletInitialized()) {
-                initializedHdSeed(wallet);
-            }
-        }
-
         // check file permissions
         if (SystemUtil.isPosix()) {
             if (!wallet.isPosixPermissionSecured()) {
@@ -181,8 +174,15 @@ public class SemuxCli extends Launcher {
 
         // check time drift
         long timeDrift = TimeUtil.getTimeOffsetFromNtp();
-        if (Math.abs(timeDrift) > 20000L) {
+        if (Math.abs(timeDrift) > 5000L) {
             logger.warn(CliMessages.get("SystemTimeDrift"));
+        }
+
+        // in case HD wallet is enabled, make sure the seed is properly initialized.
+        if (HD_WALLET_ENABLED) {
+            if (!wallet.isHdWalletInitialized()) {
+                initializedHdSeed(wallet);
+            }
         }
 
         // create a new account if the wallet is empty
@@ -406,17 +406,17 @@ public class SemuxCli extends Launcher {
             // HD Mnemonic
             MnemonicGenerator generator = new MnemonicGenerator();
             String phrase = generator.getWordlist(128, Language.ENGLISH);
-            System.out.println(CliMessages.get("HdWalletInstructions"));
-            System.out.println(phrase);
+            System.out.println(CliMessages.get("HdWalletInstructions", phrase));
 
-            // HD Password
-            String passCode = readNewPassword("EnterNewHdPassword", "ReEnterNewHdPassword");
+            String repeat = ConsoleUtil.readLine(CliMessages.get("HdWalletMnemonicRepeat"));
+            if (!repeat.equals(phrase)) {
+                logger.info(CliMessages.get("HdWalletInitializationSuccess"));
+                SystemUtil.exit(SystemUtil.Code.FAILED_TO_INIT_HD_WALLET);
+            } else {
+                logger.error(CliMessages.get("HdWalletInitializationFailure"));
+            }
 
-            // HD seed based on the mnemonics and password
-            byte[] seed = generator.getSeedFromWordlist(phrase, passCode, Language.ENGLISH);
-
-            wallet.setHdSeed(seed);
-            wallet.scanForHdKeys(null);
+            wallet.initializeHdWallet(phrase);
             wallet.flush();
         }
     }

@@ -31,11 +31,11 @@ import org.semux.config.Constants;
 import org.semux.core.Wallet;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
+import org.semux.crypto.bip39.MnemonicGenerator;
 import org.semux.gui.dialog.ChangePasswordDialog;
 import org.semux.gui.dialog.ConsoleDialog;
 import org.semux.gui.dialog.ExportPrivateKeyDialog;
 import org.semux.gui.dialog.InputDialog;
-import org.semux.gui.dialog.RecoverHdWalletDialog;
 import org.semux.message.GuiMessages;
 import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
@@ -82,23 +82,25 @@ public class MenuBar extends JMenuBar implements ActionListener {
         itemRecover.addActionListener(this);
         menuWallet.add(itemRecover);
 
-        JMenuItem itemHdRecover = new JMenuItem(GuiMessages.get("RecoverHdWallet"));
-        itemHdRecover.setName("itemHdRecover");
-        itemHdRecover.setActionCommand(Action.RECOVER_HD_WALLET.name());
-        itemHdRecover.addActionListener(this);
-        menuWallet.add(itemHdRecover);
+        JMenuItem itemBackupWallet = new JMenuItem(GuiMessages.get("BackupWallet"));
+        itemBackupWallet.setName("itemBackupWallet");
+        itemBackupWallet.setActionCommand(Action.BACKUP_WALLET.name());
+        itemBackupWallet.addActionListener(this);
+        menuWallet.add(itemBackupWallet);
+
+        menuWallet.addSeparator();
+
+        JMenuItem itemHdWalletReset = new JMenuItem(GuiMessages.get("ResetMnemonicPhrase"));
+        itemHdWalletReset.setName("itemHdRecover");
+        itemHdWalletReset.setActionCommand(Action.RESET_MNEMONIC.name());
+        itemHdWalletReset.addActionListener(this);
+        menuWallet.add(itemHdWalletReset);
 
         JMenuItem itemScanHdWallets = new JMenuItem(GuiMessages.get("ScanHdWallets"));
         itemScanHdWallets.setName("itemScanHdWallets");
         itemScanHdWallets.setActionCommand(Action.SCAN_HD_WALLETS.name());
         itemScanHdWallets.addActionListener(this);
         menuWallet.add(itemScanHdWallets);
-
-        JMenuItem itemBackupWallet = new JMenuItem(GuiMessages.get("BackupWallet"));
-        itemBackupWallet.setName("itemBackupWallet");
-        itemBackupWallet.setActionCommand(Action.BACKUP_WALLET.name());
-        itemBackupWallet.addActionListener(this);
-        menuWallet.add(itemBackupWallet);
 
         menuWallet.addSeparator();
 
@@ -155,8 +157,8 @@ public class MenuBar extends JMenuBar implements ActionListener {
         case RECOVER_ACCOUNTS:
             recoverAccounts();
             break;
-        case RECOVER_HD_WALLET:
-            recoverHdWallet();
+        case RESET_MNEMONIC:
+            resetMnemonicPhrase();
             break;
         case SCAN_HD_WALLETS:
             scanHdWallet();
@@ -207,13 +209,28 @@ public class MenuBar extends JMenuBar implements ActionListener {
         JOptionPane.showMessageDialog(frame, GuiMessages.get("ImportSuccess", found));
     }
 
-    private void recoverHdWallet() {
+    private void resetMnemonicPhrase() {
         if (showErrorIfLocked()) {
             return;
         }
 
-        RecoverHdWalletDialog d = new RecoverHdWalletDialog(gui, frame);
-        d.setVisible(true);
+        String phrase = new InputDialog(frame, GuiMessages.get("EnterMnemonicPhrase"), false)
+                .showAndGet();
+        if (phrase != null) {
+            if (JOptionPane.showConfirmDialog(frame,
+                    GuiMessages.get("ResetMnemonicPhraseConfirm")) == JOptionPane.YES_OPTION) {
+                MnemonicGenerator generator = new MnemonicGenerator();
+                try {
+                    generator.getSeedFromWordlist(phrase, Wallet.MNEMONIC_PASS_PHRASE, Wallet.MNEMONIC_LANGUAGE);
+                } catch (IllegalArgumentException iae) {
+                    JOptionPane.showMessageDialog(this, GuiMessages.get("InvalidMnemonicPhrase"));
+                    return;
+                }
+
+                gui.getKernel().getWallet().initializeHdWallet(phrase);
+                JOptionPane.showMessageDialog(frame, GuiMessages.get("HdWalletInitializationSuccess"));
+            }
+        }
     }
 
     /**

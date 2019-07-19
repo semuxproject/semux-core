@@ -37,7 +37,7 @@ import org.semux.crypto.bip32.key.KeyVersion;
 import org.semux.crypto.bip39.Language;
 import org.semux.crypto.bip39.MnemonicGenerator;
 import org.semux.crypto.bip44.Bip44;
-import org.semux.message.GuiMessages;
+import org.semux.message.CliMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.FileUtil;
@@ -59,13 +59,12 @@ public class Wallet {
     private static final int MAX_HD_WALLET_SCAN_AHEAD = 128;
 
     // the BIP-44 path prefix for semux addresses
-    private static final String PATH_PREFIX = "m/44'/7562605'/0'/0'";
-    private static final String MNEMONIC_SEPARATOR = " ";
-    private static final String MNEMONIC_PASS_PHRASE = "";
+    public static final String PATH_PREFIX = "m/44'/7562605'/0'/0'";
+    public static final String MNEMONIC_PASS_PHRASE = "";
+    public static final Language MNEMONIC_LANGUAGE = Language.ENGLISH;
     // always use mainnet to avoid confusion, since the generated key is stored
-    // within wallet
-    private static final KeyVersion KEY_VERSION = KeyVersion.MAINNET;
-    private static final CoinType COIN_TYPE = CoinType.SEMUX_SLIP10; // TODO: consider BIP32-ED25519
+    public static final KeyVersion KEY_VERSION = KeyVersion.MAINNET;
+    public static final CoinType COIN_TYPE = CoinType.SEMUX_SLIP10; // TODO: consider BIP32-ED25519
 
     private final File file;
     private final org.semux.Network network;
@@ -76,7 +75,7 @@ public class Wallet {
     private String password;
 
     // hd wallet key
-    private String[] mnemonicWords = new String[0];
+    private String mnemonicPhrase = "";
     private int nextAccountIndex = 0;
 
     /**
@@ -160,7 +159,7 @@ public class Wallet {
                     key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
                     newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
-                    mnemonicWords = dec.readString().split(MNEMONIC_SEPARATOR);
+                    mnemonicPhrase = dec.readString();
                     nextAccountIndex = dec.readInt();
                     break;
                 default:
@@ -530,7 +529,7 @@ public class Wallet {
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
 
-            enc.writeString(String.join(MNEMONIC_SEPARATOR, mnemonicWords));
+            enc.writeString(mnemonicPhrase);
             enc.writeInt(nextAccountIndex);
 
             if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
@@ -659,17 +658,17 @@ public class Wallet {
      */
     public boolean isHdWalletInitialized() {
         requireUnlocked();
-        return mnemonicWords != null && mnemonicWords.length > 0;
+        return mnemonicPhrase != null && !mnemonicPhrase.isEmpty();
     }
 
     /**
      * Initialize the HD wallet.
      * 
-     * @param mnemonicWords
+     * @param mnemonicPhrase
      *            the mnemonic word list
      */
-    public void initializeHdWallet(String[] mnemonicWords) {
-        this.mnemonicWords = mnemonicWords;
+    public void initializeHdWallet(String mnemonicPhrase) {
+        this.mnemonicPhrase = mnemonicPhrase;
         this.nextAccountIndex = 0;
     }
 
@@ -680,8 +679,7 @@ public class Wallet {
      */
     public byte[] getSeed() {
         MnemonicGenerator generator = new MnemonicGenerator();
-        return generator.getSeedFromWordlist(String.join(MNEMONIC_SEPARATOR, mnemonicWords), MNEMONIC_PASS_PHRASE,
-                Language.ENGLISH);
+        return generator.getSeedFromWordlist(mnemonicPhrase, MNEMONIC_PASS_PHRASE, MNEMONIC_LANGUAGE);
     }
 
     /**
@@ -771,7 +769,7 @@ public class Wallet {
      * @return
      */
     private String getAliasFromPath(String path) {
-        return path.replace(PATH_PREFIX, GuiMessages.get("HdWalletAliasPrefix"));
+        return path.replace(PATH_PREFIX, CliMessages.get("HdWalletAliasPrefix"));
     }
 
     private boolean isUsedAccount(AccountState accountState, byte[] bytes) {
