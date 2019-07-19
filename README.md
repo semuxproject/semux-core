@@ -16,7 +16,7 @@ More info can be found at our [Documentation page](./docs/README.md).
 
 1. Download the [Latest Release](https://github.com/semuxproject/semux-core/releases) and unpack it to a desired directory.
 2. Run `semux-gui.bat` if you're on Windows, or `./semux-gui.sh` if you're on Linux or macOS.
-3. *(Windows user) You may need to download and install [Microsoft Visual C++ 2012 Redistributable Package](https://www.microsoft.com/en-us/download/details.aspx?id=30679)  (**x64 required**)*
+3. *(Windows user) You may need to install [Microsoft Visual C++ 2012 Redistributable Package (x64)](https://www.microsoft.com/en-us/download/details.aspx?id=30679).
 
 
 ## Build from source
