@@ -45,6 +45,7 @@ import org.semux.net.msg.Message;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockMessage;
 import org.semux.net.msg.consensus.BlockPartsMessage;
+import org.semux.net.msg.consensus.GetBlockMessage;
 import org.semux.net.msg.consensus.GetBlockPartsMessage;
 import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
@@ -306,20 +307,23 @@ public class SemuxSync implements SyncManager {
 
             // request the block
             if (c.getRemotePeer().getLatestBlockNumber() >= task) {
+                if (config.syncSkipVotes()) {
+                    boolean skipVotes = fastSync
+                            && (task % config.spec().getValidatorUpdateInterval()) != 0
+                            && task < target.get() - 5 * config.spec().getValidatorUpdateInterval(); // safe guard
 
-                boolean skipVotes = config.syncSkipVotes()
-                        && fastSync
-                        && (task % config.spec().getValidatorUpdateInterval()) != 0
-                        && task < target.get() - 5 * config.spec().getValidatorUpdateInterval(); // safe guard
+                    logger.trace("Request block #{} from {}, skipVotes = {}", task, c.getRemoteIp(), skipVotes);
 
-                logger.trace("Request block #{} from {}, skipVotes = {}", task, c.getRemoteIp(), skipVotes);
-
-                if (skipVotes) {
-                    c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
-                            BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS)));
+                    if (skipVotes) {
+                        c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
+                                BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS)));
+                    } else {
+                        c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
+                                BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS, BlockPart.VOTES)));
+                    }
                 } else {
-                    c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
-                            BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS, BlockPart.VOTES)));
+                    // use old protocol to sync mainnet
+                    c.getMessageQueue().sendMessage(new GetBlockMessage(task));
                 }
 
                 if (toDownload.remove(task)) {
