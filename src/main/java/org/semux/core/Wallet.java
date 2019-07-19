@@ -56,12 +56,13 @@ public class Wallet {
     private static final int SALT_LENGTH = 16;
     private static final int BCRYPT_COST = 12;
     private static final Bip44 BIP_44 = new Bip44();
-    private static final int MAX_HD_WALLET_SCAN_AHEAD = 128;
+    private static final int MAX_HD_WALLET_SCAN_AHEAD = 64;
 
     // the BIP-44 path prefix for semux addresses
     public static final String PATH_PREFIX = "m/44'/7562605'/0'/0'";
     public static final String MNEMONIC_PASS_PHRASE = "";
     public static final Language MNEMONIC_LANGUAGE = Language.ENGLISH;
+    public static final int MNEMONIC_ENTROPY_LENGTH = 128;
     // always use mainnet to avoid confusion, since the generated key is stored
     public static final KeyVersion KEY_VERSION = KeyVersion.MAINNET;
     public static final CoinType COIN_TYPE = CoinType.SEMUX_SLIP10; // TODO: consider BIP32-ED25519

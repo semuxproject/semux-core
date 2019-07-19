@@ -25,7 +25,6 @@ import org.semux.core.Wallet;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
-import org.semux.crypto.bip39.Language;
 import org.semux.crypto.bip39.MnemonicGenerator;
 import org.semux.exception.LauncherException;
 import org.semux.message.CliMessages;
@@ -405,7 +404,7 @@ public class SemuxCli extends Launcher {
         if (wallet.isUnlocked() && !wallet.isHdWalletInitialized()) {
             // HD Mnemonic
             MnemonicGenerator generator = new MnemonicGenerator();
-            String phrase = generator.getWordlist(128, Language.ENGLISH);
+            String phrase = generator.getWordlist(Wallet.MNEMONIC_ENTROPY_LENGTH, Wallet.MNEMONIC_LANGUAGE);
             System.out.println(CliMessages.get("HdWalletInstructions", phrase));
 
             String repeat = ConsoleUtil.readLine(CliMessages.get("HdWalletMnemonicRepeat"));

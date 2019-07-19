@@ -20,7 +20,6 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 
 import org.semux.core.Wallet;
-import org.semux.crypto.bip39.Language;
 import org.semux.crypto.bip39.MnemonicGenerator;
 import org.semux.gui.Action;
 import org.semux.gui.SwingUtil;
@@ -34,7 +33,7 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
     private final JTextArea phraseField;
     private final JTextField repeatPhraseField;
     private MnemonicGenerator generator = new MnemonicGenerator();
-    private String phrase = generator.getWordlist(128, Language.ENGLISH);
+    private String phrase = generator.getWordlist(Wallet.MNEMONIC_ENTROPY_LENGTH, Wallet.MNEMONIC_LANGUAGE);
 
     public InitializeHdWalletDialog(Wallet wallet, JFrame parent) {
         super(parent, GuiMessages.get("InitializeHdWallet"));
