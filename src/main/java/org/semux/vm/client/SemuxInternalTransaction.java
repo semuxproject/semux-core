@@ -9,6 +9,7 @@ package org.semux.vm.client;
 import org.ethereum.vm.OpCode;
 import org.ethereum.vm.program.InternalTransaction;
 import org.semux.core.Amount;
+import org.semux.crypto.Hex;
 
 /**
  * Represents a Semux-flavored internal transaction.
@@ -94,5 +95,22 @@ public class SemuxInternalTransaction {
 
     public Amount getGasPrice() {
         return gasPrice;
+    }
+
+    @Override
+    public String toString() {
+        return "SemuxInternalTransaction{" +
+                "rejected=" + rejected +
+                ", depth=" + depth +
+                ", index=" + index +
+                ", type=" + type +
+                ", from=" + Hex.encode(from) +
+                ", to=" + Hex.encode(to) +
+                ", nonce=" + nonce +
+                ", value=" + value +
+                ", data=" + Hex.encode(data) +
+                ", gas=" + gas +
+                ", gasPrice=" + gasPrice +
+                '}';
     }
 }

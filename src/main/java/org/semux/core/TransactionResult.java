@@ -410,7 +410,15 @@ public class TransactionResult {
 
     @Override
     public String toString() {
-        return "TransactionResult [code=" + code + ", returnData=" + Hex.encode(returnData) + ", # logs="
-                + logs.size() + "]";
+        return "TransactionResult{" +
+                "code=" + code +
+                ", returnData=" + Hex.encode(returnData) +
+                ", logs=" + logs +
+                ", gas=" + gas +
+                ", gasPrice=" + gasPrice +
+                ", gasUsed=" + gasUsed +
+                ", blockNumber=" + blockNumber +
+                ", internalTransactions=" + internalTransactions +
+                '}';
     }
 }
