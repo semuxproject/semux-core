@@ -269,8 +269,7 @@ public class VmTransactionTest {
         assertTrue(tx.validate(network));
 
         TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
-        assertTrue(result.getCode().isSuccess());
-        assertTrue(result.getReturnData().length == 0);
+        assertFalse(result.getCode().isSuccess());
     }
 
     @Test
