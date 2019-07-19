@@ -409,14 +409,14 @@ public class SemuxCli extends Launcher {
 
             String repeat = ConsoleUtil.readLine(CliMessages.get("HdWalletMnemonicRepeat"));
             if (!repeat.equals(phrase)) {
-                logger.info(CliMessages.get("HdWalletInitializationSuccess"));
+                logger.info(CliMessages.get("HdWalletInitializationFailure"));
                 SystemUtil.exit(SystemUtil.Code.FAILED_TO_INIT_HD_WALLET);
-            } else {
-                logger.error(CliMessages.get("HdWalletInitializationFailure"));
+                return;
             }
 
             wallet.initializeHdWallet(phrase);
             wallet.flush();
+            logger.error(CliMessages.get("HdWalletInitializationSuccess"));
         }
     }
 }

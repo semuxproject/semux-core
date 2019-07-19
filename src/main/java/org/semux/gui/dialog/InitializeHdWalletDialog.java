@@ -109,12 +109,11 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
             if (!password.equals(phrase)) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("HdWalletInitializationFailure"));
                 break;
-            } else {
-                JOptionPane.showMessageDialog(this, GuiMessages.get("HdWalletInitializationSuccess"));
             }
 
             wallet.initializeHdWallet(phrase);
             wallet.flush();
+            JOptionPane.showMessageDialog(this, GuiMessages.get("HdWalletInitializationSuccess"));
 
             this.dispose();
             break;
