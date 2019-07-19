@@ -160,7 +160,12 @@ public class Wallet {
                     key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
                     newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
-                    readHdSeed(key, dec);
+                    try {
+                        readHdSeed(key, dec);
+                    } catch (Exception e) {
+                        // for wallets where a derived seed is stored
+                        logger.debug("Exception in reading HD seed", e);
+                    }
                     break;
                 default:
                     throw new CryptoException("Unknown wallet version.");
