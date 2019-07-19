@@ -55,6 +55,7 @@ public class SystemUtil {
         public static final int PASSWORD_REPEAT_NOT_MATCH = 17;
         public static final int WALLET_ALREADY_EXISTS = 18;
         public static final int WALLET_ALREADY_UNLOCKED = 19;
+        public static final int FAILED_TO_INIT_HD_WALLET = 20;
 
         // kernel
         public static final int FAILED_TO_INIT_ED25519 = 31;

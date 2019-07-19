@@ -83,20 +83,6 @@ public class SemuxGuiTest {
     }
 
     @Test
-    public void testSetupCoinbaseEmpty() throws ParseException {
-        Wallet wallet = kernelRule.getKernel().getWallet();
-        wallet.setAccounts(Collections.emptyList());
-
-        // setup coinbase
-        SemuxGui gui = spy(new SemuxGui(new WalletModel(kernelRule.getKernel().getConfig()), kernelRule.getKernel()));
-        Mockito.doNothing().when(gui).startKernel(any(), any(), any());
-        gui.setupCoinbase(wallet);
-
-        // verify
-        assertThat(wallet.size()).isEqualTo(1);
-    }
-
-    @Test
     public void testProcessBlock() {
         KernelMock kernel = kernelRule.getKernel();
 

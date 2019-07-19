@@ -11,7 +11,7 @@ public enum Action {
 
     RECOVER_ACCOUNTS,
 
-    RECOVER_HD_WALLET,
+    RESET_MNEMONIC,
 
     SCAN_HD_WALLETS,
 

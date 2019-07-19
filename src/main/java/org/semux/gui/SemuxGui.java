@@ -47,7 +47,7 @@ import org.semux.event.PubSub;
 import org.semux.event.PubSubFactory;
 import org.semux.exception.LauncherException;
 import org.semux.gui.dialog.AddressBookDialog;
-import org.semux.gui.dialog.CreateHdWalletDialog;
+import org.semux.gui.dialog.InitializeHdWalletDialog;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.dialog.SelectDialog;
 import org.semux.gui.event.MainFrameStartedEvent;
@@ -71,7 +71,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class SemuxGui extends Launcher {
 
-    public static final boolean HD_WALLET_ENABLED = false;
+    public static final boolean HD_WALLET_ENABLED = true;
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxGui.class);
 
@@ -204,6 +204,22 @@ public class SemuxGui extends Launcher {
             if (!wallet.isHdWalletInitialized()) {
                 initializedHdSeed(wallet);
             }
+            if (!wallet.isHdWalletInitialized()) {
+                System.exit(SystemUtil.Code.FAILED_TO_INIT_HD_WALLET);
+            }
+        }
+
+        // add an account is wallet is empty
+        if (wallet.size() == 0) {
+            Key key;
+            if (HD_WALLET_ENABLED) {
+                key = wallet.addAccountWithNextHdKey();
+            } else {
+                key = wallet.addAccountRandom();
+            }
+            wallet.flush();
+
+            logger.info(GuiMessages.get("NewAccountCreatedForAddress", key.toAddressString()));
         }
 
         // setup splash screen
@@ -229,10 +245,10 @@ public class SemuxGui extends Launcher {
     }
 
     /**
-     * Shows the CreateHdWalletDialog.
+     * Shows the InitializeHdWalletDialog.
      */
     protected void initializedHdSeed(Wallet wallet) {
-        CreateHdWalletDialog dialog = new CreateHdWalletDialog(wallet, main);
+        InitializeHdWalletDialog dialog = new InitializeHdWalletDialog(wallet, main);
         dialog.setVisible(true);
         dialog.dispose();
     }
@@ -304,16 +320,6 @@ public class SemuxGui extends Launcher {
      */
     protected int setupCoinbase(Wallet wallet) {
         pubSub.publish(new WalletLoadingEvent());
-
-        // create an account is empty
-        if (wallet.size() == 0) {
-            if (HD_WALLET_ENABLED) {
-                wallet.addAccountWithNextHdKey();
-            } else {
-                wallet.addAccountRandom();
-            }
-            wallet.flush();
-        }
 
         // use the coinbase specified in arguments
         if (getCoinbase() != null && getCoinbase() >= 0 && getCoinbase() < wallet.size()) {

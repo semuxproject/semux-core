@@ -93,10 +93,10 @@ public class KernelRule extends TemporaryFolder {
         // wallet
         Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"), config.network());
         wallet.unlock(password);
-        wallet.setHdSeed(Bytes.random(32));
         for (Key key : keys) {
             wallet.addAccount(key);
         }
+        wallet.initializeHdWallet("door liar oven degree snap history rotate patch portion toddler ethics sting");
         wallet.flush();
 
         // kernel
