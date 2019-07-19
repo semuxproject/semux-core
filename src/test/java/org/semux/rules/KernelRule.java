@@ -99,7 +99,6 @@ public class KernelRule extends TemporaryFolder {
         wallet.initializeHdWallet("door liar oven degree snap history rotate patch portion toddler ethics sting");
         wallet.flush();
 
-
         // kernel
         this.kernel = new KernelMock(config, genesis, wallet, coinbase);
         this.kernel.setPendingManager(mock(PendingManager.class));

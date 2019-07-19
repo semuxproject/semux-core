@@ -160,8 +160,7 @@ public class Wallet {
                     key = BCrypt.generate(Bytes.of(password), salt, BCRYPT_COST);
                     newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
-                    mnemonicPhrase = dec.readString();
-                    nextAccountIndex = dec.readInt();
+                    readHdSeed(key, dec);
                     break;
                 default:
                     throw new CryptoException("Unknown wallet version.");
@@ -236,7 +235,8 @@ public class Wallet {
 
     /**
      * Reads the address book.
-     * 
+     *
+     * @param key
      * @param dec
      * @return
      */
@@ -259,7 +259,8 @@ public class Wallet {
 
     /**
      * Writes the address book.
-     * 
+     *
+     * @param key
      * @param enc
      */
     protected void writeAddressAliases(byte[] key, SimpleEncoder enc) {
@@ -278,6 +279,43 @@ public class Wallet {
 
         enc.writeBytes(iv);
         enc.writeBytes(aliasesEncrypted);
+    }
+
+    /**
+     * Reads the mnemonic phase and next account index.
+     *
+     * @param key
+     * @param dec
+     * @return
+     */
+    protected void readHdSeed(byte[] key, SimpleDecoder dec) {
+        byte[] iv = dec.readBytes();
+        byte[] hdSeedEncrypted = dec.readBytes();
+        byte[] hdSeedRaw = Aes.decrypt(hdSeedEncrypted, key, iv);
+
+        Map<ByteArray, String> map = new HashMap<>();
+        SimpleDecoder d = new SimpleDecoder(hdSeedRaw);
+        mnemonicPhrase = d.readString();
+        nextAccountIndex = d.readInt();
+    }
+
+    /**
+     * Writes the mnemonic phase and next account index.
+     *
+     * @param key
+     * @param enc
+     */
+    protected void writeHdSeed(byte[] key, SimpleEncoder enc) {
+        SimpleEncoder e = new SimpleEncoder();
+        e.writeString(mnemonicPhrase);
+        e.writeInt(nextAccountIndex);
+
+        byte[] iv = Bytes.random(16);
+        byte[] hdSeedRaw = e.toBytes();
+        byte[] hdSeedEncrypted = Aes.encrypt(hdSeedRaw, key, iv);
+
+        enc.writeBytes(iv);
+        enc.writeBytes(hdSeedEncrypted);
     }
 
     /**
@@ -529,9 +567,7 @@ public class Wallet {
 
             writeAccounts(key, enc);
             writeAddressAliases(key, enc);
-
-            enc.writeString(mnemonicPhrase);
-            enc.writeInt(nextAccountIndex);
+            writeHdSeed(key, enc);
 
             if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
                 logger.error("Failed to create the directory for wallet");
