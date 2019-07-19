@@ -293,7 +293,6 @@ public class Wallet {
         byte[] hdSeedEncrypted = dec.readBytes();
         byte[] hdSeedRaw = Aes.decrypt(hdSeedEncrypted, key, iv);
 
-        Map<ByteArray, String> map = new HashMap<>();
         SimpleDecoder d = new SimpleDecoder(hdSeedRaw);
         mnemonicPhrase = d.readString();
         nextAccountIndex = d.readInt();
