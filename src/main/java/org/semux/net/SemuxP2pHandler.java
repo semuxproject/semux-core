@@ -28,6 +28,7 @@ import org.semux.config.Config;
 import org.semux.core.BftManager;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
+import org.semux.core.BlockPart;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
@@ -467,28 +468,28 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             long number = m.getNumber();
             int parts = m.getParts();
 
-            List<byte[]> partsSerilized = new ArrayList<>();
+            List<byte[]> partsSerialized = new ArrayList<>();
             Block block = chain.getBlock(number);
-            for (Block.BlockPart part : Block.BlockPart.decode(parts)) {
+            for (BlockPart part : BlockPart.decode(parts)) {
                 switch (part) {
                 case HEADER:
-                    partsSerilized.add(block.getEncodedHeader());
+                    partsSerialized.add(block.getEncodedHeader());
                     break;
                 case TRANSACTIONS:
-                    partsSerilized.add(block.getEncodedTransactions());
+                    partsSerialized.add(block.getEncodedTransactions());
                     break;
                 case RESULTS:
-                    partsSerilized.add(block.getEncodedResults());
+                    partsSerialized.add(block.getEncodedResults());
                     break;
                 case VOTES:
-                    partsSerilized.add(block.getEncodedVotes());
+                    partsSerialized.add(block.getEncodedVotes());
                     break;
                 default:
                     throw new UnreachableException();
                 }
             }
 
-            channel.getMessageQueue().sendMessage(new BlockPartsMessage(number, parts, partsSerilized));
+            channel.getMessageQueue().sendMessage(new BlockPartsMessage(number, parts, partsSerialized));
             break;
         }
         case BLOCK:

@@ -96,10 +96,12 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // =========================
     // Sync
     // =========================
-    protected long downloadTimeout = 2000L;
-    protected int maxQueuedJobs = 8192;
-    protected int maxPendingJobs = 256;
-    protected int maxPendingBlocks = 512;
+    protected long syncDownloadTimeout = 2000L;
+    protected int syncMaxQueuedJobs = 8192;
+    protected int syncMaxPendingJobs = 256;
+    protected int syncMaxPendingBlocks = 512;
+    protected boolean syncDisconnectOnInvalidBlock = false;
+    protected boolean syncSkipVotes = false;
 
     // =========================
     // API
@@ -404,22 +406,32 @@ public abstract class AbstractConfig implements Config, ChainSpec {
 
     @Override
     public long syncDownloadTimeout() {
-        return downloadTimeout;
+        return syncDownloadTimeout;
     }
 
     @Override
     public int syncMaxQueuedJobs() {
-        return maxQueuedJobs;
+        return syncMaxQueuedJobs;
     }
 
     @Override
     public int syncMaxPendingJobs() {
-        return maxPendingJobs;
+        return syncMaxPendingJobs;
     }
 
     @Override
     public int syncMaxPendingBlocks() {
-        return maxPendingBlocks;
+        return syncMaxPendingBlocks;
+    }
+
+    @Override
+    public boolean syncDisconnectOnInvalidBlock() {
+        return syncDisconnectOnInvalidBlock;
+    }
+
+    @Override
+    public boolean syncSkipVotes() {
+        return syncSkipVotes;
     }
 
     @Override
@@ -591,16 +603,22 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                     break;
 
                 case "sync.downloadTimeout":
-                    downloadTimeout = Long.parseLong(props.getProperty(name).trim());
+                    syncDownloadTimeout = Long.parseLong(props.getProperty(name).trim());
                     break;
                 case "sync.maxQueuedJobs":
-                    maxQueuedJobs = Integer.parseInt(props.getProperty(name).trim());
+                    syncMaxQueuedJobs = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "sync.maxPendingJobs":
-                    maxPendingJobs = Integer.parseInt(props.getProperty(name).trim());
+                    syncMaxPendingJobs = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 case "sync.maxPendingBlocks":
-                    maxPendingBlocks = Integer.parseInt(props.getProperty(name).trim());
+                    syncMaxPendingBlocks = Integer.parseInt(props.getProperty(name).trim());
+                    break;
+                case "sync.disconnectOnInvalidBlock":
+                    syncDisconnectOnInvalidBlock = Boolean.parseBoolean(props.getProperty(name).trim());
+                    break;
+                case "sync.skipVotes":
+                    syncSkipVotes = Boolean.parseBoolean(props.getProperty(name).trim());
                     break;
 
                 case "api.enabled":

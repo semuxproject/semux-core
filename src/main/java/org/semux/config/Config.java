@@ -246,6 +246,20 @@ public interface Config {
      */
     int syncMaxPendingBlocks();
 
+    /**
+     * Returns whether to disconnect the peer is an invalid block is received.
+     *
+     * @return
+     */
+    boolean syncDisconnectOnInvalidBlock();
+
+    /**
+     * Returns whether to skip votes when fastsync is enabled.
+     *
+     * @return
+     */
+    boolean syncSkipVotes();
+
     // =========================
     // API
     // =========================
