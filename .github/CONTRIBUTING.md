@@ -4,7 +4,7 @@ Anyone is welcome to contribute towards development in the form of peer review, 
 
 ## Code conventions
 
-This project follows the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) with additional requirements.
+This project follows the default Eclipse Java code style, with a larger line limit. Here are some highlights:
 ```
 indent: no tab, 4 spaces instead
 line limit: 120 chars
@@ -108,7 +108,7 @@ By contributing to this repository, you agree to license your work under the MIT
 
 ```
 /**
- * Copyright (c) 2017-2019 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
