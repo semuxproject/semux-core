@@ -404,7 +404,7 @@ public class SwingUtil {
      * @param unit
      */
     public static void setDefaultUnit(String unit) {
-        SwingUtil.unit = Unit.valueOf(unit);
+        SwingUtil.unit = Unit.of(unit);
     }
 
     /**

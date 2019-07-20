@@ -14,8 +14,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
 import static org.semux.core.Unit.NANO_SEM;
 import static org.semux.core.Unit.SEM;
 
@@ -175,7 +173,7 @@ public class TransactTest {
         // wait for transaction to be processed
         logger.info("Waiting for the transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sub(PREMINE, sum(value, fee))));
+                equalTo(PREMINE.subtract(value.add(fee))));
         await().atMost(20, SECONDS).until(availableOf(kernelReceiver, coinbaseOf(kernelReceiver)),
                 equalTo(value));
 
@@ -212,7 +210,7 @@ public class TransactTest {
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sub(PREMINE, sum(kernelPremine.getConfig().spec().minDelegateBurnAmount(), fee))));
+                equalTo(PREMINE.subtract(kernelPremine.getConfig().spec().minDelegateBurnAmount().add(fee))));
 
         // assert that the transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -227,7 +225,7 @@ public class TransactTest {
     public void testVote() throws IOException {
         final Amount fee = kernelPremine.getConfig().spec().minTransactionFee();
         final Amount votes = Amount.of(100, SEM);
-        final Amount votesWithFee = sum(votes, fee);
+        final Amount votesWithFee = votes.add(fee);
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
@@ -246,7 +244,7 @@ public class TransactTest {
         // wait for the vote transaction to be processed
         logger.info("Waiting for the vote transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sub(PREMINE, votesWithFee)));
+                equalTo(PREMINE.subtract(votesWithFee)));
 
         // assert that the vote transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -271,7 +269,7 @@ public class TransactTest {
         // wait for the vote transaction to be processed
         logger.info("Waiting for the unvote transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sum(sub(PREMINE, votesWithFee), sub(unvotes, fee))));
+                equalTo(PREMINE.subtract(votesWithFee).add(unvotes.subtract(fee))));
 
         // assert that the vote transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -279,7 +277,7 @@ public class TransactTest {
                 unvotes, fee, Bytes.EMPTY_BYTES);
 
         // assert that the number of votes has been recorded into the delegate state
-        assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), sub(votes, unvotes));
+        assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), votes.subtract(unvotes));
     }
 
     @Test

@@ -12,8 +12,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
 import static org.semux.core.TransactionResult.Code.INSUFFICIENT_AVAILABLE;
 import static org.semux.core.TransactionResult.Code.INSUFFICIENT_LOCKED;
 import static org.semux.core.Unit.NANO_SEM;
@@ -101,7 +99,7 @@ public class TransactionExecutorTest {
         // execute and commit
         result = executeAndCommit(exec, tx, as.track(), ds.track(), block);
         assertTrue(result.getCode().isSuccess());
-        assertEquals(sub(available, sum(value, fee)), as.getAccount(key.toAddress()).getAvailable());
+        assertEquals(available.subtract(value.add(fee)), as.getAccount(key.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(to).getAvailable());
     }
 
@@ -137,7 +135,7 @@ public class TransactionExecutorTest {
 
         result = executeAndCommit(exec, tx, as.track(), ds.track(), block);
         assertTrue(result.getCode().isSuccess());
-        assertEquals(sub(available, sum(config.spec().minDelegateBurnAmount(), fee)),
+        assertEquals(available.subtract(config.spec().minDelegateBurnAmount().add(fee)),
                 as.getAccount(delegate.toAddress()).getAvailable());
         assertArrayEquals(delegate.toAddress(), ds.getDelegateByName(data).getAddress());
         assertArrayEquals(data, ds.getDelegateByAddress(delegate.toAddress()).getName());
@@ -170,7 +168,7 @@ public class TransactionExecutorTest {
         // vote for delegate
         result = executeAndCommit(exec, tx, as.track(), ds.track(), block);
         assertTrue(result.getCode().isSuccess());
-        assertEquals(sub(available, sum(value, fee)), as.getAccount(voter.toAddress()).getAvailable());
+        assertEquals(available.subtract(value.add(fee)), as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(value, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(value, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
     }
@@ -211,7 +209,7 @@ public class TransactionExecutorTest {
         // normal unvote
         result = executeAndCommit(exec, tx, as.track(), ds.track(), block);
         assertTrue(result.getCode().isSuccess());
-        assertEquals(sum(available, sub(value, fee)), as.getAccount(voter.toAddress()).getAvailable());
+        assertEquals(available.add(value.subtract(fee)), as.getAccount(voter.toAddress()).getAvailable());
         assertEquals(ZERO, as.getAccount(voter.toAddress()).getLocked());
         assertEquals(ZERO, ds.getDelegateByAddress(delegate.toAddress()).getVotes());
     }
@@ -221,7 +219,7 @@ public class TransactionExecutorTest {
         Key voter = new Key();
         Key delegate = new Key();
 
-        as.adjustAvailable(voter.toAddress(), sub(config.spec().minTransactionFee(), Amount.of(1, NANO_SEM)));
+        as.adjustAvailable(voter.toAddress(), config.spec().minTransactionFee().subtract(Amount.of(1, NANO_SEM)));
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
         TransactionType type = TransactionType.UNVOTE;

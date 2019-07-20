@@ -7,8 +7,6 @@
 package org.semux.core.state;
 
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
 import static org.semux.core.Unit.NANO_SEM;
 
 import java.util.ArrayList;
@@ -116,8 +114,8 @@ public class DelegateStateImpl implements Cloneable, DelegateState {
         if (d == null) {
             return false;
         } else {
-            voteUpdates.put(key, encodeAmount(sum(value, v)));
-            d.setVotes(sum(d.getVotes(), v));
+            voteUpdates.put(key, encodeAmount(value.add(v)));
+            d.setVotes(d.getVotes().add(v));
             delegateUpdates.put(ByteArray.of(delegate), d.toBytes());
             return true;
         }
@@ -128,13 +126,13 @@ public class DelegateStateImpl implements Cloneable, DelegateState {
         ByteArray key = ByteArray.of(Bytes.merge(delegate, voter));
         Amount value = getVote(key);
 
-        if (v.gt(value)) {
+        if (v.greaterThan(value)) {
             return false;
         } else {
-            voteUpdates.put(key, encodeAmount(sub(value, v)));
+            voteUpdates.put(key, encodeAmount(value.subtract(v)));
 
             Delegate d = getDelegateByAddress(delegate);
-            d.setVotes(sub(d.getVotes(), v));
+            d.setVotes(d.getVotes().subtract(v));
             delegateUpdates.put(ByteArray.of(delegate), d.toBytes());
 
             return true;

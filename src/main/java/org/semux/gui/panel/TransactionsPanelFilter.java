@@ -97,11 +97,11 @@ public class TransactionsPanelFilter {
                 continue;
             }
 
-            if (min != null && transaction.getTransaction().getValue().lt(min)) {
+            if (min != null && transaction.getTransaction().getValue().lessThan(min)) {
                 continue;
             }
 
-            if (max != null && transaction.getTransaction().getValue().gt(max)) {
+            if (max != null && transaction.getTransaction().getValue().greaterThan(max)) {
                 continue;
             }
 

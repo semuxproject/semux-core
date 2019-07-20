@@ -6,8 +6,6 @@
  */
 package org.semux.core.state;
 
-import static org.semux.core.Amount.sum;
-
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -92,7 +90,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
 
         Account acc = getAccount(address);
-        acc.setAvailable(sum(acc.getAvailable(), delta));
+        acc.setAvailable(acc.getAvailable().add(delta));
         updates.put(k, acc.toBytes());
     }
 
@@ -101,7 +99,7 @@ public class AccountStateImpl implements Cloneable, AccountState {
         ByteArray k = getKey(TYPE_ACCOUNT, address);
 
         Account acc = getAccount(address);
-        acc.setLocked(sum(acc.getLocked(), delta));
+        acc.setLocked(acc.getLocked().add(delta));
         updates.put(k, acc.toBytes());
     }
 

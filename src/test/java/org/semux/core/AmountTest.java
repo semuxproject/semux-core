@@ -12,9 +12,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Amount.neg;
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
 import static org.semux.core.Unit.KILO_SEM;
 import static org.semux.core.Unit.MEGA_SEM;
 import static org.semux.core.Unit.MICRO_SEM;
@@ -49,17 +46,17 @@ public class AmountTest {
 
     @Test
     public void testFromSymbol() {
-        assertEquals(NANO_SEM, Unit.fromSymbol("nSEM"));
-        assertEquals(MICRO_SEM, Unit.fromSymbol("μSEM"));
-        assertEquals(MILLI_SEM, Unit.fromSymbol("mSEM"));
-        assertEquals(SEM, Unit.fromSymbol("SEM"));
-        assertEquals(KILO_SEM, Unit.fromSymbol("kSEM"));
-        assertEquals(MEGA_SEM, Unit.fromSymbol("MSEM"));
+        assertEquals(NANO_SEM, Unit.of("nSEM"));
+        assertEquals(MICRO_SEM, Unit.of("μSEM"));
+        assertEquals(MILLI_SEM, Unit.of("mSEM"));
+        assertEquals(SEM, Unit.of("SEM"));
+        assertEquals(KILO_SEM, Unit.of("kSEM"));
+        assertEquals(MEGA_SEM, Unit.of("MSEM"));
     }
 
     @Test
     public void testFromSymbolUnknown() {
-        assertNull(Unit.fromSymbol("???"));
+        assertNull(Unit.of("???"));
     }
 
     @Test
@@ -93,27 +90,27 @@ public class AmountTest {
 
     @Test
     public void testGtLtEtc() {
-        assertTrue(Amount.of(19, SEM).gt0());
-        assertTrue(Amount.of(-9, SEM).lt0());
-        assertFalse(ZERO.gt0());
-        assertFalse(ZERO.lt0());
+        assertTrue(Amount.of(19, SEM).isPositive());
+        assertTrue(Amount.of(-9, SEM).isNegative());
+        assertFalse(ZERO.isPositive());
+        assertFalse(ZERO.isNegative());
 
-        assertTrue(ZERO.gte0());
-        assertTrue(ZERO.lte0());
-        assertFalse(Amount.of(-9, SEM).gte0());
-        assertFalse(Amount.of(99, SEM).lte0());
+        assertTrue(ZERO.isNotNegative());
+        assertTrue(ZERO.isNotPositive());
+        assertFalse(Amount.of(-9, SEM).isNotNegative());
+        assertFalse(Amount.of(99, SEM).isNotPositive());
 
-        assertTrue(Amount.of(999, SEM).gt(Amount.of(999, MILLI_SEM)));
-        assertTrue(Amount.of(999, SEM).gte(Amount.of(999, MILLI_SEM)));
-        assertFalse(Amount.of(999, SEM).lt(Amount.of(999, MILLI_SEM)));
-        assertFalse(Amount.of(999, SEM).lte(Amount.of(999, MILLI_SEM)));
+        assertTrue(Amount.of(999, SEM).greaterThan(Amount.of(999, MILLI_SEM)));
+        assertTrue(Amount.of(999, SEM).greaterThanOrEqual(Amount.of(999, MILLI_SEM)));
+        assertFalse(Amount.of(999, SEM).lessThan(Amount.of(999, MILLI_SEM)));
+        assertFalse(Amount.of(999, SEM).lessThanOrEqual(Amount.of(999, MILLI_SEM)));
     }
 
     @Test
     public void testMath() {
-        assertEquals(sum(Amount.of(1000, SEM), Amount.of(1, KILO_SEM)), Amount.of(2, KILO_SEM));
-        assertEquals(sub(Amount.of(1000, SEM), Amount.of(1, KILO_SEM)), ZERO);
-        assertEquals(neg(Amount.of(1000, SEM)), Amount.of(-1, KILO_SEM));
-        assertEquals(neg(ZERO), ZERO);
+        assertEquals(Amount.of(1000, SEM).add(Amount.of(1, KILO_SEM)), Amount.of(2, KILO_SEM));
+        assertEquals(Amount.of(1000, SEM).subtract(Amount.of(1, KILO_SEM)), ZERO);
+        assertEquals(Amount.of(1000, SEM).negate(), Amount.of(-1, KILO_SEM));
+        assertEquals(ZERO.negate(), ZERO);
     }
 }

@@ -40,7 +40,7 @@ public enum Unit {
      *            the symbol text
      * @return a Unit object if valid; otherwise false
      */
-    public static Unit fromSymbol(String symbol) {
+    public static Unit of(String symbol) {
         return stream(values()).filter(v -> v.symbol.equals(symbol)).findAny().orElse(null);
     }
 }

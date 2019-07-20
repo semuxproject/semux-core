@@ -85,7 +85,7 @@ public final class Amount implements Comparable<Amount> {
 
     @Override
     public int compareTo(Amount other) {
-        return this.lt(other) ? -1 : (this.gt(other) ? 1 : 0);
+        return this.lessThan(other) ? -1 : (this.greaterThan(other) ? 1 : 0);
     }
 
     @Override
@@ -103,52 +103,55 @@ public final class Amount implements Comparable<Amount> {
         return this.toDecimal(9, Unit.SEM).stripTrailingZeros().toPlainString() + " SEM";
     }
 
-    public boolean gt(Amount other) {
+    public boolean greaterThan(Amount other) {
         return nano > other.nano;
     }
 
-    public boolean gte(Amount other) {
+    public boolean greaterThanOrEqual(Amount other) {
         return nano >= other.nano;
     }
 
-    public boolean gt0() {
-        return gt(ZERO);
+    public boolean isPositive() {
+        return greaterThan(ZERO);
     }
 
-    public boolean gte0() {
-        return gte(ZERO);
+    public boolean isNotNegative() {
+        return greaterThanOrEqual(ZERO);
     }
 
-    public boolean lt(Amount other) {
+    public boolean lessThan(Amount other) {
         return nano < other.nano;
     }
 
-    public boolean lte(Amount other) {
+    public boolean lessThanOrEqual(Amount other) {
         return nano <= other.nano;
     }
 
-    public boolean lt0() {
-        return lt(ZERO);
+    public boolean isNegative() {
+        return lessThan(ZERO);
     }
 
-    public boolean lte0() {
-        return lte(ZERO);
+    public boolean isNotPositive() {
+        return lessThanOrEqual(ZERO);
     }
 
-    public static Amount neg(Amount a) {
-        return new Amount(Math.negateExact(a.nano));
+    public Amount negate() throws ArithmeticException {
+        return new Amount(Math.negateExact(this.nano));
     }
 
-    public static Amount sum(Amount a1, Amount a2) {
-        return new Amount(Math.addExact(a1.nano, a2.nano));
+    public Amount add(Amount a) throws ArithmeticException {
+        return new Amount(Math.addExact(this.nano, a.nano));
     }
 
-    public static Amount sub(Amount a1, Amount a2) {
-        return new Amount(Math.subtractExact(a1.nano, a2.nano));
+    public Amount subtract(Amount a) throws ArithmeticException {
+        return new Amount(Math.subtractExact(this.nano, a.nano));
     }
 
-    public static Amount mul(Amount a1, long a2) {
-        return new Amount(Math.multiplyExact(a1.nano, a2));
+    public Amount multiply(long a) throws ArithmeticException {
+        return new Amount(Math.multiplyExact(this.nano, a));
     }
 
+    public static Amount sum(Amount a, Amount b) throws ArithmeticException {
+        return new Amount(Math.addExact(a.nano, b.nano));
+    }
 }

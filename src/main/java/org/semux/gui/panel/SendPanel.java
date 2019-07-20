@@ -6,8 +6,6 @@
  */
 package org.semux.gui.panel;
 
-import static org.semux.core.Amount.sum;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -371,12 +369,12 @@ public class SendPanel extends JPanel implements ActionListener {
 
             if (acc == null) {
                 showErrorDialog(GuiMessages.get("SelectAccount"));
-            } else if (value.lte0()) {
+            } else if (value.isNotPositive()) {
                 showErrorDialog(GuiMessages.get("EnterValidValue"));
-            } else if (fee.lt(config.spec().minTransactionFee())) {
+            } else if (fee.lessThan(config.spec().minTransactionFee())) {
                 showErrorDialog(GuiMessages.get("TransactionFeeTooLow"));
-            } else if (sum(value, fee).gt(acc.getAvailable())) {
-                showErrorDialog(GuiMessages.get("InsufficientFunds", SwingUtil.formatAmount(sum(value, fee))));
+            } else if (value.add(fee).greaterThan(acc.getAvailable())) {
+                showErrorDialog(GuiMessages.get("InsufficientFunds", SwingUtil.formatAmount(value.add(fee))));
             } else if (to.length != Key.ADDRESS_LEN) {
                 showErrorDialog(GuiMessages.get("InvalidReceivingAddress"));
             } else if (Bytes.of(data).length > config.spec().maxTransactionDataSize(TransactionType.TRANSFER)) {

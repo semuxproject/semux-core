@@ -6,10 +6,6 @@
  */
 package org.semux.core;
 
-import static org.semux.core.Amount.neg;
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,11 +28,15 @@ import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxInternalTransaction;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Transaction executor
  */
 public class TransactionExecutor {
+
+    private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
 
     private static final boolean[] valid = new boolean[256];
 
@@ -117,135 +117,143 @@ public class TransactionExecutor {
             Amount available = acc.getAvailable();
             Amount locked = acc.getLocked();
 
-            // check nonce
-            if (nonce != acc.getNonce()) {
-                result.setCode(Code.INVALID_NONCE);
-                continue;
-            }
-
-            // check fee (CREATE and CALL use gas instead)
-            if (tx.isVMTransaction()) {
-                // applying a very strict check to avoid mistakes
-                boolean valid = fee.equals(Amount.ZERO)
-                        && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
-                        && tx.getGasPrice().toNanoLong() >= 1 && tx.getGasPrice().toNanoLong() <= Integer.MAX_VALUE;
-                if (!valid) {
-                    result.setCode(Code.INVALID_FEE);
-                    continue;
-                }
-            } else {
-                if (fee.lt(config.spec().minTransactionFee())) {
-                    result.setCode(Code.INVALID_FEE);
-                    continue;
-                }
-            }
-
-            // check data length
-            if (data.length > config.spec().maxTransactionDataSize(type)) {
-                result.setCode(Code.INVALID_DATA);
-                continue;
-            }
-
-            // check remaining gas
-            if (!tx.isVMTransaction()) {
-                if (config.spec().nonVMTransactionGasCost() + gasUsedInBlock > block.getGasLimit()) {
-                    result.setCode(Code.INVALID);
+            try {
+                // check nonce
+                if (nonce != acc.getNonce()) {
+                    result.setCode(Code.INVALID_NONCE);
                     continue;
                 }
 
-                // Note: although we count gas usage for non-vm-transactions, the gas usage
-                // is not recorded in the TransactionResult.
-            }
-
-            switch (type) {
-            case TRANSFER: {
-                if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-                    as.adjustAvailable(from, neg(sum(value, fee)));
-                    as.adjustAvailable(to, value);
-                } else {
-                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
-                }
-                break;
-            }
-            case DELEGATE: {
-                if (!validateDelegateName(data)) {
-                    result.setCode(Code.INVALID_DELEGATE_NAME);
-                    break;
-                }
-                if (value.lt(config.spec().minDelegateBurnAmount())) {
-                    result.setCode(Code.INVALID_DELEGATE_BURN_AMOUNT);
-                    break;
-                }
-                if (!Arrays.equals(Bytes.EMPTY_ADDRESS, to)) {
-                    result.setCode(Code.INVALID_DELEGATE_BURN_ADDRESS);
-                    break;
-                }
-
-                if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-                    if (ds.register(from, data)) {
-                        as.adjustAvailable(from, neg(sum(value, fee)));
-                    } else {
-                        result.setCode(Code.INVALID_DELEGATING);
+                // check fee (CREATE and CALL use gas instead)
+                if (tx.isVMTransaction()) {
+                    // applying a very strict check to avoid mistakes
+                    boolean valid = fee.equals(Amount.ZERO)
+                            && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
+                            && tx.getGasPrice().toNanoLong() >= 1 && tx.getGasPrice().toNanoLong() <= Integer.MAX_VALUE;
+                    if (!valid) {
+                        result.setCode(Code.INVALID_FEE);
+                        continue;
                     }
                 } else {
-                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
-                }
-                break;
-            }
-            case VOTE: {
-                if (fee.lte(available) && value.lte(available) && sum(value, fee).lte(available)) {
-                    if (ds.vote(from, to, value)) {
-                        as.adjustAvailable(from, neg(sum(value, fee)));
-                        as.adjustLocked(from, value);
-                    } else {
-                        result.setCode(Code.INVALID_VOTING);
+                    if (fee.lessThan(config.spec().minTransactionFee())) {
+                        result.setCode(Code.INVALID_FEE);
+                        continue;
                     }
-                } else {
-                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
-                }
-                break;
-            }
-            case UNVOTE: {
-                if (available.lt(fee)) {
-                    result.setCode(Code.INSUFFICIENT_AVAILABLE);
-                    break;
-                }
-                if (locked.lt(value)) {
-                    result.setCode(Code.INSUFFICIENT_LOCKED);
-                    break;
                 }
 
-                if (ds.unvote(from, to, value)) {
-                    as.adjustAvailable(from, sub(value, fee));
-                    as.adjustLocked(from, neg(value));
-                } else {
-                    result.setCode(Code.INVALID_UNVOTING);
+                // check data length
+                if (data.length > config.spec().maxTransactionDataSize(type)) {
+                    result.setCode(Code.INVALID_DATA);
+                    continue;
                 }
-                break;
-            }
-            case CALL:
-            case CREATE:
-                // Note: the second parameter should be height = block number + 1; here we're
-                // checking if the fork is enabled at the end of last block.
-                if (!chain.isForkActivated(Fork.VIRTUAL_MACHINE, block.getNumber())) {
+
+                // check remaining gas
+                if (!tx.isVMTransaction()) {
+                    if (config.spec().nonVMTransactionGasCost() + gasUsedInBlock > block.getGasLimit()) {
+                        result.setCode(Code.INVALID);
+                        continue;
+                    }
+
+                    // Note: although we count gas usage for non-vm-transactions, the gas usage
+                    // is not recorded in the TransactionResult.
+                }
+
+                switch (type) {
+                case TRANSFER: {
+                    if (fee.lessThanOrEqual(available) && value.lessThanOrEqual(available)
+                            && value.add(fee).lessThanOrEqual(available)) {
+                        as.adjustAvailable(from, value.add(fee).negate());
+                        as.adjustAvailable(to, value);
+                    } else {
+                        result.setCode(Code.INSUFFICIENT_AVAILABLE);
+                    }
+                    break;
+                }
+                case DELEGATE: {
+                    if (!validateDelegateName(data)) {
+                        result.setCode(Code.INVALID_DELEGATE_NAME);
+                        break;
+                    }
+                    if (value.lessThan(config.spec().minDelegateBurnAmount())) {
+                        result.setCode(Code.INVALID_DELEGATE_BURN_AMOUNT);
+                        break;
+                    }
+                    if (!Arrays.equals(Bytes.EMPTY_ADDRESS, to)) {
+                        result.setCode(Code.INVALID_DELEGATE_BURN_ADDRESS);
+                        break;
+                    }
+
+                    if (fee.lessThanOrEqual(available) && value.lessThanOrEqual(available)
+                            && value.add(fee).lessThanOrEqual(available)) {
+                        if (ds.register(from, data)) {
+                            as.adjustAvailable(from, value.add(fee).negate());
+                        } else {
+                            result.setCode(Code.INVALID_DELEGATING);
+                        }
+                    } else {
+                        result.setCode(Code.INSUFFICIENT_AVAILABLE);
+                    }
+                    break;
+                }
+                case VOTE: {
+                    if (fee.lessThanOrEqual(available) && value.lessThanOrEqual(available)
+                            && value.add(fee).lessThanOrEqual(available)) {
+                        if (ds.vote(from, to, value)) {
+                            as.adjustAvailable(from, value.add(fee).negate());
+                            as.adjustLocked(from, value);
+                        } else {
+                            result.setCode(Code.INVALID_VOTING);
+                        }
+                    } else {
+                        result.setCode(Code.INSUFFICIENT_AVAILABLE);
+                    }
+                    break;
+                }
+                case UNVOTE: {
+                    if (available.lessThan(fee)) {
+                        result.setCode(Code.INSUFFICIENT_AVAILABLE);
+                        break;
+                    }
+                    if (locked.lessThan(value)) {
+                        result.setCode(Code.INSUFFICIENT_LOCKED);
+                        break;
+                    }
+
+                    if (ds.unvote(from, to, value)) {
+                        as.adjustAvailable(from, value.subtract(fee));
+                        as.adjustLocked(from, value.negate());
+                    } else {
+                        result.setCode(Code.INVALID_UNVOTING);
+                    }
+                    break;
+                }
+                case CALL:
+                case CREATE:
+                    // Note: the second parameter should be height = block number + 1; here we're
+                    // checking if the fork is enabled at the end of last block.
+                    if (!chain.isForkActivated(Fork.VIRTUAL_MACHINE, block.getNumber())) {
+                        result.setCode(Code.INVALID_TYPE);
+                        break;
+                    }
+
+                    // the VM transaction executor will check balance and gas cost.
+                    // do proper refunds afterwards.
+                    executeVmTransaction(result, tx, as, ds, block, gasUsedInBlock);
+
+                    // Note: we're assuming the VM will not make changes to the account
+                    // and delegate state if the transaction is INVALID; the storage changes
+                    // will be discarded if is FAILURE.
+                    //
+                    // TODO: add unit test for this
+                    break;
+                default:
+                    // unsupported transaction type
                     result.setCode(Code.INVALID_TYPE);
                     break;
                 }
-
-                // the VM transaction executor will check balance and gas cost.
-                // do proper refunds afterwards.
-                executeVmTransaction(result, tx, as, ds, block, gasUsedInBlock);
-
-                // Note: we're assuming the VM will not make changes to the account
-                // and delegate state if the transaction is INVALID; the storage changes
-                // will be discarded if is FAILURE.
-                //
-                // TODO: add unit test for this
-                break;
-            default:
-                // unsupported transaction type
-                result.setCode(Code.INVALID_TYPE);
-                break;
+            } catch (ArithmeticException ae) {
+                logger.warn("An arithmetic exception occurred during transaction execution: {}", tx);
+                result.setCode(Code.INVALID);
             }
 
             if (result.getCode().isAcceptable()) {

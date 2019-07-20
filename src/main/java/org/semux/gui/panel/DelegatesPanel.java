@@ -6,9 +6,6 @@
  */
 package org.semux.gui.panel;
 
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -474,18 +471,18 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAccount"));
         } else if (d == null) {
             JOptionPane.showMessageDialog(this, GuiMessages.get("SelectDelegate"));
-        } else if (value.lte0()) {
+        } else if (value.isNotPositive()) {
             JOptionPane.showMessageDialog(this, GuiMessages.get("EnterValidNumberOfVotes"));
         } else {
             if (action == Action.VOTE) {
-                Amount valueWithFee = sum(value, fee);
-                if (valueWithFee.gt(a.getAvailable())) {
+                Amount valueWithFee = value.add(fee);
+                if (valueWithFee.greaterThan(a.getAvailable())) {
                     JOptionPane.showMessageDialog(this,
                             GuiMessages.get("InsufficientFunds", SwingUtil.formatAmount(valueWithFee)));
                     return;
                 }
 
-                if (sub(a.getAvailable(), valueWithFee).lt(fee)) {
+                if (a.getAvailable().subtract(valueWithFee).lessThan(fee)) {
                     int ret = JOptionPane.showConfirmDialog(this, GuiMessages.get("NotEnoughBalanceToUnvote"),
                             GuiMessages.get("ConfirmDelegateRegistration"), JOptionPane.YES_NO_OPTION);
                     if (ret != JOptionPane.YES_OPTION) {
@@ -493,20 +490,20 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     }
                 }
             } else {
-                if (fee.gt(a.getAvailable())) {
+                if (fee.greaterThan(a.getAvailable())) {
                     JOptionPane.showMessageDialog(this,
                             GuiMessages.get("InsufficientFunds", SwingUtil.formatAmount(fee)));
                     return;
                 }
 
-                if (value.gt(a.getLocked())) {
+                if (value.greaterThan(a.getLocked())) {
                     JOptionPane.showMessageDialog(this,
                             GuiMessages.get("InsufficientLockedFunds", SwingUtil.formatAmount(value)));
                     return;
                 }
 
                 // check that user has voted more than amount to unvote
-                if (value.gt(d.getVotesFromMe())) {
+                if (value.greaterThan(d.getVotesFromMe())) {
                     JOptionPane.showMessageDialog(this, GuiMessages.get("InsufficientVotes"));
                     return;
                 }
@@ -530,10 +527,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
             JOptionPane.showMessageDialog(this, GuiMessages.get("SelectAccount"));
         } else if (!name.matches("[_a-z0-9]{3,16}")) {
             JOptionPane.showMessageDialog(this, GuiMessages.get("AccountNameError"));
-        } else if (a.getAvailable().lt(sum(config.spec().minDelegateBurnAmount(), config.spec().minTransactionFee()))) {
+        } else if (a.getAvailable()
+                .lessThan(config.spec().minDelegateBurnAmount().add(config.spec().minTransactionFee()))) {
             JOptionPane.showMessageDialog(this, GuiMessages.get("InsufficientFunds",
                     SwingUtil.formatAmount(
-                            sum(config.spec().minDelegateBurnAmount(), config.spec().minTransactionFee()))));
+                            config.spec().minDelegateBurnAmount().add(config.spec().minTransactionFee()))));
         } else {
             // validate delegate address
             DelegateState delegateState = kernel.getBlockchain().getDelegateState();
