@@ -4,6 +4,11 @@
 
 This release activates the virtual machine hardfork and enables HD wallet by default.
 
+**Important notice**
+
+Please backup your wallet file, `wallet.data`, and do a full-sync with the network. Note that
+the configuration file has also been updated; suggest using the new one.
+
 **Bug fixes:**
 
 - Fixed a capacity codec bug in P2P handshake (#214)
