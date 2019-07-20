@@ -6,8 +6,6 @@
  */
 package org.semux.api.util;
 
-import static org.semux.core.Amount.Unit.NANO_SEM;
-
 import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.core.Amount;
@@ -143,7 +141,7 @@ public class TransactionBuilder {
     public TransactionBuilder withValue(String value) {
         if (value != null) {
             try {
-                this.value = NANO_SEM.of(Long.parseLong(value));
+                this.value = Amount.of(value);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Parameter `value` is not a valid number");
             }
@@ -155,7 +153,7 @@ public class TransactionBuilder {
     public TransactionBuilder withFee(String fee) {
         if (fee != null) {
             try {
-                this.fee = NANO_SEM.of(Long.parseLong(fee));
+                this.fee = Amount.of(fee);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Parameter `fee` is not a valid number");
             }
@@ -211,7 +209,7 @@ public class TransactionBuilder {
     public TransactionBuilder withGasPrice(String gasPrice) {
         if (gasPrice != null) {
             try {
-                this.gasPrice = NANO_SEM.of(Long.parseLong(gasPrice));
+                this.gasPrice = Amount.of(gasPrice);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Parameter `gasPrice` is not a valid number");
             }

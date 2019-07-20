@@ -7,75 +7,110 @@
 package org.semux.core;
 
 import static java.math.RoundingMode.FLOOR;
-import static java.util.Arrays.stream;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public final class Amount {
+/**
+ * Represents an amount of {@link Unit#NANO_SEM}, the base unit of computation.
+ */
+public final class Amount implements Comparable<Amount> {
 
-    public enum Unit {
-        NANO_SEM(0, "nSEM"),
-
-        MICRO_SEM(3, "μSEM"),
-
-        MILLI_SEM(6, "mSEM"),
-
-        SEM(9, "SEM"),
-
-        KILO_SEM(12, "kSEM"),
-
-        MEGA_SEM(15, "MSEM");
-
-        private final int exp;
-        private final long factor;
-        public final String symbol;
-
-        Unit(int exp, String symbol) {
-            this.exp = exp;
-            this.factor = BigInteger.TEN.pow(exp).longValueExact();
-            this.symbol = symbol;
-        }
-
-        public static Unit ofSymbol(String s) {
-            return stream(values()).filter(i -> s.equals(i.symbol)).findAny().get();
-        }
-
-        public Amount of(long a) {
-            return new Amount(Math.multiplyExact(a, factor));
-        }
-
-        public Amount ofGas(long gas, long gasPrice) {
-            return new Amount(Math.multiplyExact(gas, gasPrice));
-        }
-
-        public BigDecimal toDecimal(Amount a, int scale) {
-            BigDecimal $nano = BigDecimal.valueOf(a.nano);
-            return $nano.movePointLeft(exp).setScale(scale, FLOOR);
-        }
-
-        public Amount fromDecimal(BigDecimal d) {
-            return new Amount(d.movePointRight(exp).setScale(0, FLOOR).longValueExact());
-        }
-    }
+    public static final Amount ZERO = new Amount(0);
+    public static final Amount ONE = new Amount(1);
+    public static final Amount TEN = new Amount(10);
 
     private final long nano;
-    public static final Amount ZERO = new Amount(0);
 
     private Amount(long nano) {
         this.nano = nano;
     }
 
-    public long getNano() {
+    /**
+     * Converts n nSEM to an amount.
+     *
+     * @param n
+     *            the number of nSEM
+     * @return
+     */
+    public static Amount of(long n) {
+        return new Amount(n);
+    }
+
+    /**
+     * Converts n nSEM to an amount.
+     *
+     * @param n
+     *            the number of nSEM
+     * @return
+     */
+    public static Amount of(String n) {
+        return new Amount(Long.parseLong(n));
+    }
+
+    /**
+     * Converts n units to an amount.
+     *
+     * @param n
+     *            the number of unit
+     * @param unit
+     *            the unit
+     * @return an Amount
+     * @throws ArithmeticException
+     *             if the value overflows
+     */
+    public static Amount of(long n, Unit unit) throws ArithmeticException {
+        return new Amount(Math.multiplyExact(n, unit.factor));
+    }
+
+    /**
+     * Converts a BigDecimal of units to an amount.
+     *
+     * @param d
+     *            the big decimal
+     * @param unit
+     *            the unit to use when converting
+     * @return an Amount
+     */
+    public static Amount of(BigDecimal d, Unit unit) {
+        return new Amount(d.movePointRight(unit.exp).setScale(0, FLOOR).longValueExact());
+    }
+
+    /**
+     * Converts this amount to a BigDecimal.
+     *
+     * @param scale
+     *            the scale of digits
+     * @param unit
+     *            the unit to use when converting.
+     * @return A BigDecimal
+     */
+    public BigDecimal toDecimal(int scale, Unit unit) {
+        BigDecimal nano = BigDecimal.valueOf(this.nano);
+        return nano.movePointLeft(unit.exp).setScale(scale, FLOOR);
+    }
+
+    /**
+     * Converts this amount to a long integer.
+     *
+     * @return a long integer.
+     */
+    public long toLong() {
         return nano;
     }
 
-    public BigInteger getBigInteger() {
+    /**
+     * Converts this amount to a BigInteger.
+     *
+     * @return a BigInteger
+     */
+    public BigInteger toBigInteger() {
         return BigInteger.valueOf(nano);
     }
 
+    @Override
     public int compareTo(Amount other) {
-        return this.lt(other) ? -1 : (this.gt(other) ? 1 : 0);
+        return this.lessThan(other) ? -1 : (this.greaterThan(other) ? 1 : 0);
     }
 
     @Override
@@ -90,55 +125,58 @@ public final class Amount {
 
     @Override
     public String toString() {
-        return Unit.SEM.toDecimal(this, 9).stripTrailingZeros().toPlainString() + " SEM";
+        return String.valueOf(nano);
     }
 
-    public boolean gt(Amount other) {
+    public boolean greaterThan(Amount other) {
         return nano > other.nano;
     }
 
-    public boolean gte(Amount other) {
+    public boolean greaterThanOrEqual(Amount other) {
         return nano >= other.nano;
     }
 
-    public boolean gt0() {
-        return gt(ZERO);
+    public boolean isPositive() {
+        return greaterThan(ZERO);
     }
 
-    public boolean gte0() {
-        return gte(ZERO);
+    public boolean isNotNegative() {
+        return greaterThanOrEqual(ZERO);
     }
 
-    public boolean lt(Amount other) {
+    public boolean lessThan(Amount other) {
         return nano < other.nano;
     }
 
-    public boolean lte(Amount other) {
+    public boolean lessThanOrEqual(Amount other) {
         return nano <= other.nano;
     }
 
-    public boolean lt0() {
-        return lt(ZERO);
+    public boolean isNegative() {
+        return lessThan(ZERO);
     }
 
-    public boolean lte0() {
-        return lte(ZERO);
+    public boolean isNotPositive() {
+        return lessThanOrEqual(ZERO);
     }
 
-    public static Amount neg(Amount a) {
-        return new Amount(Math.negateExact(a.nano));
+    public Amount negate() throws ArithmeticException {
+        return new Amount(Math.negateExact(this.nano));
     }
 
-    public static Amount sum(Amount a1, Amount a2) {
-        return new Amount(Math.addExact(a1.nano, a2.nano));
+    public Amount add(Amount a) throws ArithmeticException {
+        return new Amount(Math.addExact(this.nano, a.nano));
     }
 
-    public static Amount sub(Amount a1, Amount a2) {
-        return new Amount(Math.subtractExact(a1.nano, a2.nano));
+    public Amount subtract(Amount a) throws ArithmeticException {
+        return new Amount(Math.subtractExact(this.nano, a.nano));
     }
 
-    public static Amount mul(Amount a1, long a2) {
-        return new Amount(Math.multiplyExact(a1.nano, a2));
+    public Amount multiply(long a) throws ArithmeticException {
+        return new Amount(Math.multiplyExact(this.nano, a));
     }
 
+    public static Amount sum(Amount a, Amount b) throws ArithmeticException {
+        return new Amount(Math.addExact(a.nano, b.nano));
+    }
 }

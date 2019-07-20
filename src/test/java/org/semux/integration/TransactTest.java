@@ -13,11 +13,8 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Amount.sub;
-import static org.semux.core.Amount.sum;
+import static org.semux.core.Unit.SEM;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,7 +59,7 @@ public class TransactTest {
 
     private static Logger logger = LoggerFactory.getLogger(TransactTest.class);
 
-    private static final Amount PREMINE = SEM.of(5000);
+    private static final Amount PREMINE = Amount.of(5000, SEM);
 
     @Rule
     public KernelRule kernelRuleValidator1 = new KernelRule(51610, 51710);
@@ -155,15 +152,15 @@ public class TransactTest {
 
     @Test
     public void testTransfer() throws IOException {
-        final Amount value = SEM.of(1000);
+        final Amount value = Amount.of(1000, SEM);
         final Amount fee = kernelPremine.getConfig().spec().minTransactionFee();
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", coinbaseOf(kernelReceiver));
-        params.put("value", String.valueOf(value.getNano()));
-        params.put("fee", String.valueOf(fee.getNano()));
+        params.put("value", value.toString());
+        params.put("fee", fee.toString());
 
         // send transaction
         logger.info("Making transfer request: {}", params);
@@ -175,7 +172,7 @@ public class TransactTest {
         // wait for transaction to be processed
         logger.info("Waiting for the transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sub(PREMINE, sum(value, fee))));
+                equalTo(PREMINE.subtract(value.add(fee))));
         await().atMost(20, SECONDS).until(availableOf(kernelReceiver, coinbaseOf(kernelReceiver)),
                 equalTo(value));
 
@@ -199,7 +196,7 @@ public class TransactTest {
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", coinbaseOf(kernelPremine));
-        params.put("fee", fee.getNano());
+        params.put("fee", fee.toString());
         params.put("data", Bytes.of("test"));
 
         // send transaction
@@ -212,7 +209,7 @@ public class TransactTest {
         // wait for transaction processing
         logger.info("Waiting for the transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sub(PREMINE, sum(kernelPremine.getConfig().spec().minDelegateBurnAmount(), fee))));
+                equalTo(PREMINE.subtract(kernelPremine.getConfig().spec().minDelegateBurnAmount().add(fee))));
 
         // assert that the transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -226,15 +223,15 @@ public class TransactTest {
     @Test
     public void testVote() throws IOException {
         final Amount fee = kernelPremine.getConfig().spec().minTransactionFee();
-        final Amount votes = SEM.of(100);
-        final Amount votesWithFee = sum(votes, fee);
+        final Amount votes = Amount.of(100, SEM);
+        final Amount votesWithFee = votes.add(fee);
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", coinbaseOf(kernelValidator1));
-        params.put("value", votes.getNano());
-        params.put("fee", fee.getNano());
+        params.put("value", votes.toString());
+        params.put("fee", fee.toString());
 
         // send vote transaction
         logger.info("Making vote request: {}", params);
@@ -246,7 +243,7 @@ public class TransactTest {
         // wait for the vote transaction to be processed
         logger.info("Waiting for the vote transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sub(PREMINE, votesWithFee)));
+                equalTo(PREMINE.subtract(votesWithFee)));
 
         // assert that the vote transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -257,12 +254,12 @@ public class TransactTest {
         assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), votes);
 
         // send unvote transaction
-        final Amount unvotes = SEM.of(50);
+        final Amount unvotes = Amount.of(50, SEM);
         logger.info("Making unvote request: {}", params);
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", coinbaseOf(kernelValidator1));
-        params.put("value", unvotes.getNano());
-        params.put("fee", fee.getNano());
+        params.put("value", unvotes.toString());
+        params.put("fee", fee.toString());
         DoTransactionResponse unvoteResponse = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().post("/transaction/unvote", params),
                 DoTransactionResponse.class);
@@ -271,7 +268,7 @@ public class TransactTest {
         // wait for the vote transaction to be processed
         logger.info("Waiting for the unvote transaction to be processed...");
         await().atMost(20, SECONDS).until(availableOf(kernelPremine, coinbaseOf(kernelPremine)),
-                equalTo(sum(sub(PREMINE, votesWithFee), sub(unvotes, fee))));
+                equalTo(PREMINE.subtract(votesWithFee).add(unvotes.subtract(fee))));
 
         // assert that the vote transaction has been recorded across nodes
         assertLatestTransaction(kernelPremine, coinbaseOf(kernelPremine),
@@ -279,19 +276,19 @@ public class TransactTest {
                 unvotes, fee, Bytes.EMPTY_BYTES);
 
         // assert that the number of votes has been recorded into the delegate state
-        assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), sub(votes, unvotes));
+        assertDelegate(kernelValidator1, kernelValidator1.getCoinbase().toAddress(), votes.subtract(unvotes));
     }
 
     @Test
     public void testCREATE() throws IOException {
         final long gas = 100_000;
-        final Amount gasPrice = NANO_SEM.of(100);
+        final Amount gasPrice = Amount.of(100);
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", coinbaseOf(kernelPremine));
         params.put("gas", String.valueOf(gas));
-        params.put("gasPrice", String.valueOf(gasPrice.getNano()));
+        params.put("gasPrice", gasPrice.toString());
         params.put("data", "0x60006000");
 
         // send transaction
@@ -315,16 +312,16 @@ public class TransactTest {
     @Test
     public void testCREATEWithValue() throws IOException {
         final long gas = 100_000;
-        final Amount gasPrice = NANO_SEM.of(100);
-        final Amount value = NANO_SEM.of(50);
+        final Amount gasPrice = Amount.of(100);
+        final Amount value = Amount.of(50);
 
         // prepare transaction
         HashMap<String, Object> params = new HashMap<>();
         params.put("from", coinbaseOf(kernelPremine));
         params.put("gas", String.valueOf(gas));
-        params.put("gasPrice", String.valueOf(gasPrice.getNano()));
+        params.put("gasPrice", gasPrice.toString());
         params.put("data", "0x60006000");
-        params.put("value", String.valueOf(value.getNano()));
+        params.put("value", value.toString());
 
         // send transaction
         logger.info("Making create request: {}", params);
@@ -350,7 +347,7 @@ public class TransactTest {
     @Test
     public void testCALL() throws IOException {
         final long gas = 100_000;
-        final Amount gasPrice = NANO_SEM.of(100);
+        final Amount gasPrice = Amount.of(100);
         final byte[] contractAddress = Bytes.random(20);
 
         // prepare transaction
@@ -358,7 +355,7 @@ public class TransactTest {
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", Hex.encode(contractAddress));
         params.put("gas", String.valueOf(gas));
-        params.put("gasPrice", String.valueOf(gasPrice.getNano()));
+        params.put("gasPrice", gasPrice.toString());
         params.put("data", "0x60006000");
 
         // send transaction
@@ -382,8 +379,8 @@ public class TransactTest {
     @Test
     public void testCALLWithValue() throws IOException {
         final long gas = 100_000;
-        final Amount gasPrice = NANO_SEM.of(100);
-        final Amount value = NANO_SEM.of(50);
+        final Amount gasPrice = Amount.of(100);
+        final Amount value = Amount.of(50);
         final byte[] contractAddress = Bytes.random(20);
 
         // prepare transaction
@@ -391,9 +388,9 @@ public class TransactTest {
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", Hex.encode(contractAddress));
         params.put("gas", String.valueOf(gas));
-        params.put("gasPrice", String.valueOf(gasPrice.getNano()));
+        params.put("gasPrice", gasPrice.toString());
         params.put("data", "0x60006000");
-        params.put("value", String.valueOf(value.getNano()));
+        params.put("value", value.toString());
 
         // send transaction
         logger.info("Making CALL request: {}", params);
@@ -436,8 +433,8 @@ public class TransactTest {
         assertEquals(type.name(), result.getType());
         assertEquals(Hex.encode0x(from), result.getFrom());
         assertEquals(Hex.encode0x(to), result.getTo());
-        assertEquals(value, NANO_SEM.of(Long.parseLong(result.getValue())));
-        assertEquals(fee, NANO_SEM.of(Long.parseLong(result.getFee())));
+        assertEquals(value, Amount.of(result.getValue()));
+        assertEquals(fee, Amount.of(result.getFee()));
         assertEquals(Hex.encode0x(data), result.getData());
     }
 
@@ -456,7 +453,7 @@ public class TransactTest {
                         .get("/delegate", "address", Hex.encode0x(address)),
                 GetDelegateResponse.class);
         assertTrue(getDelegateResponse.isSuccess());
-        assertEquals(votes, NANO_SEM.of(Long.parseLong(getDelegateResponse.getResult().getVotes())));
+        assertEquals(votes, Amount.of(getDelegateResponse.getResult().getVotes()));
     }
 
     /**
@@ -474,7 +471,7 @@ public class TransactTest {
                     apiClient.get("/account", "address", address),
                     GetAccountResponse.class);
 
-            return NANO_SEM.of(Long.parseLong(response.getResult().getAvailable()));
+            return Amount.of(response.getResult().getAvailable());
         };
     }
 

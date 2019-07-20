@@ -6,8 +6,6 @@
  */
 package org.semux.bench;
 
-import static org.semux.core.Amount.Unit.NANO_SEM;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +49,7 @@ public class BlockchainPerformance {
             Network network = config.network();
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
-            Amount value = NANO_SEM.of(1);
+            Amount value = Amount.of(1);
             Amount fee = config.spec().minTransactionFee();
             long nonce = 1 + i;
             long timestamp = TimeUtil.currentTimeMillis();
@@ -113,7 +111,7 @@ public class BlockchainPerformance {
         Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(1);
+        Amount value = Amount.of(1);
         Amount fee = config.spec().minTransactionFee();
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();

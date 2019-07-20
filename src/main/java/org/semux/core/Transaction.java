@@ -163,8 +163,8 @@ public class Transaction {
                 && to != null && to.length == Key.ADDRESS_LEN
                 && (type != TransactionType.CREATE && type != TransactionType.DELEGATE
                         || Arrays.equals(to, EMPTY_ADDRESS))
-                && value.gte0()
-                && fee.gte0()
+                && value.isNotNegative()
+                && fee.isNotNegative()
                 && nonce >= 0
                 && timestamp > 0
                 && data != null

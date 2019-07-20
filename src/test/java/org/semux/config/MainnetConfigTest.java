@@ -11,8 +11,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Unit.SEM;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class MainnetConfigTest {
                 .mapToObj(config::getBlockReward)
                 .reduce(ZERO, Amount::sum);
 
-        assertEquals(SEM.of(22_000_000), total);
+        assertEquals(Amount.of(22_000_000, SEM), total);
     }
 
     @Test

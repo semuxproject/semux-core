@@ -9,6 +9,7 @@ package org.semux.vm.client;
 import java.math.BigInteger;
 
 import org.semux.core.Amount;
+import org.semux.core.Unit;
 
 /**
  * Conversion between ETH and SEM. The idea is to make 1 SEM = 1 ETH from a
@@ -20,11 +21,11 @@ public class Conversion {
 
     public static Amount weiToAmount(BigInteger value) {
         BigInteger nanoSEM = value.divide(TEN_POW_NINE);
-        return Amount.Unit.NANO_SEM.of(nanoSEM.longValue());
+        return Amount.of(nanoSEM.longValue(), Unit.NANO_SEM);
     }
 
     public static BigInteger amountToWei(Amount value) {
-        return value.getBigInteger().multiply(TEN_POW_NINE);
+        return value.toBigInteger().multiply(TEN_POW_NINE);
     }
 
     public static BigInteger amountToWei(long nanoSEM) {

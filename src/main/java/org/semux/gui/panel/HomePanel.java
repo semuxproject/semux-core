@@ -6,8 +6,6 @@
  */
 package org.semux.gui.panel;
 
-import static org.semux.core.Amount.sum;
-
 import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Font;
@@ -341,8 +339,8 @@ public class HomePanel extends JPanel implements ActionListener {
         this.available.setToolTipText(SwingUtil.formatAmount(model.getTotalAvailable()));
         this.locked.setText(SwingUtil.formatAmount(model.getTotalLocked()));
         this.locked.setToolTipText(SwingUtil.formatAmount(model.getTotalLocked()));
-        this.total.setText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
-        this.total.setToolTipText(SwingUtil.formatAmount(sum(model.getTotalAvailable(), model.getTotalLocked())));
+        this.total.setText(SwingUtil.formatAmount(model.getTotalAvailable().add(model.getTotalLocked())));
+        this.total.setToolTipText(SwingUtil.formatAmount(model.getTotalAvailable().add(model.getTotalLocked())));
 
         // consensus info table
         this.primaryValidator

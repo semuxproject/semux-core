@@ -65,9 +65,9 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 byte[] to = Arrays.copyOfRange(context.getData(), 12, 32);
                 Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 32, 64)));
 
-                if (as.getAccount(from).getAvailable().gte(value)
+                if (as.getAccount(from).getAvailable().greaterThanOrEqual(value)
                         && ds.vote(from, to, value)) {
-                    as.adjustAvailable(from, Amount.neg(value));
+                    as.adjustAvailable(from, value.negate());
                     as.adjustLocked(from, value);
                     return success;
                 }
@@ -98,10 +98,10 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 byte[] to = Arrays.copyOfRange(context.getData(), 12, 32);
                 Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 32, 64)));
 
-                if (as.getAccount(from).getLocked().gte(value)
+                if (as.getAccount(from).getLocked().greaterThanOrEqual(value)
                         && ds.unvote(from, to, value)) {
                     as.adjustAvailable(from, value);
-                    as.adjustLocked(from, Amount.neg(value));
+                    as.adjustLocked(from, value.negate());
                     return success;
                 }
             }

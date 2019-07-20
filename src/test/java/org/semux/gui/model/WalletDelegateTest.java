@@ -12,7 +12,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.ZERO;
 
 import java.util.Arrays;
@@ -29,7 +28,7 @@ public class WalletDelegateTest {
     private final byte[] address = Bytes.random(20);
     private final byte[] name = Bytes.of("test");
     private final long registeredAt = 2;
-    private final Amount votes = NANO_SEM.of(3);
+    private final Amount votes = Amount.of(3);
 
     @Test
     public void testBasic() {
@@ -47,12 +46,12 @@ public class WalletDelegateTest {
         assertEquals(0, wd.getNumberOfTurnsHit());
         assertEquals(0, wd.getNumberOfTurnsMissed());
 
-        wd.setVotesFromMe(NANO_SEM.of(1));
+        wd.setVotesFromMe(Amount.of(1));
         wd.setNumberOfBlocksForged(2);
         wd.setNumberOfTurnsHit(3);
         wd.setNumberOfTurnsMissed(4);
 
-        assertEquals(NANO_SEM.of(1), wd.getVotesFromMe());
+        assertEquals(Amount.of(1), wd.getVotesFromMe());
         assertEquals(2L, wd.getNumberOfBlocksForged());
         assertEquals(3L, wd.getNumberOfTurnsHit());
         assertEquals(4L, wd.getNumberOfTurnsMissed());

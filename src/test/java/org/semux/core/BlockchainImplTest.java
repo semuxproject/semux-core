@@ -13,7 +13,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,8 +48,8 @@ public class BlockchainImplTest {
     private Key key = new Key();
     private byte[] from = key.toAddress();
     private byte[] to = Bytes.random(20);
-    private Amount value = NANO_SEM.of(20);
-    private Amount fee = NANO_SEM.of(1);
+    private Amount value = Amount.of(20);
+    private Amount fee = Amount.of(1);
     private long nonce = 12345;
     private byte[] data = Bytes.of("test");
     private long timestamp = TimeUtil.currentTimeMillis() - 60 * 1000;

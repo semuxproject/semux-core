@@ -817,7 +817,7 @@ public class Wallet {
             return false;
         }
         Account account = accountState.getAccount(bytes);
-        return account.getNonce() > 0 || account.getAvailable().gt0();
+        return account.getNonce() > 0 || account.getAvailable().isPositive();
     }
 
     private void requireHdWalletInitialized() throws WalletLockedException {

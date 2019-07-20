@@ -14,9 +14,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Unit.SEM;
 
 import org.ethereum.vm.util.HashUtil;
 import org.ethereum.vm.util.HexUtil;
@@ -89,7 +88,7 @@ public class VmTransactionTest {
         TransactionType type = TransactionType.CALL;
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(5);
+        Amount value = Amount.of(5);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -102,7 +101,7 @@ public class VmTransactionTest {
 
         byte[] data = Bytes.random(16);
         long gas = 30000;
-        Amount gasPrice = NANO_SEM.of(1);
+        Amount gasPrice = Amount.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
@@ -112,7 +111,7 @@ public class VmTransactionTest {
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
-        Amount available = SEM.of(1000);
+        Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
@@ -139,7 +138,7 @@ public class VmTransactionTest {
         TransactionType type = TransactionType.CREATE;
         byte[] from = key.toAddress();
         byte[] to = Bytes.EMPTY_ADDRESS;
-        Amount value = NANO_SEM.of(0);
+        Amount value = Amount.of(0);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -149,7 +148,7 @@ public class VmTransactionTest {
         byte[] data = HexUtil.fromHexString(code.substring(code.indexOf("60806040", 1)));
 
         long gas = 1000000;
-        Amount gasPrice = NANO_SEM.of(1);
+        Amount gasPrice = Amount.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, create, gas,
                 gasPrice);
@@ -160,7 +159,7 @@ public class VmTransactionTest {
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
-        Amount available = SEM.of(1000);
+        Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
@@ -200,7 +199,7 @@ public class VmTransactionTest {
         TransactionType type = TransactionType.CREATE;
         byte[] from = key.toAddress();
         byte[] to = Bytes.EMPTY_ADDRESS;
-        Amount value = NANO_SEM.of(0);
+        Amount value = Amount.of(0);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -209,9 +208,9 @@ public class VmTransactionTest {
         byte[] data = HexUtil.fromHexString(code);
 
         long gas = 1000000;
-        Amount gasPrice = NANO_SEM.of(1);
+        Amount gasPrice = Amount.of(1);
 
-        Amount available = SEM.of(1000);
+        Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
@@ -250,7 +249,7 @@ public class VmTransactionTest {
         TransactionType type = TransactionType.CREATE;
         byte[] from = key.toAddress();
         byte[] to = Bytes.EMPTY_ADDRESS;
-        Amount value = NANO_SEM.of(0);
+        Amount value = Amount.of(0);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -259,9 +258,9 @@ public class VmTransactionTest {
         byte[] data = HexUtil.fromHexString(code);
 
         long gas = 100000;
-        Amount gasPrice = NANO_SEM.of(1);
+        Amount gasPrice = Amount.of(1);
 
-        Amount available = SEM.of(1000);
+        Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
@@ -279,7 +278,7 @@ public class VmTransactionTest {
         TransactionType type = TransactionType.CREATE;
         byte[] from = key.toAddress();
         byte[] to = Bytes.EMPTY_ADDRESS;
-        Amount value = NANO_SEM.of(0);
+        Amount value = Amount.of(0);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -288,9 +287,9 @@ public class VmTransactionTest {
         byte[] data = HexUtil.fromHexString(code);
 
         long gas = 1000000;
-        Amount gasPrice = NANO_SEM.of(1);
+        Amount gasPrice = Amount.of(1);
 
-        Amount available = SEM.of(1000);
+        Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
@@ -306,7 +305,7 @@ public class VmTransactionTest {
         to = newContractAddress;
         nonce += 1;
         data = Hex.decode0x("0x3e58c58c000000000000000000000000791f1c3f06b19f1b3a4c7774675df9933a091d10");
-        value = SEM.of(1);
+        value = Amount.of(1, SEM);
         tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
         assertTrue(tx.validate(network));
@@ -331,16 +330,16 @@ public class VmTransactionTest {
         TransactionType type = TransactionType.CALL;
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(50);
+        Amount value = Amount.of(50);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
         byte[] contract = Hex.decode("60006000");
         as.setCode(to, contract);
-        as.adjustAvailable(from, SEM.of(1000));
+        as.adjustAvailable(from, Amount.of(1000, SEM));
 
         long gas = 100000;
-        Amount gasPrice = NANO_SEM.of(1);
+        Amount gasPrice = Amount.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, contract, gas,
                 gasPrice);
@@ -348,11 +347,11 @@ public class VmTransactionTest {
 
         TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isSuccess());
-        assertEquals(SEM.of(1000).getNano()
-                - value.getNano()
-                - tx.getGasPrice().getNano() * result.getGasUsed(),
-                as.getAccount(from).getAvailable().getNano());
-        assertEquals(value.getNano(), as.getAccount(to).getAvailable().getNano());
+        assertEquals(Amount.of(1000, SEM)
+                .subtract(value)
+                .subtract(tx.getGasPrice().multiply(result.getGasUsed())),
+                as.getAccount(from).getAvailable());
+        assertEquals(value, as.getAccount(to).getAvailable());
 
         // miner're reward is not yet given
         assertEquals(ZERO, as.getAccount(block.getCoinbase()).getAvailable());
@@ -365,16 +364,16 @@ public class VmTransactionTest {
         TransactionType type = TransactionType.CALL;
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(50);
+        Amount value = Amount.of(50);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
         byte[] contract = Hex.decode("6000");
         as.setCode(to, contract);
-        as.adjustAvailable(from, SEM.of(1000));
+        as.adjustAvailable(from, Amount.of(1000, SEM));
 
         long gas = 21073;
-        Amount gasPrice = NANO_SEM.of(1);
+        Amount gasPrice = Amount.of(1);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, contract, gas,
                 gasPrice);
@@ -383,9 +382,9 @@ public class VmTransactionTest {
         TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isFailure());
         // value transfer reverted
-        assertEquals(SEM.of(1000).getNano() - tx.getGasPrice().getNano() * result.getGasUsed(),
-                as.getAccount(from).getAvailable().getNano());
-        assertEquals(0, as.getAccount(to).getAvailable().getNano());
+        assertEquals(Amount.of(1000, SEM).subtract(tx.getGasPrice().multiply(result.getGasUsed())),
+                as.getAccount(from).getAvailable());
+        assertEquals(ZERO, as.getAccount(to).getAvailable());
 
         // miner're reward is not yet given
         assertEquals(ZERO, as.getAccount(block.getCoinbase()).getAvailable());

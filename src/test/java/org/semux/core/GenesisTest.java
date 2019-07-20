@@ -54,7 +54,7 @@ public class GenesisTest {
 
         assertFalse(premine.isEmpty());
         for (Premine p : premine.values()) {
-            assertTrue(p.getAmount().gt0());
+            assertTrue(p.getAmount().isPositive());
         }
     }
 

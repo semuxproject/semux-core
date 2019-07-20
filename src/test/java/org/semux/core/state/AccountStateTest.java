@@ -9,7 +9,6 @@ package org.semux.core.state;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.ZERO;
 
 import java.util.Map;
@@ -19,6 +18,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
+import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis.Premine;
@@ -54,13 +54,13 @@ public class AccountStateTest {
     public void testAccount() {
         byte[] address = Bytes.random(20);
         Account acc = state.getAccount(address);
-        acc.setAvailable(NANO_SEM.of(1));
-        acc.setLocked(NANO_SEM.of(2));
+        acc.setAvailable(Amount.of(1));
+        acc.setLocked(Amount.of(2));
         acc.setNonce(3);
 
         Account acc2 = Account.fromBytes(address, acc.toBytes());
-        assertEquals(NANO_SEM.of(1), acc2.getAvailable());
-        assertEquals(NANO_SEM.of(2), acc2.getLocked());
+        assertEquals(Amount.of(1), acc2.getAvailable());
+        assertEquals(Amount.of(2), acc2.getLocked());
         assertEquals(3L, acc2.getNonce());
     }
 
@@ -111,11 +111,11 @@ public class AccountStateTest {
     public void testAvailable() {
         byte[] address = Bytes.random(20);
         assertEquals(ZERO, state.getAccount(address).getAvailable());
-        state.adjustAvailable(address, NANO_SEM.of(20));
-        assertEquals(NANO_SEM.of(20), state.getAccount(address).getAvailable());
+        state.adjustAvailable(address, Amount.of(20));
+        assertEquals(Amount.of(20), state.getAccount(address).getAvailable());
 
         AccountState state2 = state.track();
-        assertEquals(NANO_SEM.of(20), state2.getAccount(address).getAvailable());
+        assertEquals(Amount.of(20), state2.getAccount(address).getAvailable());
 
         state.rollback();
         assertEquals(ZERO, state2.getAccount(address).getAvailable());
@@ -125,11 +125,11 @@ public class AccountStateTest {
     public void testLocked() {
         byte[] address = Bytes.random(20);
         assertEquals(ZERO, state.getAccount(address).getLocked());
-        state.adjustLocked(address, NANO_SEM.of(20));
-        assertEquals(NANO_SEM.of(20), state.getAccount(address).getLocked());
+        state.adjustLocked(address, Amount.of(20));
+        assertEquals(Amount.of(20), state.getAccount(address).getLocked());
 
         AccountState state2 = state.track();
-        assertEquals(NANO_SEM.of(20), state2.getAccount(address).getLocked());
+        assertEquals(Amount.of(20), state2.getAccount(address).getLocked());
 
         state.rollback();
         assertEquals(ZERO, state2.getAccount(address).getLocked());

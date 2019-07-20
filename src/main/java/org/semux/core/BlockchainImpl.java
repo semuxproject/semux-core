@@ -799,7 +799,7 @@ public class BlockchainImpl implements Blockchain {
         // [5] apply block reward and tx fees
         Amount reward = Block.getBlockReward(block, config);
 
-        if (reward.gt0()) {
+        if (reward.isPositive()) {
             asSnapshot.adjustAvailable(block.getCoinbase(), reward);
         }
 
@@ -903,7 +903,7 @@ public class BlockchainImpl implements Blockchain {
             // [1] apply block reward and tx fees
             Amount reward = Block.getBlockReward(block, config);
 
-            if (reward.gt0()) {
+            if (reward.isPositive()) {
                 getAccountState().adjustAvailable(block.getCoinbase(), reward);
             }
             // [2] commit the updates

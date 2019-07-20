@@ -7,7 +7,6 @@
 package org.semux.core;
 
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Amount.sum;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -221,7 +220,7 @@ public class Block {
         Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
         Amount gasReward = getGasReward(block);
 
-        return sum(sum(config.spec().getBlockReward(block.getNumber()), txsReward), gasReward);
+        return config.spec().getBlockReward(block.getNumber()).add(txsReward).add(gasReward);
     }
 
     /**
@@ -237,7 +236,7 @@ public class Block {
         for (int i = 0; i < transactions.size(); i++) {
             Transaction transaction = transactions.get(i);
             TransactionResult result = results.get(i);
-            sum = Amount.sum(sum, Amount.mul(transaction.getGasPrice(), result.getGasUsed()));
+            sum = sum.add(transaction.getGasPrice().multiply(result.getGasUsed()));
         }
         return sum;
     }

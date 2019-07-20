@@ -12,10 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.semux.core.Amount.Unit.MILLI_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.PendingManager.ALLOWED_TIME_DRIFT;
 import static org.semux.core.TransactionResult.Code.INVALID_TIMESTAMP;
+import static org.semux.core.Unit.MILLI_SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +51,7 @@ public class PendingManagerTest {
     private static TransactionType type = TransactionType.TRANSFER;
     private static byte[] from = key.toAddress();
     private static byte[] to = new Key().toAddress();
-    private static Amount value = MILLI_SEM.of(1);
+    private static Amount value = Amount.of(1, MILLI_SEM);
     private static Amount fee;
 
     @ClassRule
@@ -66,7 +66,7 @@ public class PendingManagerTest {
         kernel.setChannelManager(new ChannelManager(kernel));
 
         accountState = kernel.getBlockchain().getAccountState();
-        accountState.adjustAvailable(from, SEM.of(10000));
+        accountState.adjustAvailable(from, Amount.of(10000, SEM));
 
         network = kernel.getConfig().network();
         fee = kernel.getConfig().spec().minTransactionFee();

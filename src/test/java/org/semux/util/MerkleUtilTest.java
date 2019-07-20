@@ -8,8 +8,8 @@ package org.semux.util;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Unit.SEM;
 
 import java.util.Arrays;
 
@@ -28,7 +28,7 @@ public class MerkleUtilTest {
         Network network = Network.DEVNET;
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
-        Amount value = SEM.of(1);
+        Amount value = Amount.of(1, SEM);
         Amount fee = ZERO;
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();

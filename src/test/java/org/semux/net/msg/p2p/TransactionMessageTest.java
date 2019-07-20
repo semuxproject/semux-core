@@ -8,7 +8,6 @@ package org.semux.net.msg.p2p;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.semux.core.Amount.Unit.NANO_SEM;
 
 import org.junit.Test;
 import org.semux.Network;
@@ -25,8 +24,8 @@ public class TransactionMessageTest {
         Network network = Network.DEVNET;
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(2);
-        Amount fee = NANO_SEM.of(50_000_000L);
+        Amount value = Amount.of(2);
+        Amount fee = Amount.of(50_000_000L);
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.of("data");

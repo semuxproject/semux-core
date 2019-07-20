@@ -17,8 +17,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
+import static org.semux.core.Unit.SEM;
 
 import java.util.Collections;
 import java.util.List;
@@ -120,7 +120,8 @@ public class SemuxBftTest {
         long time = TimeUtil.currentTimeMillis();
         Transaction tx1 = createTransaction(to, from1, time, 0);
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), SEM.of(1000));
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), Amount.of(
+                1000, SEM));
         Block block1 = TestUtils.createBlock(
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
                 from1,
@@ -133,7 +134,8 @@ public class SemuxBftTest {
         // create a tx with the same hash with tx1 from a different signer in the second
         // block
         Key from2 = new Key();
-        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from2.toAddress(), SEM.of(1000));
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from2.toAddress(), Amount.of(
+                1000, SEM));
         Transaction tx2 = createTransaction(to, from2, time, 0);
         Block block2 = TestUtils.createBlock(
                 kernelRule.getKernel().getBlockchain().getLatestBlock().getHash(),
@@ -263,7 +265,7 @@ public class SemuxBftTest {
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
-                SEM.of(10),
+                Amount.of(10, SEM),
                 kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 nonce,
                 time,

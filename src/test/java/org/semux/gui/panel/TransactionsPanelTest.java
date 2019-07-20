@@ -11,9 +11,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.MILLI_SEM;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Unit.MILLI_SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.util.Collections;
 
@@ -62,14 +61,14 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testTransactions() {
         Key key = new Key();
-        Amount $1 = NANO_SEM.of(1);
+        Amount $1 = Amount.of(1);
         WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), $1, $1, 1), null));
 
         Transaction tx = new Transaction(kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 Bytes.random(Key.ADDRESS_LEN),
-                SEM.of(1),
-                MILLI_SEM.of(10),
+                Amount.of(1, SEM),
+                Amount.of(10, MILLI_SEM),
                 0,
                 TimeUtil.currentTimeMillis(),
                 Bytes.EMPTY_BYTES);
