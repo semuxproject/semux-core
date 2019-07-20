@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SemuxCli extends Launcher {
 
-    public static final boolean HD_WALLET_ENABLED = true;
+    public static final boolean HD_WALLET_ENABLED = false;
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxCli.class);
 
