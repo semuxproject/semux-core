@@ -35,11 +35,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import org.semux.Kernel;
-import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.core.Amount;
 import org.semux.core.PendingManager;
-import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hex;
@@ -47,12 +45,12 @@ import org.semux.crypto.Key;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.TransactionSender;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
-import org.semux.util.TimeUtil;
 import org.semux.util.exception.UnreachableException;
 
 public class SendPanel extends JPanel implements ActionListener {
@@ -389,19 +387,11 @@ public class SendPanel extends JPanel implements ActionListener {
                         GuiMessages.get("TransferInfo", SwingUtil.formatAmountFull(value), Hex.encode0x(to)),
                         GuiMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
                 if (ret == JOptionPane.YES_OPTION) {
-                    PendingManager pendingMgr = kernel.getPendingManager();
-
-                    byte[] rawData = rdbtnText.isSelected() ? Bytes.of(data) : Hex.decode0x(data);
-
-                    Network network = kernel.getConfig().network();
                     TransactionType type = TransactionType.TRANSFER;
-                    byte[] from = acc.getKey().toAddress();
-                    long nonce = pendingMgr.getNonce(from);
-                    long timestamp = TimeUtil.currentTimeMillis();
-                    Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, rawData);
-                    tx.sign(acc.getKey());
-
-                    sendTransaction(pendingMgr, tx);
+                    byte[] rawData = rdbtnText.isSelected() ? Bytes.of(data) : Hex.decode0x(data);
+                    PendingManager.ProcessingResult result = TransactionSender.send(kernel, acc, type, to, value, fee,
+                            rawData);
+                    handleTransactionResult(result);
                 }
             }
         } catch (ParseException | CryptoException ex) {
@@ -442,13 +432,11 @@ public class SendPanel extends JPanel implements ActionListener {
     }
 
     /**
-     * Adds a transaction to the pending manager.
-     * 
-     * @param pendingMgr
-     * @param tx
+     * Handles pending transaction result.
+     *
+     * @param result
      */
-    protected void sendTransaction(PendingManager pendingMgr, Transaction tx) {
-        PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
+    protected void handleTransactionResult(PendingManager.ProcessingResult result) {
         if (result.error == null) {
             JOptionPane.showMessageDialog(
                     this,

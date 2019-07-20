@@ -246,19 +246,20 @@ public class TransactionsPanel extends JPanel implements ActionListener {
         List<StatusTransaction> transactions = new ArrayList<>();
 
         // add pending transactions
-        transactions.addAll(gui.getKernel().getPendingManager().getPendingTransactions()
-                .parallelStream()
-                .filter(pendingTx -> {
-                    for (WalletAccount acc : model.getAccounts()) {
-                        if (Arrays.equals(acc.getAddress(), pendingTx.transaction.getFrom()) ||
-                                Arrays.equals(acc.getAddress(), pendingTx.transaction.getTo())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
-                .map(pendingTx -> new StatusTransaction(pendingTx.transaction, GuiMessages.get("Pending")))
-                .collect(Collectors.toList()));
+        transactions.addAll(
+                gui.getKernel().getPendingManager().getPendingTransactions()
+                        .parallelStream()
+                        .filter(pendingTx -> {
+                            for (WalletAccount acc : model.getAccounts()) {
+                                if (Arrays.equals(acc.getAddress(), pendingTx.transaction.getFrom()) ||
+                                        Arrays.equals(acc.getAddress(), pendingTx.transaction.getTo())) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        })
+                        .map(pendingTx -> new StatusTransaction(pendingTx.transaction, GuiMessages.get("Pending")))
+                        .collect(Collectors.toList()));
 
         // add completed transactions
         Set<ByteArray> hashes = new HashSet<>();

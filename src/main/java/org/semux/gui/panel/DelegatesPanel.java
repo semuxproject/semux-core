@@ -45,7 +45,6 @@ import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.PendingManager;
-import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
@@ -54,6 +53,7 @@ import org.semux.gui.Action;
 import org.semux.gui.PlaceHolder;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
+import org.semux.gui.TransactionSender;
 import org.semux.gui.dialog.DelegateDialog;
 import org.semux.gui.model.WalletAccount;
 import org.semux.gui.model.WalletDelegate;
@@ -61,7 +61,6 @@ import org.semux.gui.model.WalletModel;
 import org.semux.message.GuiMessages;
 import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
-import org.semux.util.TimeUtil;
 import org.semux.util.exception.UnreachableException;
 
 public class DelegatesPanel extends JPanel implements ActionListener {
@@ -513,19 +512,11 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 }
             }
 
-            PendingManager pendingMgr = kernel.getPendingManager();
-
-            Network network = kernel.getConfig().network();
             TransactionType type = action.equals(Action.VOTE) ? TransactionType.VOTE : TransactionType.UNVOTE;
-            byte[] fromAddress = a.getKey().toAddress();
-            byte[] toAddress = d.getAddress();
-            long nonce = pendingMgr.getNonce(fromAddress);
-            long timestamp = TimeUtil.currentTimeMillis();
-            byte[] data = {};
-            Transaction tx = new Transaction(network, type, toAddress, value, fee, nonce, timestamp, data);
-            tx.sign(a.getKey());
-
-            sendTransaction(pendingMgr, tx);
+            byte[] to = d.getAddress();
+            byte[] data = Bytes.EMPTY_BYTES;
+            PendingManager.ProcessingResult result = TransactionSender.send(kernel, a, type, to, value, fee, data);
+            handleTransactionResult(result);
         }
     }
 
@@ -582,30 +573,22 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                 return;
             }
 
-            PendingManager pendingMgr = kernel.getPendingManager();
-
-            Network network = kernel.getConfig().network();
             TransactionType type = TransactionType.DELEGATE;
             byte[] to = Bytes.EMPTY_ADDRESS;
             Amount value = config.spec().minDelegateBurnAmount();
             Amount fee = config.spec().minTransactionFee();
-            long nonce = pendingMgr.getNonce(a.getAddress());
-            long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.of(name);
-            Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(a.getKey());
-
-            sendTransaction(pendingMgr, tx);
+            PendingManager.ProcessingResult result = TransactionSender.send(kernel, a, type, to, value, fee, data);
+            handleTransactionResult(result);
         }
     }
 
     /**
-     * Adds a transaction to the pending manager.
-     * 
-     * @param pendingMgr
-     * @param tx
+     * Handles pending transaction result.
+     *
+     * @param result
      */
-    protected void sendTransaction(PendingManager pendingMgr, Transaction tx) {
-        PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
+    protected void handleTransactionResult(PendingManager.ProcessingResult result) {
         if (result.error == null) {
             JOptionPane.showMessageDialog(this, GuiMessages.get("TransactionSent", 30),
                     GuiMessages.get("SuccessDialogTitle"), JOptionPane.INFORMATION_MESSAGE);

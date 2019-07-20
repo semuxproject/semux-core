@@ -6,6 +6,8 @@
  */
 package org.semux.gui;
 
+import java.util.Objects;
+
 public class ComboBoxItem<T> implements Comparable<ComboBoxItem<T>> {
     private final String displayName;
     private final T value;
@@ -37,7 +39,7 @@ public class ComboBoxItem<T> implements Comparable<ComboBoxItem<T>> {
 
         ComboBoxItem<?> that = (ComboBoxItem<?>) o;
 
-        return displayName != null ? displayName.equals(that.displayName) : that.displayName == null;
+        return Objects.equals(displayName, that.displayName);
     }
 
     @Override

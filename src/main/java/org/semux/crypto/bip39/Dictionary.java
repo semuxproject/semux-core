@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Dictionary {
 
@@ -23,7 +24,8 @@ public class Dictionary {
         InputStream wordStream = this.getClass().getClassLoader()
                 .getResourceAsStream("wordlists/" + language.name().toLowerCase() + ".txt");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(wordStream, StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(Objects.requireNonNull(wordStream), StandardCharsets.UTF_8));
         String word;
 
         while ((word = reader.readLine()) != null) {

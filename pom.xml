@@ -435,7 +435,7 @@
                 <configuration>
                     <groups>java.,javax.,org.,com.</groups>
                     <staticGroups>java,*</staticGroups>
-                    <excludes></excludes>
+                    <excludes/>
                 </configuration>
                 <executions>
                     <execution>
@@ -498,7 +498,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -511,7 +511,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -855,40 +855,6 @@
                 <skip.git.info>true</skip.git.info>
                 <git.commit.id.abbrev>local</git.commit.id.abbrev>
             </properties>
-        </profile>
-        <profile>
-            <id>windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.22.0</version>
-                        <configuration>
-                            <groups>org.semux.windows.WindowsIntegrationTest</groups>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>integration-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 </project>

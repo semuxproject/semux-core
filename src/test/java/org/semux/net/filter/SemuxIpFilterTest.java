@@ -6,7 +6,7 @@
  */
 package org.semux.net.filter;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -94,7 +94,7 @@ public class SemuxIpFilterTest {
     @Test
     public void testIsAcceptable() throws UnknownHostException {
         for (Map.Entry<String, Boolean> entry : isAcceptable.entrySet()) {
-            assertTrue(filter.isAcceptable(mockAddress(entry.getKey())) == entry.getValue());
+            assertEquals(filter.isAcceptable(mockAddress(entry.getKey())), (boolean) entry.getValue());
         }
     }
 

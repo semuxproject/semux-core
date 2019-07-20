@@ -810,9 +810,7 @@ public class SemuxBft implements BftManager {
     }
 
     /**
-     * Check if a block proposal is valid. TODO: too much redundant code with
-     * {@link org.semux.core.BlockchainImpl#validateBlock(Block, AccountState, DelegateState, boolean)}
-     * .
+     * Check if a block proposal is valid.
      */
     protected boolean validateBlockProposal(BlockHeader header, List<Transaction> transactions) {
         try {
@@ -895,12 +893,10 @@ public class SemuxBft implements BftManager {
                 .map(pendingTx -> pendingTx.transaction)
                 .collect(Collectors.toSet());
 
-        List<Transaction> unvalidatedTransactions = transactions
+        return transactions
                 .stream()
                 .filter(it -> !pendingValidatedTransactions.contains(it))
                 .collect(Collectors.toList());
-
-        return unvalidatedTransactions;
     }
 
     public enum State {

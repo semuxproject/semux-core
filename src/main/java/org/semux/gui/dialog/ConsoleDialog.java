@@ -18,6 +18,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import javax.swing.AbstractAction;
@@ -116,7 +117,7 @@ public class ConsoleDialog extends JDialog implements ActionListener {
         this.api = new org.semux.api.v2.SemuxApiImpl(gui.getKernel());
         for (Method m : SemuxApi.class.getMethods()) {
             MethodDescriptor md = parseMethod(m);
-            this.methods.put(md.name, md);
+            this.methods.put(Objects.requireNonNull(md).name, md);
         }
 
         console.append(GuiMessages.get("ConsoleHelp", HELP));

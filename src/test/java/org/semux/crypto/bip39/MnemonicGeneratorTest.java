@@ -15,7 +15,7 @@ public class MnemonicGeneratorTest {
 
     public static final char jpSpace = '\u3000';
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testHappyPath() {
 
         Dictionary dictionary;
@@ -42,20 +42,7 @@ public class MnemonicGeneratorTest {
 
         @SuppressWarnings("unused")
         int index = dictionary.indexOf(words[0]);
-
-        try {
-            words[0] = "asdf";
-            generator.getSeedFromWordlist(String.join(" ", words), "", Language.ENGLISH);
-            Assert.fail("Should not allow unknown word");
-        } catch (IllegalArgumentException e) {
-        }
-
-        // try {
-        // words[0] = dictionary.getWord((index + 1) % 2048);
-        // generator.getSeedFromWordlist(String.join(" ", words), "", Language.english);
-        // Assert.fail("Should not allow non-checksum'd words");
-        // } catch (IllegalArgumentException e) {
-        //
-        // }
+        words[0] = "asdf";
+        generator.getSeedFromWordlist(String.join(" ", words), "", Language.ENGLISH);
     }
 }

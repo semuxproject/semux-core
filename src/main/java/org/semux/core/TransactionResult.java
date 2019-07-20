@@ -325,10 +325,8 @@ public class TransactionResult {
         long gas = dec.readLong();
         Amount gasPrice = dec.readAmount();
 
-        SemuxInternalTransaction tx = new SemuxInternalTransaction(isRejected, depth, index,
+        return new SemuxInternalTransaction(isRejected, depth, index,
                 type, from, to, nonce, value, data, gas, gasPrice);
-
-        return tx;
     }
 
     public static TransactionResult fromBytes(byte[] bytes) {

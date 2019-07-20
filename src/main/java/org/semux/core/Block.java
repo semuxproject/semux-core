@@ -220,9 +220,8 @@ public class Block {
 
         Amount txsReward = block.getTransactions().stream().map(Transaction::getFee).reduce(ZERO, Amount::sum);
         Amount gasReward = getGasReward(block);
-        Amount reward = sum(sum(config.spec().getBlockReward(block.getNumber()), txsReward), gasReward);
 
-        return reward;
+        return sum(sum(config.spec().getBlockReward(block.getNumber()), txsReward), gasReward);
     }
 
     /**

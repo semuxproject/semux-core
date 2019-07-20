@@ -339,11 +339,11 @@ public class VmTransactionTest {
         as.setCode(to, contract);
         as.adjustAvailable(from, SEM.of(1000));
 
-        byte[] data = contract;
         long gas = 100000;
         Amount gasPrice = NANO_SEM.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, contract, gas,
+                gasPrice);
         tx.sign(key);
 
         TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
@@ -373,11 +373,11 @@ public class VmTransactionTest {
         as.setCode(to, contract);
         as.adjustAvailable(from, SEM.of(1000));
 
-        byte[] data = contract;
         long gas = 21073;
         Amount gasPrice = NANO_SEM.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, contract, gas,
+                gasPrice);
         tx.sign(key);
 
         TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);

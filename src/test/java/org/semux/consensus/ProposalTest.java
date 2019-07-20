@@ -75,7 +75,7 @@ public class ProposalTest {
         p.sign(new Key());
         assertTrue(p.validate());
 
-        assertTrue(!p.toString().startsWith("java.lang.Object"));
+        assertFalse(p.toString().startsWith("java.lang.Object"));
 
         Proposal p2 = Proposal.fromBytes(p.toBytes());
 

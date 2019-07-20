@@ -97,7 +97,7 @@ public class TestUtils {
             throw new IllegalArgumentException("object, field name, and \"where\" must not be empty or null.");
         }
 
-        Field field = null;
+        Field field;
         try {
             field = where.getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -151,7 +151,7 @@ public class TestUtils {
             throw new IllegalArgumentException("where cannot be null");
         }
 
-        Field field = null;
+        Field field;
         try {
             field = where.getDeclaredField(fieldName);
             field.setAccessible(true);

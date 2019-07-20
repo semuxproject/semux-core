@@ -15,7 +15,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.semux.core.Amount.Unit.NANO_SEM;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -143,9 +142,9 @@ public class BlockchainImplTest {
 
         Transaction t = chain.getTransaction(tx.getHash());
         assertNotNull(t);
-        assertTrue(Arrays.equals(from, t.getFrom()));
-        assertTrue(Arrays.equals(to, t.getTo()));
-        assertTrue(Arrays.equals(data, t.getData()));
+        assertArrayEquals(from, t.getFrom());
+        assertArrayEquals(to, t.getTo());
+        assertArrayEquals(data, t.getData());
         assertEquals(value, t.getValue());
         assertEquals(nonce, t.getNonce());
         assertEquals(timestamp, t.getTimestamp());

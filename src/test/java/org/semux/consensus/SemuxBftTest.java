@@ -6,6 +6,7 @@
  */
 package org.semux.consensus;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -19,7 +20,6 @@ import static org.mockito.Mockito.when;
 import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -143,7 +143,7 @@ public class SemuxBftTest {
                 Collections.singletonList(new TransactionResult()));
 
         // this test case is valid if and only if tx1 and tx2 have the same tx hash
-        assertTrue(Arrays.equals(tx1.getHash(), tx2.getHash()));
+        assertArrayEquals(tx1.getHash(), tx2.getHash());
 
         // the block should be rejected because of the duplicated tx
         semuxBFT.proposal = new Proposal(new Proof(block2.getNumber(), 0), block2.getHeader(), Collections.emptyList());

@@ -14,7 +14,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -51,7 +50,7 @@ public class LeveldbDatabaseTest {
         try {
             assertNull(db.get(key));
             db.put(key, value);
-            assertTrue(Arrays.equals(value, db.get(key)));
+            assertArrayEquals(value, db.get(key));
         } finally {
             db.destroy();
         }

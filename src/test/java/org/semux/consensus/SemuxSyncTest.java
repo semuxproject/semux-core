@@ -6,6 +6,7 @@
  */
 package org.semux.consensus;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -116,7 +117,7 @@ public class SemuxSyncTest {
 
         assertTrue(toProcess.isEmpty());
         assertTrue(currentSet.isEmpty());
-        assertTrue(toFinalize.size() == validatorInterval);
+        assertEquals(toFinalize.size(), validatorInterval);
         assertTrue(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
 
         for (int i = 0; i < validatorInterval; i++) {
@@ -124,7 +125,7 @@ public class SemuxSyncTest {
         }
 
         assertTrue(toFinalize.isEmpty());
-        assertTrue(chain.getLatestBlockNumber() == validatorInterval);
+        assertEquals(chain.getLatestBlockNumber(), validatorInterval);
         assertFalse(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
     }
 
@@ -177,7 +178,7 @@ public class SemuxSyncTest {
         // when fastSync is not activated, votes are validated for each block
         assertTrue(toProcess.isEmpty());
         assertFalse(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
-        assertTrue(chain.getLatestBlockNumber() == 0);
+        assertEquals(0, chain.getLatestBlockNumber());
 
         vote = new Vote(VoteType.PRECOMMIT, Vote.VALUE_APPROVE, block.getNumber(), block.getView(),
                 block.getHash());
@@ -194,7 +195,7 @@ public class SemuxSyncTest {
 
         assertTrue(toProcess.isEmpty());
         assertFalse(TestUtils.getInternalState(sync, "fastSync", SemuxSync.class));
-        assertTrue(chain.getLatestBlockNumber() == 1);
+        assertEquals(1, chain.getLatestBlockNumber());
 
         target.set(10 * validatorInterval); // fastSync is activated only at the beginning of a validator set
         sync.process();
@@ -245,7 +246,7 @@ public class SemuxSyncTest {
 
         sync.validateSetHashes();
 
-        assertTrue(currentSet.size() == validatorInterval / 2);
+        assertEquals(currentSet.size(), validatorInterval / 2);
         assertTrue(toFinalize.isEmpty());
 
         Block invalidBlock = kernelRule.createBlock(Collections.emptyList(), currentSet.last().getKey().getHeader());
@@ -265,7 +266,7 @@ public class SemuxSyncTest {
 
         sync.validateSetHashes();
 
-        assertTrue(currentSet.size() == validatorInterval - 1);
+        assertEquals(currentSet.size(), validatorInterval - 1);
         assertTrue(toFinalize.isEmpty());
         assertTrue(toDownload.contains(validatorInterval));
 
@@ -282,21 +283,21 @@ public class SemuxSyncTest {
         currentSet.add(Pair.of(lastBlock, channel));
         sync.validateSetHashes();
 
-        assertTrue(currentSet.size() == validatorInterval / 2);
-        assertTrue(toFinalize.size() == validatorInterval - currentSet.size() - 1);
+        assertEquals(currentSet.size(), validatorInterval / 2);
+        assertEquals(toFinalize.size(), validatorInterval - currentSet.size() - 1);
         assertTrue(toDownload.contains(validatorInterval - toFinalize.size()));
 
         Channel channel2 = new Channel(null);
         currentSet.add(Pair.of(lastBlock, channel2));
         sync.validateSetHashes();
 
-        assertTrue(currentSet.size() == validatorInterval / 2);
-        assertTrue(toFinalize.size() == validatorInterval - currentSet.size() - 1);
+        assertEquals(currentSet.size(), validatorInterval / 2);
+        assertEquals(toFinalize.size(), validatorInterval - currentSet.size() - 1);
 
         currentSet.add(Pair.of(validBlock, channel));
         sync.validateSetHashes();
 
         assertTrue(currentSet.isEmpty());
-        assertTrue(toFinalize.size() == validatorInterval);
+        assertEquals(toFinalize.size(), validatorInterval);
     }
 }

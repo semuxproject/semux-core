@@ -166,7 +166,7 @@ public class TransactTest {
         params.put("fee", String.valueOf(fee.getNano()));
 
         // send transaction
-        logger.info("Making transfer request", params);
+        logger.info("Making transfer request: {}", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().post("/transaction/transfer", params),
                 DoTransactionResponse.class);
@@ -203,7 +203,7 @@ public class TransactTest {
         params.put("data", Bytes.of("test"));
 
         // send transaction
-        logger.info("Making delegate request", params);
+        logger.info("Making delegate request: {}", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().post("/transaction/delegate", params),
                 DoTransactionResponse.class);
@@ -237,7 +237,7 @@ public class TransactTest {
         params.put("fee", fee.getNano());
 
         // send vote transaction
-        logger.info("Making vote request", params);
+        logger.info("Making vote request: {}", params);
         DoTransactionResponse voteResponse = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().post("/transaction/vote", params),
                 DoTransactionResponse.class);
@@ -258,7 +258,7 @@ public class TransactTest {
 
         // send unvote transaction
         final Amount unvotes = SEM.of(50);
-        logger.info("Making unvote request", params);
+        logger.info("Making unvote request: {}", params);
         params.put("from", coinbaseOf(kernelPremine));
         params.put("to", coinbaseOf(kernelValidator1));
         params.put("value", unvotes.getNano());
@@ -295,7 +295,7 @@ public class TransactTest {
         params.put("data", "0x60006000");
 
         // send transaction
-        logger.info("Making create request", params);
+        logger.info("Making create request: {}", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().post("/transaction/create", params),
                 DoTransactionResponse.class);
@@ -327,7 +327,7 @@ public class TransactTest {
         params.put("value", String.valueOf(value.getNano()));
 
         // send transaction
-        logger.info("Making create request", params);
+        logger.info("Making create request: {}", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().post("/transaction/create", params),
                 DoTransactionResponse.class);
@@ -362,7 +362,7 @@ public class TransactTest {
         params.put("data", "0x60006000");
 
         // send transaction
-        logger.info("Making CALL request", params);
+        logger.info("Making CALL request: {}", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().post("/transaction/call", params),
                 DoTransactionResponse.class);
@@ -396,7 +396,7 @@ public class TransactTest {
         params.put("value", String.valueOf(value.getNano()));
 
         // send transaction
-        logger.info("Making CALL request", params);
+        logger.info("Making CALL request: {}", params);
         DoTransactionResponse response = new ObjectMapper().readValue(
                 kernelPremine.getApiClient().post("/transaction/call", params),
                 DoTransactionResponse.class);

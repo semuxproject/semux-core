@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.semux.core.Amount.ZERO;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import org.apache.commons.cli.ParseException;
 import org.junit.Rule;

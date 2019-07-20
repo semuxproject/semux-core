@@ -162,7 +162,6 @@ public class BlockchainImpl implements Blockchain {
         // checks if the database needs to be upgraded
         if (getDatabaseVersion() == 0) {
             upgradeDb0(factory);
-            return;
         }
     }
 

@@ -132,6 +132,6 @@ public class VoteSetTest {
 
     @Test
     public void testToString() {
-        assertTrue(!vs.toString().startsWith("java.lang.Object"));
+        assertFalse(vs.toString().startsWith("java.lang.Object"));
     }
 }

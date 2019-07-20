@@ -196,9 +196,7 @@ public class ChannelManager {
      */
     public List<Channel> getActiveChannels() {
 
-        List<Channel> list = new ArrayList<>(activeChannels.values());
-
-        return list;
+        return new ArrayList<>(activeChannels.values());
     }
 
     /**

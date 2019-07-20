@@ -26,7 +26,7 @@ public class Bip32Ed25519Test {
             Language.ENGLISH);
 
     private HdKeyGenerator generator = new HdKeyGenerator();
-    private HdKeyPair root = generator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX);
+    private HdKeyPair root = generator.getMasterKeyPairFromSeed(SEED, KeyVersion.MAINNET, CoinType.SEMUX_BIP32_ED25519);
 
     @Test
     public void testRoot() {

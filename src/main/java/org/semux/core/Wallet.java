@@ -65,7 +65,7 @@ public class Wallet {
     public static final int MNEMONIC_ENTROPY_LENGTH = 128;
     // always use mainnet to avoid confusion, since the generated key is stored
     public static final KeyVersion KEY_VERSION = KeyVersion.MAINNET;
-    public static final CoinType COIN_TYPE = CoinType.SEMUX_SLIP10; // TODO: consider BIP32-ED25519
+    public static final CoinType COIN_TYPE = CoinType.SEMUX_SLIP10;
 
     private final File file;
     private final org.semux.Network network;
@@ -163,8 +163,7 @@ public class Wallet {
                     try {
                         readHdSeed(key, dec);
                     } catch (Exception e) {
-                        // for wallets where a derived seed is stored
-                        logger.debug("Exception in reading HD seed", e);
+                        logger.warn("Failed to read HD mnemonic phrase");
                     }
                     break;
                 default:

@@ -73,7 +73,7 @@
     window.onload = function() {
 
         // Build a system
-        const ui = SwaggerUIBundle({
+        window.ui = SwaggerUIBundle({
             url: "./swagger/v2.3.0.json",
             validatorUrl : false,
             dom_id: '#swagger-ui',
@@ -87,8 +87,6 @@
             ],
             layout: "StandaloneLayout"
         });
-
-        window.ui = ui;
     }
 </script>
 </body>

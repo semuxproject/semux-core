@@ -11,7 +11,7 @@ public enum CoinType {
 
     SEMUX_SLIP10(Scheme.SLIP10_ED25519, 7562605, true),
 
-    SEMUX(Scheme.BIP32_ED25519, 7562605, false);
+    SEMUX_BIP32_ED25519(Scheme.BIP32_ED25519, 7562605, false);
 
     private final Scheme scheme;
     private final long coinType;

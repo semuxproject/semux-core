@@ -6,8 +6,6 @@
  */
 package org.semux.core.state;
 
-import static org.semux.core.Amount.ZERO;
-
 import java.util.Arrays;
 
 import org.semux.core.Amount;
@@ -21,7 +19,7 @@ public class Delegate {
     protected final byte[] name;
     protected final long registeredAt;
 
-    protected Amount votes = ZERO;
+    protected Amount votes;
 
     /**
      * Create a delegate instance.

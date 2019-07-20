@@ -6,9 +6,7 @@
  */
 package org.semux.crypto;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
+import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 import org.semux.util.Bytes;
@@ -23,13 +21,13 @@ public class AesTest {
     public void testEncrypt() throws CryptoException {
         byte[] bytes = Aes.encrypt(raw, key, iv);
 
-        assertTrue(Arrays.equals(encrypted, bytes));
+        assertArrayEquals(encrypted, bytes);
     }
 
     @Test
     public void testDecrypt() throws CryptoException {
         byte[] bytes = Aes.decrypt(encrypted, key, iv);
 
-        assertTrue(Arrays.equals(raw, bytes));
+        assertArrayEquals(raw, bytes);
     }
 }

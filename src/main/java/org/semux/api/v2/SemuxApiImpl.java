@@ -668,9 +668,8 @@ public final class SemuxApiImpl implements SemuxApi {
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
                 kernel.getConfig().spec().vmSpec(), invokeFactory, gasUsedInBlock, true);
-        TransactionReceipt receipt = executor.run();
 
-        return receipt;
+        return executor.run();
     }
 
     @Override
@@ -827,9 +826,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 .withGas(gas)
                 .withGasPrice(gasPrice);
 
-        Transaction tx = transactionBuilder.buildSigned();
-
-        return tx;
+        return transactionBuilder.buildSigned();
     }
 
     private Response doTransaction(TransactionType type, String from, String to, String value, String fee,

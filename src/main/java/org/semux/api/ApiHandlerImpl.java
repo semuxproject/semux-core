@@ -48,7 +48,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiHandlerImpl.class);
 
-    private static final Pattern VERSIONED_PATH = Pattern.compile("/(v[\\.0-9]+)(/.*)");
+    private static final Pattern VERSIONED_PATH = Pattern.compile("/(v[.0-9]+)(/.*)");
 
     private final Map<ApiVersion, Map<ImmutablePair<HttpMethod, String>, Route>> routes = new HashMap<>();
 
