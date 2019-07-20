@@ -38,6 +38,7 @@ import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.net.Channel;
+import org.semux.net.Peer;
 import org.semux.net.msg.MessageQueue;
 import org.semux.rules.KernelRule;
 import org.semux.rules.TemporaryDatabaseRule;
@@ -75,6 +76,7 @@ public class SemuxSyncTest {
         Channel channel = mock(Channel.class);
         when(channel.getRemoteAddress()).thenReturn(new InetSocketAddress("0.0.0.0", 5161));
         when(channel.getMessageQueue()).thenReturn(msgQueue);
+        when(channel.getRemotePeer()).thenReturn(mock(Peer.class));
 
         TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
                 Comparator.comparingLong(o -> o.getKey().getNumber()));
@@ -150,6 +152,7 @@ public class SemuxSyncTest {
         Channel channel = mock(Channel.class);
         when(channel.getRemoteAddress()).thenReturn(new InetSocketAddress("0.0.0.0", 5161));
         when(channel.getMessageQueue()).thenReturn(msgQueue);
+        when(channel.getRemotePeer()).thenReturn(mock(Peer.class));
 
         TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
                 Comparator.comparingLong(o -> o.getKey().getNumber()));
@@ -226,6 +229,7 @@ public class SemuxSyncTest {
         Channel channel = mock(Channel.class);
         when(channel.getRemoteAddress()).thenReturn(new InetSocketAddress("0.0.0.0", 5161));
         when(channel.getMessageQueue()).thenReturn(msgQueue);
+        when(channel.getRemotePeer()).thenReturn(mock(Peer.class));
 
         TreeSet<Pair<Block, Channel>> currentSet = new TreeSet<>(
                 Comparator.comparingLong(o -> o.getKey().getNumber()));

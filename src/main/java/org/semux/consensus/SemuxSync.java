@@ -323,27 +323,28 @@ public class SemuxSync implements SyncManager {
                     && !badPeers.contains(c.getRemotePeer().getPeerId())) {
 
                 if (config.syncFastSync()
-                        && support(c.getRemotePeer().getCapabilities(), Capability.FAST_SYNC)) {
-
+                // TODO: enable this following check
+                /* && support(c.getRemotePeer().getCapabilities(), Capability.FAST_SYNC) */
+                ) {
                     boolean skipVotes = fastSync
                             && (task % config.spec().getValidatorUpdateInterval()) != 0
                             && task < target.get() - 5 * config.spec().getValidatorUpdateInterval(); // safe guard
 
                     if (skipVotes) {
                         logger.trace("Requesting block #{} from {}:{}, HEADER + TRANSACTIONS", task, c.getRemoteIp(),
-                                c.getRemoteIp());
+                                c.getRemotePort());
                         c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
                                 BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS)));
                     } else {
                         logger.trace("Requesting block #{} from {}:{}, HEADER + TRANSACTIONS + VOTES", task,
-                                c.getRemoteIp(),
-                                c.getRemoteIp());
+                                c.getRemoteIp(), c.getRemotePort());
                         c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
                                 BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS, BlockPart.VOTES)));
                     }
                 } else {
                     // for older clients
-                    logger.trace("Requesting block #{} from {}:{}, FULL BLOCK", task, c.getRemoteIp(), c.getRemoteIp());
+                    logger.trace("Requesting block #{} from {}:{}, FULL BLOCK", task, c.getRemoteIp(),
+                            c.getRemotePort());
                     c.getMessageQueue().sendMessage(new GetBlockMessage(task));
                 }
 
