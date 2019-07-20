@@ -2,7 +2,7 @@
 
 ## [v2.0.0](https://github.com/semuxproject/semux-core/tree/v2.0.0) (2019-08-25)
 
-This release activates the virtual machine hardfork and enables HD wallet by default.
+This release features the **virtual machine hardfork** and **HD wallet**.
 
 **Important notice**
 
@@ -19,14 +19,15 @@ the configuration file has also been updated; suggest using the new one.
 
 - Updated docs (#156, #158, #193)
 - Reset the `testnet` with new keys (#175, #176)
-- No need to install JVM from now on (#225)
+- Packed JVM images in releases (#225)
+- Added support for quotes in console dialog (#203)
 
 **New features:**
 
 - Consensus
     - Replaced the block size limit with a `20m` gas limit (#211, #213, #214)
 - Sync
-    - Added support for the experimental `FAST_SYNC` protocol (#155, #117, #228, #232)
+    - Added support for the experimental `FAST_SYNC` protocol (#155, #228, #232)
 - Wallet
     - Added support for HD wallet (#173, #174, #231)
 - API
