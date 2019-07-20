@@ -105,8 +105,11 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
         switch (action) {
         case OK: {
             String phrase = phraseField.getText();
-            String password = repeatPhraseField.getText();
-            if (!password.equals(phrase)) {
+
+            String repeat = repeatPhraseField.getText();
+            repeat = String.join(" ", repeat.trim().split("\\s+"));
+
+            if (!repeat.equals(phrase)) {
                 JOptionPane.showMessageDialog(this, GuiMessages.get("HdWalletInitializationFailure"));
                 break;
             }

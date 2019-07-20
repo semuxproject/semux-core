@@ -403,11 +403,14 @@ public class SemuxCli extends Launcher {
     protected void initializedHdSeed(Wallet wallet) {
         if (wallet.isUnlocked() && !wallet.isHdWalletInitialized()) {
             // HD Mnemonic
+            System.out.println(CliMessages.get("HdWalletInitialize"));
             MnemonicGenerator generator = new MnemonicGenerator();
             String phrase = generator.getWordlist(Wallet.MNEMONIC_ENTROPY_LENGTH, Wallet.MNEMONIC_LANGUAGE);
-            System.out.println(CliMessages.get("HdWalletInstructions", phrase));
+            System.out.println(CliMessages.get("HdWalletMnemonic", phrase));
 
             String repeat = ConsoleUtil.readLine(CliMessages.get("HdWalletMnemonicRepeat"));
+            repeat = String.join(" ", repeat.trim().split("\\s+"));
+
             if (!repeat.equals(phrase)) {
                 logger.error(CliMessages.get("HdWalletInitializationFailure"));
                 SystemUtil.exit(SystemUtil.Code.FAILED_TO_INIT_HD_WALLET);
