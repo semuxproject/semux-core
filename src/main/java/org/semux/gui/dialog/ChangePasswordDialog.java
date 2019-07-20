@@ -92,7 +92,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(btnCancel)
                         .addComponent(btnOk))
-                    .addContainerGap(77, Short.MAX_VALUE))
+                    .addContainerGap(40, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);
         // @formatter:on
@@ -100,7 +100,7 @@ public class ChangePasswordDialog extends JDialog implements ActionListener {
         this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setIconImage(SwingUtil.loadImage("logo", 128, 128).getImage());
-        this.setMinimumSize(new Dimension(400, 240));
+        this.pack();
         this.setLocationRelativeTo(parent);
     }
 

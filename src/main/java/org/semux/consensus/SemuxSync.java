@@ -15,11 +15,13 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
@@ -111,6 +113,9 @@ public class SemuxSync implements SyncManager {
     private Instant beginningInstant;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
+    // reset at the beginning of a sync task
+    private Set<String> badPeers = new HashSet<>();
+
     public SemuxSync(Kernel kernel) {
         this.config = kernel.getConfig();
 
@@ -127,6 +132,8 @@ public class SemuxSync implements SyncManager {
     public void start(long targetHeight) {
         if (isRunning.compareAndSet(false, true)) {
             beginningInstant = Instant.now();
+
+            badPeers.clear();
 
             logger.info("Syncing started, best known block = {}", targetHeight - 1);
 
@@ -306,7 +313,8 @@ public class SemuxSync implements SyncManager {
             Channel c = channels.get(random.nextInt(channels.size()));
 
             // request the block
-            if (c.getRemotePeer().getLatestBlockNumber() >= task) {
+            if (c.getRemotePeer().getLatestBlockNumber() >= task
+                    && !badPeers.contains(c.getRemotePeer().getPeerId())) {
                 if (config.syncSkipVotes()) {
                     boolean skipVotes = fastSync
                             && (task % config.spec().getValidatorUpdateInterval()) != 0
@@ -520,6 +528,8 @@ public class SemuxSync implements SyncManager {
             toFinalize.remove(block.getNumber(), Pair.of(block, channel));
             toProcess.remove(Pair.of(block, channel));
         }
+
+        badPeers.add(channel.getRemotePeer().getPeerId());
 
         if (config.syncDisconnectOnInvalidBlock()) {
             // disconnect if the peer sends us invalid block
