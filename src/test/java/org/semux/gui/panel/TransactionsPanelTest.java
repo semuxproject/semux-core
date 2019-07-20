@@ -62,14 +62,14 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testTransactions() {
         Key key = new Key();
-        Amount $1 = NANO_SEM.of(1);
+        Amount $1 = Amount.of(1, NANO_SEM);
         WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), $1, $1, 1), null));
 
         Transaction tx = new Transaction(kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 Bytes.random(Key.ADDRESS_LEN),
-                SEM.of(1),
-                MILLI_SEM.of(10),
+                Amount.of(1, SEM),
+                Amount.of(10, MILLI_SEM),
                 0,
                 TimeUtil.currentTimeMillis(),
                 Bytes.EMPTY_BYTES);

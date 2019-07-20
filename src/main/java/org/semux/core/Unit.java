@@ -6,10 +6,8 @@
  */
 package org.semux.core;
 
-import static java.math.RoundingMode.FLOOR;
 import static java.util.Arrays.stream;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public enum Unit {
@@ -25,8 +23,8 @@ public enum Unit {
 
     MEGA_SEM(15, "MSEM");
 
-    private final int exp;
-    private final long factor;
+    public final int exp;
+    public final long factor;
     public final String symbol;
 
     Unit(int exp, String symbol) {
@@ -35,24 +33,14 @@ public enum Unit {
         this.symbol = symbol;
     }
 
-    public static Unit ofSymbol(String s) {
-        return stream(values()).filter(i -> s.equals(i.symbol)).findAny().get();
-    }
-
-    public Amount of(long a) {
-        return new Amount(Math.multiplyExact(a, factor));
-    }
-
-    public Amount ofGas(long gas, long gasPrice) {
-        return new Amount(Math.multiplyExact(gas, gasPrice));
-    }
-
-    public BigDecimal toDecimal(Amount a, int scale) {
-        BigDecimal $nano = BigDecimal.valueOf(a.getNano());
-        return $nano.movePointLeft(exp).setScale(scale, FLOOR);
-    }
-
-    public Amount fromDecimal(BigDecimal d) {
-        return new Amount(d.movePointRight(exp).setScale(0, FLOOR).longValueExact());
+    /**
+     * Decode the unit from symbol.
+     *
+     * @param symbol
+     *            the symbol text
+     * @return a Unit object if valid; otherwise false
+     */
+    public static Unit fromSymbol(String symbol) {
+        return stream(values()).filter(v -> v.symbol.equals(symbol)).findAny().orElse(null);
     }
 }

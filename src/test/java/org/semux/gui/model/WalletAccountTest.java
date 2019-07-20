@@ -16,6 +16,7 @@ import static org.semux.core.Unit.NANO_SEM;
 import java.util.Collections;
 
 import org.junit.Test;
+import org.semux.core.Amount;
 import org.semux.core.state.Account;
 import org.semux.crypto.Key;
 
@@ -24,12 +25,12 @@ public class WalletAccountTest {
     @Test
     public void testKey() {
         Key key = new Key();
-        Account acc = new Account(key.toAddress(), NANO_SEM.of(1), NANO_SEM.of(2), 3);
+        Account acc = new Account(key.toAddress(), Amount.of(1, NANO_SEM), Amount.of(2, NANO_SEM), 3);
         WalletAccount wa = new WalletAccount(key, acc, "test account");
 
         assertThat(wa.getAddress(), equalTo(key.toAddress()));
-        assertThat(wa.getAvailable(), equalTo(NANO_SEM.of(1)));
-        assertThat(wa.getLocked(), equalTo(NANO_SEM.of(2)));
+        assertThat(wa.getAvailable(), equalTo(Amount.of(1, NANO_SEM)));
+        assertThat(wa.getLocked(), equalTo(Amount.of(2, NANO_SEM)));
         assertThat(wa.getNonce(), equalTo(3L));
 
         assertTrue(wa.getTransactions().isEmpty());
@@ -47,7 +48,7 @@ public class WalletAccountTest {
     @Test(expected = IllegalArgumentException.class)
     public void testMismatch() {
         Key key = new Key();
-        Account acc = new Account(new Key().toAddress(), NANO_SEM.of(1), NANO_SEM.of(2), 3);
+        Account acc = new Account(new Key().toAddress(), Amount.of(1, NANO_SEM), Amount.of(2, NANO_SEM), 3);
         new WalletAccount(key, acc, "test account");
     }
 

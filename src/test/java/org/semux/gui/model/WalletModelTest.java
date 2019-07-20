@@ -119,13 +119,13 @@ public class WalletModelTest {
         WalletAccount wa1 = mock(WalletAccount.class);
         WalletAccount wa2 = mock(WalletAccount.class);
         when(wa1.getKey()).thenReturn(new Key());
-        when(wa1.getAvailable()).thenReturn(NANO_SEM.of(1));
+        when(wa1.getAvailable()).thenReturn(Amount.of(1, NANO_SEM));
         when(wa2.getKey()).thenReturn(new Key());
-        when(wa2.getAvailable()).thenReturn(NANO_SEM.of(2));
+        when(wa2.getAvailable()).thenReturn(Amount.of(2, NANO_SEM));
 
         assertEquals(ZERO, model.getTotalAvailable());
         model.setAccounts(Arrays.asList(wa1, wa2));
-        assertEquals(NANO_SEM.of(3), model.getTotalAvailable());
+        assertEquals(Amount.of(3, NANO_SEM), model.getTotalAvailable());
 
         assertThat(model.getAccounts(), equalTo(Arrays.asList(wa1, wa2)));
     }
@@ -135,13 +135,13 @@ public class WalletModelTest {
         WalletAccount wa1 = mock(WalletAccount.class);
         WalletAccount wa2 = mock(WalletAccount.class);
         when(wa1.getKey()).thenReturn(new Key());
-        when(wa1.getLocked()).thenReturn(NANO_SEM.of(1));
+        when(wa1.getLocked()).thenReturn(Amount.of(1, NANO_SEM));
         when(wa2.getKey()).thenReturn(new Key());
-        when(wa2.getLocked()).thenReturn(NANO_SEM.of(2));
+        when(wa2.getLocked()).thenReturn(Amount.of(2, NANO_SEM));
 
         assertEquals(ZERO, model.getTotalLocked());
         model.setAccounts(Arrays.asList(wa1, wa2));
-        assertEquals(NANO_SEM.of(3), model.getTotalLocked());
+        assertEquals(Amount.of(3, NANO_SEM), model.getTotalLocked());
     }
 
     @Test

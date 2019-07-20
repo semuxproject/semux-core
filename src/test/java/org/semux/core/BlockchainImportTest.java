@@ -53,24 +53,26 @@ public class BlockchainImportTest {
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
-                SEM.of(10),
+                Amount.of(10, SEM),
                 kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 0,
                 time,
                 Bytes.EMPTY_BYTES).sign(from1);
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
-        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), SEM.of(1000));
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), Amount.of(
+                1000, SEM));
         Block block1 = kernelRule.createBlock(Collections.singletonList(tx1));
         kernelRule.getKernel().getBlockchain().addBlock(block1);
         // create a tx with the same hash with tx1 from a different signer in the second
         // block
         Key from2 = new Key();
-        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from2.toAddress(), SEM.of(1000));
+        kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from2.toAddress(), Amount.of(
+                1000, SEM));
         Transaction tx2 = new Transaction(
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
-                SEM.of(10),
+                Amount.of(10, SEM),
                 kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 0,
                 time,

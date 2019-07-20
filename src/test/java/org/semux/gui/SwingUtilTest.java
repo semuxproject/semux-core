@@ -67,7 +67,7 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatAndEncodeValue() throws ParseException {
-        Amount x = NANO_SEM.of(1_234_456_789_000L);
+        Amount x = Amount.of(1_234_456_789_000L, NANO_SEM);
         assertEquals("1,234.456 SEM", SwingUtil.formatAmount(x));
         assertEquals(x, SwingUtil.parseAmount("1,234.456789"));
         assertEquals(x, SwingUtil.parseAmount("1,234.456789 SEM"));
@@ -77,7 +77,7 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatValueWithCustomUnit() {
-        Amount x = NANO_SEM.of(1_234_456_789_123L);
+        Amount x = Amount.of(1_234_456_789_123L, NANO_SEM);
         assertEquals("1,234.456 SEM", SwingUtil.formatAmount(x));
         SwingUtil.setDefaultUnit("mSEM");
         assertEquals("1,234,456.789 mSEM", SwingUtil.formatAmount(x));
@@ -87,7 +87,7 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatValueWithCustomFractionDigits() {
-        Amount x = NANO_SEM.of(1_234_456_789_123L);
+        Amount x = Amount.of(1_234_456_789_123L, NANO_SEM);
         SwingUtil.setDefaultUnit("SEM");
         SwingUtil.setDefaultFractionDigits(9);
         assertEquals("1,234.456789123 SEM", SwingUtil.formatAmount(x));
@@ -95,7 +95,7 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatValueFull() {
-        Amount x = NANO_SEM.of(1_234_456_789_123L);
+        Amount x = Amount.of(1_234_456_789_123L, NANO_SEM);
         SwingUtil.setDefaultFractionDigits(0);
         assertEquals("1,234.456789123 SEM", SwingUtil.formatAmountFull(x));
     }

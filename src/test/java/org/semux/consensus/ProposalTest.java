@@ -36,8 +36,8 @@ public class ProposalTest {
         Network network = Network.DEVNET;
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(2);
-        Amount fee = NANO_SEM.of(50_000_000L);
+        Amount value = Amount.of(2, NANO_SEM);
+        Amount fee = Amount.of(50_000_000L, NANO_SEM);
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.of("data");

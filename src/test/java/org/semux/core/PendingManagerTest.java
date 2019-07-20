@@ -51,7 +51,7 @@ public class PendingManagerTest {
     private static TransactionType type = TransactionType.TRANSFER;
     private static byte[] from = key.toAddress();
     private static byte[] to = new Key().toAddress();
-    private static Amount value = MILLI_SEM.of(1);
+    private static Amount value = Amount.of(1, MILLI_SEM);
     private static Amount fee;
 
     @ClassRule
@@ -66,7 +66,7 @@ public class PendingManagerTest {
         kernel.setChannelManager(new ChannelManager(kernel));
 
         accountState = kernel.getBlockchain().getAccountState();
-        accountState.adjustAvailable(from, SEM.of(10000));
+        accountState.adjustAvailable(from, Amount.of(10000, SEM));
 
         network = kernel.getConfig().network();
         fee = kernel.getConfig().spec().minTransactionFee();

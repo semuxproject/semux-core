@@ -128,7 +128,7 @@ public class TransactionExecutor {
                 // applying a very strict check to avoid mistakes
                 boolean valid = fee.equals(Amount.ZERO)
                         && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
-                        && tx.getGasPrice().getNano() >= 1 && tx.getGasPrice().getNano() <= Integer.MAX_VALUE;
+                        && tx.getGasPrice().toNanoLong() >= 1 && tx.getGasPrice().toNanoLong() <= Integer.MAX_VALUE;
                 if (!valid) {
                     result.setCode(Code.INVALID_FEE);
                     continue;

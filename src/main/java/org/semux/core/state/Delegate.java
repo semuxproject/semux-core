@@ -97,7 +97,7 @@ public class Delegate {
     @Override
     public String toString() {
         return "Delegate [address=" + Hex.encode(address) + ", name=" + Arrays.toString(name) + ", registeredAt="
-                + registeredAt + ", votes=" + votes.getNano() + "]";
+                + registeredAt + ", votes=" + votes.toNanoLong() + "]";
     }
 
 }

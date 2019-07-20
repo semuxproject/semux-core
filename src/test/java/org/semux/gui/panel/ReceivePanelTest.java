@@ -57,8 +57,8 @@ public class ReceivePanelTest extends AssertJSwingJUnitTestCase {
     public void testCopyAddress() {
         Key key1 = new Key();
         Key key2 = new Key();
-        Amount $1 = NANO_SEM.of(1);
-        Amount $2 = NANO_SEM.of(2);
+        Amount $1 = Amount.of(1, NANO_SEM);
+        Amount $2 = Amount.of(2, NANO_SEM);
         WalletAccount acc1 = new WalletAccount(key1, new Account(key1.toAddress(), $1, $1, 1), null);
         WalletAccount acc2 = new WalletAccount(key2, new Account(key2.toAddress(), $2, $2, 2), null);
 

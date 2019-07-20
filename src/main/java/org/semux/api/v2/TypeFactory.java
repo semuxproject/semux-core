@@ -106,7 +106,7 @@ public class TypeFactory {
                                         isValidator))
                 .votes(
                         String.valueOf(
-                                blockchain.getDelegateState().getVote(address, delegate.getAddress()).getNano()));
+                                blockchain.getDelegateState().getVote(address, delegate.getAddress()).toNanoLong()));
     }
 
     public static InfoType infoType(Kernel kernel) {
@@ -204,6 +204,6 @@ public class TypeFactory {
     }
 
     public static String encodeAmount(Amount a) {
-        return a == null ? null : String.valueOf(a.getNano());
+        return a == null ? null : String.valueOf(a.toNanoLong());
     }
 }

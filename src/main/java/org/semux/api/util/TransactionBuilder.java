@@ -143,7 +143,7 @@ public class TransactionBuilder {
     public TransactionBuilder withValue(String value) {
         if (value != null) {
             try {
-                this.value = NANO_SEM.of(Long.parseLong(value));
+                this.value = Amount.of(Long.parseLong(value), NANO_SEM);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Parameter `value` is not a valid number");
             }
@@ -155,7 +155,7 @@ public class TransactionBuilder {
     public TransactionBuilder withFee(String fee) {
         if (fee != null) {
             try {
-                this.fee = NANO_SEM.of(Long.parseLong(fee));
+                this.fee = Amount.of(Long.parseLong(fee), NANO_SEM);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Parameter `fee` is not a valid number");
             }
@@ -211,7 +211,7 @@ public class TransactionBuilder {
     public TransactionBuilder withGasPrice(String gasPrice) {
         if (gasPrice != null) {
             try {
-                this.gasPrice = NANO_SEM.of(Long.parseLong(gasPrice));
+                this.gasPrice = Amount.of(Long.parseLong(gasPrice), NANO_SEM);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Parameter `gasPrice` is not a valid number");
             }

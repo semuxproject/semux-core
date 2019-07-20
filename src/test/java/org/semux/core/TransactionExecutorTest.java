@@ -75,7 +75,7 @@ public class TransactionExecutorTest {
         TransactionType type = TransactionType.TRANSFER;
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(5);
+        Amount value = Amount.of(5, NANO_SEM);
         Amount fee = config.spec().minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
@@ -89,7 +89,7 @@ public class TransactionExecutorTest {
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, chain, 0);
         assertFalse(result.getCode().isSuccess());
 
-        Amount available = SEM.of(1000);
+        Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
         // execute but not commit
@@ -109,7 +109,7 @@ public class TransactionExecutorTest {
     public void testDelegate() {
         Key delegate = new Key();
 
-        Amount available = SEM.of(2000);
+        Amount available = Amount.of(2000, SEM);
         as.adjustAvailable(delegate.toAddress(), available);
 
         TransactionType type = TransactionType.DELEGATE;
@@ -148,13 +148,13 @@ public class TransactionExecutorTest {
         Key voter = new Key();
         Key delegate = new Key();
 
-        Amount available = SEM.of(100);
+        Amount available = Amount.of(100, SEM);
         as.adjustAvailable(voter.toAddress(), available);
 
         TransactionType type = TransactionType.VOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
-        Amount value = SEM.of(33);
+        Amount value = Amount.of(33, SEM);
         Amount fee = config.spec().minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
@@ -180,7 +180,7 @@ public class TransactionExecutorTest {
         Key voter = new Key();
         Key delegate = new Key();
 
-        Amount available = SEM.of(100);
+        Amount available = Amount.of(100, SEM);
         as.adjustAvailable(voter.toAddress(), available);
 
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
@@ -188,7 +188,7 @@ public class TransactionExecutorTest {
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
-        Amount value = SEM.of(33);
+        Amount value = Amount.of(33, SEM);
         Amount fee = config.spec().minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
@@ -221,13 +221,13 @@ public class TransactionExecutorTest {
         Key voter = new Key();
         Key delegate = new Key();
 
-        as.adjustAvailable(voter.toAddress(), sub(config.spec().minTransactionFee(), NANO_SEM.of(1)));
+        as.adjustAvailable(voter.toAddress(), sub(config.spec().minTransactionFee(), Amount.of(1, NANO_SEM)));
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
         TransactionType type = TransactionType.UNVOTE;
         byte[] from = voter.toAddress();
         byte[] to = delegate.toAddress();
-        Amount value = SEM.of(100);
+        Amount value = Amount.of(100, SEM);
         Amount fee = config.spec().minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();

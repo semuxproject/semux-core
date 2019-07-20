@@ -53,8 +53,8 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // Chain spec
     // =========================
     protected long maxBlockGasLimit = 20_000_000L; // 20m gas
-    protected Amount minTransactionFee = MILLI_SEM.of(5);
-    protected Amount minDelegateBurnAmount = SEM.of(1000);
+    protected Amount minTransactionFee = Amount.of(5, MILLI_SEM);
+    protected Amount minDelegateBurnAmount = Amount.of(1000, SEM);
     protected long nonVMTransactionGasCost = 5_000L;
 
     // =========================
@@ -127,7 +127,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // Transaction pool
     // =========================
     protected int poolBlockGasLimit = 10_000_000;
-    protected Amount poolMinGasPrice = NANO_SEM.of(10); // 10 NanoSEM = 10 Gwei
+    protected Amount poolMinGasPrice = Amount.of(10, NANO_SEM); // 10 NanoSEM = 10 Gwei
     protected long poolMaxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
 
     // =========================
@@ -207,11 +207,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     @Override
     public Amount getBlockReward(long number) {
         if (number <= 2_000_000L) { // ~2 years
-            return SEM.of(3);
+            return Amount.of(3, SEM);
         } else if (number <= 6_000_000L) { // ~4 years
-            return SEM.of(2);
+            return Amount.of(2, SEM);
         } else if (number <= 14_000_000L) { // ~8 years
-            return SEM.of(1);
+            return Amount.of(1, SEM);
         } else {
             return ZERO;
         }
@@ -657,7 +657,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                     break;
                 }
                 case "txpool.minGasPrice": {
-                    poolMinGasPrice = NANO_SEM.of(Long.parseLong(props.getProperty(name).trim()));
+                    poolMinGasPrice = Amount.of(Long.parseLong(props.getProperty(name).trim()), NANO_SEM);
                     break;
                 }
                 case "txpool.maxTransactionTimeDrift": {

@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.semux.config.Config;
+import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Wallet;
@@ -46,7 +47,7 @@ public abstract class SemuxApiTestBase {
 
         chain = apiMock.getKernel().getBlockchain();
         accountState = apiMock.getKernel().getBlockchain().getAccountState();
-        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), SEM.of(5000));
+        accountState.adjustAvailable(wallet.getAccount(0).toAddress(), Amount.of(5000, SEM));
         delegateState = apiMock.getKernel().getBlockchain().getDelegateState();
         pendingMgr = apiMock.getKernel().getPendingManager();
         nodeMgr = apiMock.getKernel().getNodeManager();

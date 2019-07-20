@@ -44,8 +44,8 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
 
         Key from = new Key();
         Key to = new Key();
-        Amount value = SEM.of(1000);
-        Amount fee = SEM.fromDecimal(new BigDecimal("0.05"));
+        Amount value = Amount.of(1000, SEM);
+        Amount fee = Amount.of(new BigDecimal("0.05"), SEM);
         long nonce = 0L;
         long now = Instant.now().toEpochMilli();
         byte[] data = "some data".getBytes();

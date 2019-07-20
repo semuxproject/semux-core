@@ -65,7 +65,7 @@ public class SimpleDecoder {
     }
 
     public Amount readAmount() {
-        return NANO_SEM.of(readLong());
+        return Amount.of(readLong(), NANO_SEM);
     }
 
     /**

@@ -52,7 +52,7 @@ public class MainnetConfigTest {
                 .mapToObj(config::getBlockReward)
                 .reduce(ZERO, Amount::sum);
 
-        assertEquals(SEM.of(22_000_000), total);
+        assertEquals(Amount.of(22_000_000, SEM), total);
     }
 
     @Test

@@ -49,8 +49,8 @@ public class BlockchainImplTest {
     private Key key = new Key();
     private byte[] from = key.toAddress();
     private byte[] to = Bytes.random(20);
-    private Amount value = NANO_SEM.of(20);
-    private Amount fee = NANO_SEM.of(1);
+    private Amount value = Amount.of(20, NANO_SEM);
+    private Amount fee = Amount.of(1, NANO_SEM);
     private long nonce = 12345;
     private byte[] data = Bytes.of("test");
     private long timestamp = TimeUtil.currentTimeMillis() - 60 * 1000;

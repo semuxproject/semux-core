@@ -51,7 +51,7 @@ public class BlockchainPerformance {
             Network network = config.network();
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
-            Amount value = NANO_SEM.of(1);
+            Amount value = Amount.of(1, NANO_SEM);
             Amount fee = config.spec().minTransactionFee();
             long nonce = 1 + i;
             long timestamp = TimeUtil.currentTimeMillis();
@@ -113,7 +113,7 @@ public class BlockchainPerformance {
         Network network = config.network();
         TransactionType type = TransactionType.TRANSFER;
         byte[] to = Bytes.random(20);
-        Amount value = NANO_SEM.of(1);
+        Amount value = Amount.of(1, NANO_SEM);
         Amount fee = config.spec().minTransactionFee();
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();

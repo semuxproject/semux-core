@@ -36,7 +36,7 @@ import org.semux.rules.KernelRule;
 @Category(IntegrationTest.class)
 public class SyncingTest {
 
-    private static final Amount PREMINE = SEM.of(5000);
+    private static final Amount PREMINE = Amount.of(5000, SEM);
 
     @Rule
     public KernelRule kernelRule1 = new KernelRule(51610, 51710);

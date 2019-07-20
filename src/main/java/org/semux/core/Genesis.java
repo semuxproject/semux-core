@@ -148,7 +148,7 @@ public class Genesis extends Block {
         @JsonCreator
         public Premine(@JsonProperty("address") String address, @JsonProperty("amount") long amount,
                 @JsonProperty("note") String note) {
-            this(Hex.decode0x(address), NANO_SEM.of(amount), note);
+            this(Hex.decode0x(address), Amount.of(amount, NANO_SEM), note);
         }
 
         public byte[] getAddress() {

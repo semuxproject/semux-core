@@ -394,7 +394,7 @@ public class SwingUtil {
      * @return
      */
     private static String formatAmount(Amount a, Unit unit, int fractionDigits, boolean withUnit) {
-        return formatNumber(unit.toDecimal(a, fractionDigits), fractionDigits)
+        return formatNumber(a.toDecimal(fractionDigits, unit), fractionDigits)
                 + (withUnit ? (" " + unit.symbol) : "");
     }
 
@@ -404,7 +404,7 @@ public class SwingUtil {
      * @param unit
      */
     public static void setDefaultUnit(String unit) {
-        SwingUtil.unit = Unit.ofSymbol(unit);
+        SwingUtil.unit = Unit.valueOf(unit);
     }
 
     /**
@@ -424,13 +424,13 @@ public class SwingUtil {
      * @throws ParseException
      */
     public static Amount parseAmount(String str) throws ParseException {
-        Unit theUnit = stream(Unit.values())
+        Unit unit = stream(Unit.values())
                 .filter(u -> str.endsWith(" " + u.symbol))
                 .findAny()
-                .orElse(unit);
-        String strNoUnit = str.replace(" " + theUnit.symbol, "");
+                .orElse(SwingUtil.unit);
+        String strNoUnit = str.replace(" " + unit.symbol, "").trim();
 
-        return theUnit.fromDecimal(parseNumber(strNoUnit));
+        return Amount.of(parseNumber(strNoUnit), unit);
     }
 
     /**

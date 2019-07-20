@@ -332,10 +332,10 @@ public class DelegateStateImpl implements Cloneable, DelegateState {
     }
 
     protected byte[] encodeAmount(Amount a) {
-        return Bytes.of(a.getNano());
+        return Bytes.of(a.toNanoLong());
     }
 
     protected Amount decodeAmount(byte[] bs) {
-        return bs == null ? ZERO : NANO_SEM.of(Bytes.toLong(bs));
+        return bs == null ? ZERO : Amount.of(Bytes.toLong(bs), NANO_SEM);
     }
 }

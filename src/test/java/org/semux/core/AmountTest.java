@@ -9,6 +9,7 @@ package org.semux.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.neg;
@@ -22,7 +23,6 @@ import static org.semux.core.Unit.NANO_SEM;
 import static org.semux.core.Unit.SEM;
 
 import java.math.BigDecimal;
-import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
@@ -31,86 +31,89 @@ public class AmountTest {
     @Test
     public void testUnits() {
         assertEquals(ZERO, ZERO);
-        assertEquals(NANO_SEM.of(1), NANO_SEM.of(1));
-        assertEquals(NANO_SEM.of(1000), MICRO_SEM.of(1));
-        assertEquals(MICRO_SEM.of(1000), MILLI_SEM.of(1));
-        assertEquals(MILLI_SEM.of(1000), SEM.of(1));
-        assertEquals(SEM.of(1000), KILO_SEM.of(1));
-        assertEquals(KILO_SEM.of(1000), MEGA_SEM.of(1));
+        assertEquals(Amount.of(1, NANO_SEM), Amount.of(1, NANO_SEM));
+        assertEquals(Amount.of(1000, NANO_SEM), Amount.of(1, MICRO_SEM));
+        assertEquals(Amount.of(1000, MICRO_SEM), Amount.of(1, MILLI_SEM));
+        assertEquals(Amount.of(1000, MILLI_SEM), Amount.of(1, SEM));
+        assertEquals(Amount.of(1000, SEM), Amount.of(1, KILO_SEM));
+        assertEquals(Amount.of(1000, KILO_SEM), Amount.of(1, MEGA_SEM));
     }
 
     @Test
     public void testFromDecimal() {
-        assertEquals(ZERO, SEM.fromDecimal(BigDecimal.ZERO));
-        assertEquals(SEM.of(10), SEM.fromDecimal(new BigDecimal("10.000")));
-        assertEquals(SEM.of(1000), KILO_SEM.fromDecimal(BigDecimal.ONE));
-        assertEquals(MILLI_SEM.of(1), SEM.fromDecimal(new BigDecimal("0.001")));
+        assertEquals(ZERO, Amount.of(BigDecimal.ZERO, SEM));
+        assertEquals(Amount.of(10, SEM), Amount.of(new BigDecimal("10.000"), SEM));
+        assertEquals(Amount.of(1000, SEM), Amount.of(BigDecimal.ONE, KILO_SEM));
+        assertEquals(Amount.of(1, MILLI_SEM), Amount.of(new BigDecimal("0.001"), SEM));
     }
 
-    @Test(expected = NoSuchElementException.class)
-    public void testOfSymbol() {
-        assertEquals(NANO_SEM, Unit.ofSymbol("nSEM"));
-        assertEquals(MICRO_SEM, Unit.ofSymbol("μSEM"));
-        assertEquals(MILLI_SEM, Unit.ofSymbol("mSEM"));
-        assertEquals(SEM, Unit.ofSymbol("SEM"));
-        assertEquals(KILO_SEM, Unit.ofSymbol("kSEM"));
-        assertEquals(MEGA_SEM, Unit.ofSymbol("MSEM"));
+    @Test
+    public void testFromSymbol() {
+        assertEquals(NANO_SEM, Unit.fromSymbol("nSEM"));
+        assertEquals(MICRO_SEM, Unit.fromSymbol("μSEM"));
+        assertEquals(MILLI_SEM, Unit.fromSymbol("mSEM"));
+        assertEquals(SEM, Unit.fromSymbol("SEM"));
+        assertEquals(KILO_SEM, Unit.fromSymbol("kSEM"));
+        assertEquals(MEGA_SEM, Unit.fromSymbol("MSEM"));
+    }
 
-        Unit.ofSymbol("???");
+    @Test
+    public void testFromSymbolUnknown() {
+        assertNull(Unit.fromSymbol("???"));
     }
 
     @Test
     public void testToDecimal() {
-        assertEquals(new BigDecimal("0"), SEM.toDecimal(ZERO, 0));
-        assertEquals(new BigDecimal("0.000"), SEM.toDecimal(ZERO, 3));
+        assertEquals(new BigDecimal("0"), ZERO.toDecimal(0, SEM));
+        assertEquals(new BigDecimal("0.000"), ZERO.toDecimal(3, SEM));
 
-        Amount oneSem = SEM.of(1);
-        assertEquals(new BigDecimal("1.000"), SEM.toDecimal(oneSem, 3));
-        assertEquals(new BigDecimal("1000.000"), MILLI_SEM.toDecimal(oneSem, 3));
-        assertEquals(new BigDecimal("0.001000"), KILO_SEM.toDecimal(oneSem, 6));
+        Amount oneSem = Amount.of(1, SEM);
+        assertEquals(new BigDecimal("1.000"), oneSem.toDecimal(3, SEM));
+        assertEquals(new BigDecimal("1000.000"), oneSem.toDecimal(3, MILLI_SEM));
+        assertEquals(new BigDecimal("0.001000"), oneSem.toDecimal(6, KILO_SEM));
     }
 
     @Test
     public void testCompareTo() {
         assertEquals(ZERO.compareTo(ZERO), 0);
-        assertEquals(NANO_SEM.of(1000).compareTo(MICRO_SEM.of(1)), 0);
+        assertEquals(Amount.of(1000, NANO_SEM).compareTo(Amount.of(1, MICRO_SEM)), 0);
 
-        assertEquals(NANO_SEM.of(10).compareTo(NANO_SEM.of(10)), 0);
-        assertEquals(NANO_SEM.of(5).compareTo(NANO_SEM.of(10)), -1);
-        assertEquals(NANO_SEM.of(10).compareTo(NANO_SEM.of(5)), 1);
+        assertEquals(Amount.of(10, NANO_SEM).compareTo(Amount.of(10, NANO_SEM)), 0);
+        assertEquals(Amount.of(5, NANO_SEM).compareTo(Amount.of(10, NANO_SEM)), -1);
+        assertEquals(Amount.of(10, NANO_SEM).compareTo(Amount.of(5, NANO_SEM)), 1);
     }
 
     @Test
     public void testHashCode() {
-        assertEquals(ZERO.hashCode(), SEM.of(0).hashCode());
-        assertEquals(SEM.of(999).hashCode(), SEM.of(999).hashCode());
-        assertEquals(SEM.of(1000).hashCode(), KILO_SEM.of(1).hashCode());
-        assertNotEquals(SEM.of(1).hashCode(), KILO_SEM.of(1).hashCode());
+        assertEquals(ZERO.hashCode(), Amount.of(0, SEM).hashCode());
+        assertEquals(Amount.of(999, SEM).hashCode(), Amount.of(999, SEM).hashCode());
+        assertEquals(Amount.of(1000, SEM).hashCode(), Amount.of(1, KILO_SEM).hashCode());
+        assertNotEquals(Amount.of(1, SEM).hashCode(), Amount.of(1, KILO_SEM).hashCode());
     }
 
     @Test
     public void testGtLtEtc() {
-        assertTrue(SEM.of(19).gt0());
-        assertTrue(SEM.of(-9).lt0());
+        assertTrue(Amount.of(19, SEM).gt0());
+        assertTrue(Amount.of(-9, SEM).lt0());
         assertFalse(ZERO.gt0());
         assertFalse(ZERO.lt0());
 
         assertTrue(ZERO.gte0());
         assertTrue(ZERO.lte0());
-        assertFalse(SEM.of(-9).gte0());
-        assertFalse(SEM.of(99).lte0());
+        assertFalse(Amount.of(-9, SEM).gte0());
+        assertFalse(Amount.of(99, SEM).lte0());
 
-        assertTrue(SEM.of(999).gt(MILLI_SEM.of(999)));
-        assertTrue(SEM.of(999).gte(MILLI_SEM.of(999)));
-        assertFalse(SEM.of(999).lt(MILLI_SEM.of(999)));
-        assertFalse(SEM.of(999).lte(MILLI_SEM.of(999)));
+        assertTrue(Amount.of(999, SEM).gt(Amount.of(999, MILLI_SEM)));
+        assertTrue(Amount.of(999, SEM).gte(Amount.of(999, MILLI_SEM)));
+        assertFalse(Amount.of(999, SEM).lt(Amount.of(999, MILLI_SEM)));
+        assertFalse(Amount.of(999, SEM).lte(Amount.of(999, MILLI_SEM)));
     }
 
     @Test
     public void testMath() {
-        assertEquals(sum(SEM.of(1000), KILO_SEM.of(1)), KILO_SEM.of(2));
-        assertEquals(sub(SEM.of(1000), KILO_SEM.of(1)), ZERO);
-        assertEquals(neg(SEM.of(1000)), KILO_SEM.of(-1));
+        assertEquals(sum(Amount.of(1000, SEM), Amount.of(1, KILO_SEM)), Amount.of(2, KILO_SEM));
+        assertEquals(sub(Amount.of(1000, SEM), Amount.of(1, KILO_SEM)), ZERO);
+        assertEquals(neg(Amount.of(1000, SEM)), Amount.of(-1, KILO_SEM));
         assertEquals(neg(ZERO), ZERO);
     }
 }

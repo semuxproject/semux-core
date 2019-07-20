@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.semux.config.Constants;
 import org.semux.config.DevnetConfig;
+import org.semux.core.Amount;
 import org.semux.util.Bytes;
 import org.semux.util.ConsoleUtil;
 import org.semux.util.SimpleApiClient;
@@ -43,8 +44,8 @@ public class SemuxPerformance {
             Map<String, Object> params = new HashMap<>();
             params.put("from", address);
             params.put("to", address);
-            params.put("value", MILLI_SEM.of(1).getNano());
-            params.put("fee", config.spec().minTransactionFee().getNano());
+            params.put("value", Amount.of(1, MILLI_SEM).toNanoLong());
+            params.put("fee", config.spec().minTransactionFee().toNanoLong());
             params.put("data", Bytes.EMPTY_BYTES);
             params.put("password", password);
 

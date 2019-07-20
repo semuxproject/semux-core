@@ -34,7 +34,7 @@ public class TransactionTest {
     private Network network = Network.DEVNET;
     private TransactionType type = TransactionType.TRANSFER;
     private byte[] to = Hex.decode0x("0xdb7cadb25fdcdd546fb0268524107582c3f8999c");
-    private Amount value = NANO_SEM.of(2);
+    private Amount value = Amount.of(2, NANO_SEM);
     private Amount fee = config.spec().minTransactionFee();
     private long nonce = 1;
     private long timestamp = 1523028482000L;

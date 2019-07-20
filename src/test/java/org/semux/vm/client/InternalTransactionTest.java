@@ -78,7 +78,7 @@ public class InternalTransactionTest {
         TransactionType type = TransactionType.CALL;
         byte[] from = key.toAddress();
         byte[] to = Bytes.EMPTY_ADDRESS;
-        Amount value = NANO_SEM.of(0);
+        Amount value = Amount.of(0, NANO_SEM);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -90,11 +90,11 @@ public class InternalTransactionTest {
                 new BlockHeader(123, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
                         Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
                 config.spec().maxBlockGasLimit());
-        as.adjustAvailable(from, SEM.of(1000));
-        as.adjustAvailable(to, SEM.of(1000));
+        as.adjustAvailable(from, Amount.of(1000, SEM));
+        as.adjustAvailable(to, Amount.of(1000, SEM));
 
         long gas = 100000;
-        Amount gasPrice = NANO_SEM.of(1);
+        Amount gasPrice = Amount.of(1, NANO_SEM);
 
         Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, contract, gas,
                 gasPrice);
@@ -102,14 +102,15 @@ public class InternalTransactionTest {
 
         TransactionResult result = exec.execute(tx, as, ds, bh, chain, 0);
         assertTrue(result.getCode().isSuccess());
-        assertEquals(SEM.of(1000).getNano() - SEM.of(5).getNano(), as.getAccount(to).getAvailable().getNano());
-        assertEquals(SEM.of(5).getNano(),
-                as.getAccount(Hex.decode0x("0x0000000000000000000000000000000012345678")).getAvailable().getNano());
+        assertEquals(Amount.of(1000, SEM).toNanoLong() - Amount.of(5, SEM).toNanoLong(),
+                as.getAccount(to).getAvailable().toNanoLong());
+        assertEquals(Amount.of(5, SEM).toNanoLong(),
+                as.getAccount(Hex.decode0x("0x0000000000000000000000000000000012345678")).getAvailable().toNanoLong());
 
         assertFalse(result.getInternalTransactions().isEmpty());
         SemuxInternalTransaction it = result.getInternalTransactions().get(0);
         assertArrayEquals(to, it.getFrom());
         assertArrayEquals(Hex.decode0x("0x0000000000000000000000000000000012345678"), it.getTo());
-        assertEquals(SEM.of(5), it.getValue());
+        assertEquals(Amount.of(5, SEM), it.getValue());
     }
 }
