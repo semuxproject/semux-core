@@ -6,8 +6,6 @@
  */
 package org.semux.core;
 
-import static org.semux.core.Unit.NANO_SEM;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -148,7 +146,7 @@ public class Genesis extends Block {
         @JsonCreator
         public Premine(@JsonProperty("address") String address, @JsonProperty("amount") long amount,
                 @JsonProperty("note") String note) {
-            this(Hex.decode0x(address), Amount.of(amount, NANO_SEM), note);
+            this(Hex.decode0x(address), Amount.of(amount), note);
         }
 
         public byte[] getAddress() {

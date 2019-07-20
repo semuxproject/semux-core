@@ -12,7 +12,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.semux.core.Unit.NANO_SEM;
+import static org.semux.core.Amount.ONE;
+import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Unit.SEM;
 
 import org.junit.Before;
@@ -81,7 +82,7 @@ public class PrecompiledContractTest {
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
         byte[] delegate = Bytes.random(20);
-        Amount value = Amount.of(0, NANO_SEM);
+        Amount value = Amount.of(0);
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
 
@@ -101,9 +102,9 @@ public class PrecompiledContractTest {
                 Hex.decode("000000000000000000000000"), delegate,
                 Hex.decode("000000000000000000000000000000000000000000000000000000003B9ACA00")); // 1 nanoSEM
         long gas = 100000;
-        Amount gasPrice = Amount.of(1, NANO_SEM);
+        Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
         long dataGasCost = 0;
@@ -114,25 +115,25 @@ public class PrecompiledContractTest {
         TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(21_000 + 21_000 + dataGasCost + 1088, result.getGasUsed());
-        assertEquals(Amount.of(1000, SEM).toNanoLong() - result.getGasUsed() * gasPrice.toNanoLong(),
-                as.getAccount(from).getAvailable().toNanoLong());
-        assertEquals(Amount.of(1000, SEM).toNanoLong() - 1, as.getAccount(to).getAvailable().toNanoLong());
-        assertEquals(1, as.getAccount(to).getLocked().toNanoLong());
-        assertEquals(0, as.getAccount(delegate).getAvailable().toNanoLong());
-        assertEquals(0, as.getAccount(delegate).getLocked().toNanoLong());
+        assertEquals(Amount.of(1000, SEM).subtract(gasPrice.multiply(result.getGasUsed())),
+                as.getAccount(from).getAvailable());
+        assertEquals(Amount.of(1000, SEM).subtract(ONE), as.getAccount(to).getAvailable());
+        assertEquals(ONE, as.getAccount(to).getLocked());
+        assertEquals(ZERO, as.getAccount(delegate).getAvailable());
+        assertEquals(ZERO, as.getAccount(delegate).getLocked());
 
         data = Bytes.merge(Hex.decode("02aa9be2"),
                 Hex.decode("000000000000000000000000"), delegate,
                 Hex.decode("000000000000000000000000000000000000000000000000000000003B9ACA00")); // 1 nanoSEM
 
-        tx = new Transaction(network, type, to, value, Amount.ZERO, nonce + 1, timestamp, data, gas, gasPrice);
+        tx = new Transaction(network, type, to, value, ZERO, nonce + 1, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
         result = exec.execute(tx, as, ds, block, chain, 0);
         assertTrue(result.getCode().isSuccess());
-        assertEquals(Amount.of(1000, SEM).toNanoLong(), as.getAccount(to).getAvailable().toNanoLong());
-        assertEquals(0, as.getAccount(to).getLocked().toNanoLong());
-        assertEquals(0, as.getAccount(delegate).getAvailable().toNanoLong());
-        assertEquals(0, as.getAccount(delegate).getLocked().toNanoLong());
+        assertEquals(Amount.of(1000, SEM), as.getAccount(to).getAvailable());
+        assertEquals(ZERO, as.getAccount(to).getLocked());
+        assertEquals(ZERO, as.getAccount(delegate).getAvailable());
+        assertEquals(ZERO, as.getAccount(delegate).getLocked());
     }
 }

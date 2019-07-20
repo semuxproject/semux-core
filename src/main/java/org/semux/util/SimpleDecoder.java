@@ -6,8 +6,6 @@
  */
 package org.semux.util;
 
-import static org.semux.core.Unit.NANO_SEM;
-
 import java.io.UnsupportedEncodingException;
 
 import org.semux.core.Amount;
@@ -65,7 +63,7 @@ public class SimpleDecoder {
     }
 
     public Amount readAmount() {
-        return Amount.of(readLong(), NANO_SEM);
+        return Amount.of(readLong());
     }
 
     /**

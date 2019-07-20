@@ -7,7 +7,6 @@
 package org.semux.gui.dialog;
 
 import static org.semux.core.TransactionType.CREATE;
-import static org.semux.core.Unit.NANO_SEM;
 import static org.semux.core.Unit.SEM;
 
 import java.math.BigDecimal;
@@ -53,7 +52,7 @@ public class TransactionResultDialogTest extends AssertJSwingJUnitTestCase {
         long now = Instant.now().toEpochMilli();
         byte[] data = "some data".getBytes();
         long gas = 10_000;
-        Amount gasPrice = Amount.of(10, NANO_SEM);
+        Amount gasPrice = Amount.of(10);
         Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().network(), CREATE, to.toAddress(), value,
                 fee, nonce, now, data, gas, gasPrice).sign(from);
 

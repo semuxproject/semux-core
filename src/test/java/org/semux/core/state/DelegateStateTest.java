@@ -12,7 +12,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Unit.NANO_SEM;
 import static org.semux.core.Unit.SEM;
 
 import java.util.List;
@@ -67,7 +66,7 @@ public class DelegateStateTest {
         Key delegate = new Key();
         Key voter = new Key();
 
-        assertFalse(ds.vote(voter.toAddress(), delegate.toAddress(), Amount.of(1, NANO_SEM)));
+        assertFalse(ds.vote(voter.toAddress(), delegate.toAddress(), Amount.of(1)));
     }
 
     @Test
@@ -79,7 +78,7 @@ public class DelegateStateTest {
 
         assertTrue(ds.register(delegate, delegateName));
         for (int i = 0; i < 1000; i++) {
-            assertTrue(ds.vote(voter, delegate, Amount.of(1000, NANO_SEM)));
+            assertTrue(ds.vote(voter, delegate, Amount.of(1000)));
         }
 
         List<Delegate> list = ds.getDelegates();
@@ -87,7 +86,7 @@ public class DelegateStateTest {
 
         assertArrayEquals(delegate, list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
-        assertEquals(Amount.of(1000 * 1000, NANO_SEM), list.get(0).getVotes());
+        assertEquals(Amount.of(1000 * 1000), list.get(0).getVotes());
     }
 
     @Test
@@ -101,7 +100,7 @@ public class DelegateStateTest {
             delegate = new Key().toAddress();
             delegateName = Bytes.of("delegate" + i);
             assertTrue(ds.register(delegate, delegateName));
-            assertTrue(ds.vote(voter, delegate, Amount.of(i, NANO_SEM)));
+            assertTrue(ds.vote(voter, delegate, Amount.of(i)));
         }
 
         List<Delegate> list = ds.getDelegates();
@@ -109,7 +108,7 @@ public class DelegateStateTest {
 
         assertArrayEquals(delegate, list.get(0).getAddress());
         assertArrayEquals(delegateName, list.get(0).getName());
-        assertEquals(Amount.of(200 - 1, NANO_SEM), list.get(0).getVotes());
+        assertEquals(Amount.of(200 - 1), list.get(0).getVotes());
     }
 
     @Test

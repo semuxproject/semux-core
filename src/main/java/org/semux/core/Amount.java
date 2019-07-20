@@ -11,16 +11,41 @@ import static java.math.RoundingMode.FLOOR;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+/**
+ * Represents an amount of {@link Unit#NANO_SEM}, the base unit of computation.
+ */
 public final class Amount implements Comparable<Amount> {
 
     public static final Amount ZERO = new Amount(0);
-    public static final Amount ONE_SEM = Amount.of(1, Unit.SEM);
-    public static final Amount ONE_NANO_SEM = Amount.of(1, Unit.NANO_SEM);
+    public static final Amount ONE = new Amount(1);
+    public static final Amount TEN = new Amount(10);
 
     private final long nano;
 
     private Amount(long nano) {
         this.nano = nano;
+    }
+
+    /**
+     * Converts n nSEM to an amount.
+     *
+     * @param n
+     *            the number of nSEM
+     * @return
+     */
+    public static Amount of(long n) {
+        return new Amount(n);
+    }
+
+    /**
+     * Converts n nSEM to an amount.
+     *
+     * @param n
+     *            the number of nSEM
+     * @return
+     */
+    public static Amount of(String n) {
+        return new Amount(Long.parseLong(n));
     }
 
     /**
@@ -70,7 +95,7 @@ public final class Amount implements Comparable<Amount> {
      *
      * @return a long integer.
      */
-    public long toNanoLong() {
+    public long toLong() {
         return nano;
     }
 
@@ -79,7 +104,7 @@ public final class Amount implements Comparable<Amount> {
      *
      * @return a BigInteger
      */
-    public BigInteger toNanoBigInteger() {
+    public BigInteger toBigInteger() {
         return BigInteger.valueOf(nano);
     }
 
@@ -100,7 +125,7 @@ public final class Amount implements Comparable<Amount> {
 
     @Override
     public String toString() {
-        return this.toDecimal(9, Unit.SEM).stripTrailingZeros().toPlainString() + " SEM";
+        return String.valueOf(nano);
     }
 
     public boolean greaterThan(Amount other) {

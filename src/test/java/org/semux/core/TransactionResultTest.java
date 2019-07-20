@@ -10,7 +10,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Unit.NANO_SEM;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,13 +104,13 @@ public class TransactionResultTest {
         List<LogInfo> logs = new ArrayList<>();
         logs.add(new LogInfo(Bytes.random(20), Arrays.asList(DataWord.ONE, DataWord.ZERO), Bytes.random(48)));
         long gas = 1;
-        Amount gasPrice = Amount.of(2, NANO_SEM);
+        Amount gasPrice = Amount.of(2);
         long gasUsed = 3;
         long blockNumber = 4;
         List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
         internalTransactions
                 .add(new SemuxInternalTransaction(false, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
-                        3, Amount.of(1, NANO_SEM), Bytes.random(5), 4, Amount.of(10, NANO_SEM)));
+                        3, Amount.of(1), Bytes.random(5), 4, Amount.of(10)));
 
         TransactionResult tr1 = new TransactionResult(code, returnData, logs);
         tr1.setGas(gas, gasPrice, gasUsed);

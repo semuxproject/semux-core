@@ -44,8 +44,8 @@ public class SemuxPerformance {
             Map<String, Object> params = new HashMap<>();
             params.put("from", address);
             params.put("to", address);
-            params.put("value", Amount.of(1, MILLI_SEM).toNanoLong());
-            params.put("fee", config.spec().minTransactionFee().toNanoLong());
+            params.put("value", Amount.of(1, MILLI_SEM).toString());
+            params.put("fee", config.spec().minTransactionFee().toString());
             params.put("data", Bytes.EMPTY_BYTES);
             params.put("password", password);
 

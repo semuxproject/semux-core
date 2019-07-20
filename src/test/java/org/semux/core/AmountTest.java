@@ -28,8 +28,8 @@ public class AmountTest {
     @Test
     public void testUnits() {
         assertEquals(ZERO, ZERO);
-        assertEquals(Amount.of(1, NANO_SEM), Amount.of(1, NANO_SEM));
-        assertEquals(Amount.of(1000, NANO_SEM), Amount.of(1, MICRO_SEM));
+        assertEquals(Amount.of(1), Amount.of(1));
+        assertEquals(Amount.of(1000), Amount.of(1, MICRO_SEM));
         assertEquals(Amount.of(1000, MICRO_SEM), Amount.of(1, MILLI_SEM));
         assertEquals(Amount.of(1000, MILLI_SEM), Amount.of(1, SEM));
         assertEquals(Amount.of(1000, SEM), Amount.of(1, KILO_SEM));
@@ -73,11 +73,11 @@ public class AmountTest {
     @Test
     public void testCompareTo() {
         assertEquals(ZERO.compareTo(ZERO), 0);
-        assertEquals(Amount.of(1000, NANO_SEM).compareTo(Amount.of(1, MICRO_SEM)), 0);
+        assertEquals(Amount.of(1000).compareTo(Amount.of(1, MICRO_SEM)), 0);
 
-        assertEquals(Amount.of(10, NANO_SEM).compareTo(Amount.of(10, NANO_SEM)), 0);
-        assertEquals(Amount.of(5, NANO_SEM).compareTo(Amount.of(10, NANO_SEM)), -1);
-        assertEquals(Amount.of(10, NANO_SEM).compareTo(Amount.of(5, NANO_SEM)), 1);
+        assertEquals(Amount.of(10).compareTo(Amount.of(10)), 0);
+        assertEquals(Amount.of(5).compareTo(Amount.of(10)), -1);
+        assertEquals(Amount.of(10).compareTo(Amount.of(5)), 1);
     }
 
     @Test

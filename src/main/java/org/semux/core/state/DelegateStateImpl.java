@@ -7,7 +7,6 @@
 package org.semux.core.state;
 
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Unit.NANO_SEM;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -330,10 +329,10 @@ public class DelegateStateImpl implements Cloneable, DelegateState {
     }
 
     protected byte[] encodeAmount(Amount a) {
-        return Bytes.of(a.toNanoLong());
+        return Bytes.of(a.toLong());
     }
 
     protected Amount decodeAmount(byte[] bs) {
-        return bs == null ? ZERO : Amount.of(Bytes.toLong(bs), NANO_SEM);
+        return bs == null ? ZERO : Amount.of(Bytes.toLong(bs));
     }
 }

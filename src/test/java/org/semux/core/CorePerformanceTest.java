@@ -66,7 +66,7 @@ public class CorePerformanceTest {
 
             TransactionType type = TransactionType.TRANSFER;
             byte[] to = Bytes.random(20);
-            Amount value = Amount.of(5, NANO_SEM);
+            Amount value = Amount.of(5);
             Amount fee = config.spec().minTransactionFee();
             long nonce = 1;
             long timestamp = TimeUtil.currentTimeMillis();

@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.TransactionResult.Code.INSUFFICIENT_AVAILABLE;
 import static org.semux.core.TransactionResult.Code.INSUFFICIENT_LOCKED;
-import static org.semux.core.Unit.NANO_SEM;
 import static org.semux.core.Unit.SEM;
 
 import org.junit.Before;
@@ -73,7 +72,7 @@ public class TransactionExecutorTest {
         TransactionType type = TransactionType.TRANSFER;
         byte[] from = key.toAddress();
         byte[] to = Bytes.random(20);
-        Amount value = Amount.of(5, NANO_SEM);
+        Amount value = Amount.of(5);
         Amount fee = config.spec().minTransactionFee();
         long nonce = as.getAccount(from).getNonce();
         long timestamp = TimeUtil.currentTimeMillis();
@@ -219,7 +218,7 @@ public class TransactionExecutorTest {
         Key voter = new Key();
         Key delegate = new Key();
 
-        as.adjustAvailable(voter.toAddress(), config.spec().minTransactionFee().subtract(Amount.of(1, NANO_SEM)));
+        as.adjustAvailable(voter.toAddress(), config.spec().minTransactionFee().subtract(Amount.of(1)));
         ds.register(delegate.toAddress(), Bytes.of("delegate"));
 
         TransactionType type = TransactionType.UNVOTE;

@@ -7,7 +7,6 @@
 package org.semux.gui;
 
 import static org.junit.Assert.assertEquals;
-import static org.semux.core.Unit.NANO_SEM;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -67,7 +66,7 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatAndEncodeValue() throws ParseException {
-        Amount x = Amount.of(1_234_456_789_000L, NANO_SEM);
+        Amount x = Amount.of(1_234_456_789_000L);
         assertEquals("1,234.456 SEM", SwingUtil.formatAmount(x));
         assertEquals(x, SwingUtil.parseAmount("1,234.456789"));
         assertEquals(x, SwingUtil.parseAmount("1,234.456789 SEM"));
@@ -77,7 +76,7 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatValueWithCustomUnit() {
-        Amount x = Amount.of(1_234_456_789_123L, NANO_SEM);
+        Amount x = Amount.of(1_234_456_789_123L);
         assertEquals("1,234.456 SEM", SwingUtil.formatAmount(x));
         SwingUtil.setDefaultUnit("mSEM");
         assertEquals("1,234,456.789 mSEM", SwingUtil.formatAmount(x));
@@ -87,7 +86,7 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatValueWithCustomFractionDigits() {
-        Amount x = Amount.of(1_234_456_789_123L, NANO_SEM);
+        Amount x = Amount.of(1_234_456_789_123L);
         SwingUtil.setDefaultUnit("SEM");
         SwingUtil.setDefaultFractionDigits(9);
         assertEquals("1,234.456789123 SEM", SwingUtil.formatAmount(x));
@@ -95,7 +94,7 @@ public class SwingUtilTest {
 
     @Test
     public void testFormatValueFull() {
-        Amount x = Amount.of(1_234_456_789_123L, NANO_SEM);
+        Amount x = Amount.of(1_234_456_789_123L);
         SwingUtil.setDefaultFractionDigits(0);
         assertEquals("1,234.456789123 SEM", SwingUtil.formatAmountFull(x));
     }

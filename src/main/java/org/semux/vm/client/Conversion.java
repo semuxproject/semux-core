@@ -25,7 +25,7 @@ public class Conversion {
     }
 
     public static BigInteger amountToWei(Amount value) {
-        return value.toNanoBigInteger().multiply(TEN_POW_NINE);
+        return value.toBigInteger().multiply(TEN_POW_NINE);
     }
 
     public static BigInteger amountToWei(long nanoSEM) {

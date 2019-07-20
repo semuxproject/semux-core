@@ -8,7 +8,6 @@ package org.semux.config;
 
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Unit.MILLI_SEM;
-import static org.semux.core.Unit.NANO_SEM;
 import static org.semux.core.Unit.SEM;
 
 import java.io.File;
@@ -127,7 +126,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // Transaction pool
     // =========================
     protected int poolBlockGasLimit = 10_000_000;
-    protected Amount poolMinGasPrice = Amount.of(10, NANO_SEM); // 10 NanoSEM = 10 Gwei
+    protected Amount poolMinGasPrice = Amount.of(10); // 10 NanoSEM = 10 Gwei
     protected long poolMaxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
 
     // =========================
@@ -657,7 +656,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                     break;
                 }
                 case "txpool.minGasPrice": {
-                    poolMinGasPrice = Amount.of(Long.parseLong(props.getProperty(name).trim()), NANO_SEM);
+                    poolMinGasPrice = Amount.of(props.getProperty(name).trim());
                     break;
                 }
                 case "txpool.maxTransactionTimeDrift": {

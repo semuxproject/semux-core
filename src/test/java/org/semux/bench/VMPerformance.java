@@ -6,7 +6,6 @@
  */
 package org.semux.bench;
 
-import static org.semux.core.Unit.NANO_SEM;
 import static org.semux.core.Unit.SEM;
 
 import java.util.ArrayList;
@@ -78,7 +77,7 @@ public class VMPerformance {
                 long timestamp = TimeUtil.currentTimeMillis();
                 byte[] data = Bytes.merge(Hex.decode0x("9c438a3d"), Bytes.of(j)); // sha1()
                 long gas = 100_000L;
-                Amount gasPrice = Amount.of(10, NANO_SEM);
+                Amount gasPrice = Amount.of(10);
                 Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasPrice)
                         .sign(key);
                 txs.add(tx);

@@ -61,7 +61,7 @@ public class SimpleEncoder {
     }
 
     public void writeAmount(Amount a) {
-        writeLong(a.toNanoLong());
+        writeLong(a.toLong());
     }
 
     /**
