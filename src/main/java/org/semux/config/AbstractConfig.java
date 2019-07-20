@@ -101,7 +101,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     protected int syncMaxPendingJobs = 256;
     protected int syncMaxPendingBlocks = 512;
     protected boolean syncDisconnectOnInvalidBlock = false;
-    protected boolean syncSkipVotes = false;
+    protected boolean syncFastSync = false;
 
     // =========================
     // API
@@ -321,7 +321,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
 
     @Override
     public CapabilityTreeSet getClientCapabilities() {
-        return CapabilityTreeSet.of(Capability.SEMUX);
+        return CapabilityTreeSet.of(Capability.SEMUX, Capability.FAST_SYNC);
     }
 
     @Override
@@ -430,8 +430,8 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
-    public boolean syncSkipVotes() {
-        return syncSkipVotes;
+    public boolean syncFastSync() {
+        return syncFastSync;
     }
 
     @Override
@@ -617,8 +617,8 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                 case "sync.disconnectOnInvalidBlock":
                     syncDisconnectOnInvalidBlock = Boolean.parseBoolean(props.getProperty(name).trim());
                     break;
-                case "sync.skipVotes":
-                    syncSkipVotes = Boolean.parseBoolean(props.getProperty(name).trim());
+                case "sync.fastSync":
+                    syncFastSync = Boolean.parseBoolean(props.getProperty(name).trim());
                     break;
 
                 case "api.enabled":

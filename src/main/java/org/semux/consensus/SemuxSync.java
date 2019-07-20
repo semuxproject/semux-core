@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
@@ -41,6 +42,7 @@ import org.semux.core.Block;
 import org.semux.core.BlockPart;
 import org.semux.core.Blockchain;
 import org.semux.core.SyncManager;
+import org.semux.net.Capability;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
 import org.semux.net.msg.Message;
@@ -260,6 +262,10 @@ public class SemuxSync implements SyncManager {
         }
     }
 
+    private boolean support(String[] capabilities, Capability capability) {
+        return Stream.of(capabilities).anyMatch(c -> capability.name().equals(c));
+    }
+
     private void download() {
         if (!isRunning()) {
             return;
@@ -273,7 +279,7 @@ public class SemuxSync implements SyncManager {
                 Entry<Long, Long> entry = itr.next();
 
                 if (entry.getValue() + DOWNLOAD_TIMEOUT < now) {
-                    logger.debug("Downloading of block #{} has expired", entry.getKey());
+                    logger.debug("Failed to download block #{}, expired", entry.getKey());
                     toDownload.add(entry.getKey());
                     itr.remove();
                 }
@@ -315,22 +321,30 @@ public class SemuxSync implements SyncManager {
             // request the block
             if (c.getRemotePeer().getLatestBlockNumber() >= task
                     && !badPeers.contains(c.getRemotePeer().getPeerId())) {
-                if (config.syncSkipVotes()) {
+
+                if (config.syncFastSync()
+                // TODO: enable this following check
+                /* && support(c.getRemotePeer().getCapabilities(), Capability.FAST_SYNC) */
+                ) {
                     boolean skipVotes = fastSync
                             && (task % config.spec().getValidatorUpdateInterval()) != 0
                             && task < target.get() - 5 * config.spec().getValidatorUpdateInterval(); // safe guard
 
-                    logger.trace("Request block #{} from {}, skipVotes = {}", task, c.getRemoteIp(), skipVotes);
-
                     if (skipVotes) {
+                        logger.trace("Requesting block #{} from {}:{}, HEADER + TRANSACTIONS", task, c.getRemoteIp(),
+                                c.getRemotePort());
                         c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
                                 BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS)));
                     } else {
+                        logger.trace("Requesting block #{} from {}:{}, HEADER + TRANSACTIONS + VOTES", task,
+                                c.getRemoteIp(), c.getRemotePort());
                         c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
                                 BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS, BlockPart.VOTES)));
                     }
                 } else {
-                    // use old protocol to sync mainnet
+                    // for older clients
+                    logger.trace("Requesting block #{} from {}:{}, FULL BLOCK", task, c.getRemoteIp(),
+                            c.getRemotePort());
                     c.getMessageQueue().sendMessage(new GetBlockMessage(task));
                 }
 

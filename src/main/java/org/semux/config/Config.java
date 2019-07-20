@@ -254,11 +254,12 @@ public interface Config {
     boolean syncDisconnectOnInvalidBlock();
 
     /**
-     * Returns whether to skip votes when fastsync is enabled.
+     * Returns whether to use FAST_SYNC. When enabled, votes are downloaded for
+     * pivot blocks only.
      *
      * @return
      */
-    boolean syncSkipVotes();
+    boolean syncFastSync();
 
     // =========================
     // API
