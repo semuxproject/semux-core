@@ -12,10 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.semux.core.Amount.Unit.MILLI_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.PendingManager.ALLOWED_TIME_DRIFT;
 import static org.semux.core.TransactionResult.Code.INVALID_TIMESTAMP;
+import static org.semux.core.Unit.MILLI_SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.util.Arrays;
 import java.util.List;

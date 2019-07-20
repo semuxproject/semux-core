@@ -10,22 +10,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.Unit.KILO_SEM;
-import static org.semux.core.Amount.Unit.MEGA_SEM;
-import static org.semux.core.Amount.Unit.MICRO_SEM;
-import static org.semux.core.Amount.Unit.MILLI_SEM;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.neg;
 import static org.semux.core.Amount.sub;
 import static org.semux.core.Amount.sum;
+import static org.semux.core.Unit.KILO_SEM;
+import static org.semux.core.Unit.MEGA_SEM;
+import static org.semux.core.Unit.MICRO_SEM;
+import static org.semux.core.Unit.MILLI_SEM;
+import static org.semux.core.Unit.NANO_SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.math.BigDecimal;
 import java.util.NoSuchElementException;
 
 import org.junit.Test;
-import org.semux.core.Amount.Unit;
 
 public class AmountTest {
 

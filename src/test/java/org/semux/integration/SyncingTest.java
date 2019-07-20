@@ -10,7 +10,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -11,13 +11,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Amount.sub;
 import static org.semux.core.Amount.sum;
 import static org.semux.core.TransactionResult.Code.INSUFFICIENT_AVAILABLE;
 import static org.semux.core.TransactionResult.Code.INSUFFICIENT_LOCKED;
+import static org.semux.core.Unit.NANO_SEM;
+import static org.semux.core.Unit.SEM;
 
 import org.junit.Before;
 import org.junit.Rule;

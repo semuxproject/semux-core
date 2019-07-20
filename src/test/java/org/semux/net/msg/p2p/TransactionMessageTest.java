@@ -8,7 +8,7 @@ package org.semux.net.msg.p2p;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Unit.NANO_SEM;
 
 import org.junit.Test;
 import org.semux.Network;

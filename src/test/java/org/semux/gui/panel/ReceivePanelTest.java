@@ -9,7 +9,7 @@ package org.semux.gui.panel;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Unit.NANO_SEM;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;

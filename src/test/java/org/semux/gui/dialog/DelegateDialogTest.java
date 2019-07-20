@@ -7,7 +7,7 @@
 package org.semux.gui.dialog;
 
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.util.Collections;
 

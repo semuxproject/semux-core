@@ -11,9 +11,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.MILLI_SEM;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Unit.MILLI_SEM;
+import static org.semux.core.Unit.NANO_SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.util.Collections;
 

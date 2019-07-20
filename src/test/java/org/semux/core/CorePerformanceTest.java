@@ -7,7 +7,7 @@
 package org.semux.core;
 
 import static org.junit.Assert.assertTrue;
-import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Unit.NANO_SEM;
 
 import java.util.ArrayList;
 import java.util.List;

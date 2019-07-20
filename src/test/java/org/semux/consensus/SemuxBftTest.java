@@ -17,8 +17,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
+import static org.semux.core.Unit.SEM;
 
 import java.util.Collections;
 import java.util.List;

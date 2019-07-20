@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.util.ArrayList;
 import java.util.Arrays;

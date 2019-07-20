@@ -6,7 +6,7 @@
  */
 package org.semux.core;
 
-import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Unit.NANO_SEM;
 
 import java.io.IOException;
 import java.io.InputStream;

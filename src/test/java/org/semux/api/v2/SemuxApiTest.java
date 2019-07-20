@@ -43,14 +43,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.semux.TestUtils.createBlock;
 import static org.semux.TestUtils.createTransaction;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.TransactionType.CALL;
 import static org.semux.core.TransactionType.COINBASE;
 import static org.semux.core.TransactionType.CREATE;
 import static org.semux.core.TransactionType.TRANSFER;
 import static org.semux.core.TransactionType.UNVOTE;
 import static org.semux.core.TransactionType.VOTE;
+import static org.semux.core.Unit.NANO_SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -111,6 +111,7 @@ import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
+import org.semux.core.Unit;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -269,7 +270,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         List<Delegate> delegates = delegateState.getDelegates();
         Key voter = new Key();
         for (int i = 0; i < delegates.size(); i++) {
-            delegateState.vote(voter.toAddress(), delegates.get(i).getAddress(), Amount.Unit.NANO_SEM.of(i + 1));
+            delegateState.vote(voter.toAddress(), delegates.get(i).getAddress(), Unit.NANO_SEM.of(i + 1));
         }
 
         GetAccountVotesResponse resp = api.getAccountVotes(Hex.encode0x(voter.toAddress()));
@@ -437,7 +438,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void getTransactionTest() {
         Key from = new Key(), to = new Key();
-        Transaction tx = createTransaction(config, from, to, Amount.Unit.SEM.of(1));
+        Transaction tx = createTransaction(config, from, to, Unit.SEM.of(1));
         TransactionResult res = new TransactionResult();
         Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
                 Collections.singletonList(res));
@@ -459,7 +460,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     @Test
     public void getTransactionReceiptTest() {
         Key from = new Key(), to = new Key();
-        Transaction tx = createTransaction(config, CREATE, from, to, Amount.Unit.SEM.of(1), 1);
+        Transaction tx = createTransaction(config, CREATE, from, to, Unit.SEM.of(1), 1);
         TransactionResult res = new TransactionResult();
         Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
                 Collections.singletonList(res));
@@ -653,7 +654,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Transaction tx = list.get(list.size() - 1).transaction;
         assertArrayEquals(tx.getHash(), Hex.decode0x(response.getResult()));
         assertEquals(TRANSFER, tx.getType());
-        assertEquals(Amount.Unit.NANO_SEM.of(Long.parseLong(fee)), tx.getFee());
+        assertEquals(Unit.NANO_SEM.of(Long.parseLong(fee)), tx.getFee());
         assertEquals(data, Hex.encode(tx.getData()));
     }
 

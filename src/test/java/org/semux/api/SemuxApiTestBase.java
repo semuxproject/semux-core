@@ -6,7 +6,7 @@
  */
 package org.semux.api;
 
-import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Unit.SEM;
 
 import org.junit.After;
 import org.junit.Before;

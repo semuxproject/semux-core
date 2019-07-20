@@ -6,7 +6,7 @@
  */
 package org.semux.bench;
 
-import static org.semux.core.Amount.Unit.MILLI_SEM;
+import static org.semux.core.Unit.MILLI_SEM;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

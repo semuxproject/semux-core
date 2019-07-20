@@ -7,7 +7,7 @@
 package org.semux.gui;
 
 import static org.junit.Assert.assertEquals;
-import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Unit.NANO_SEM;
 
 import java.math.BigDecimal;
 import java.text.ParseException;

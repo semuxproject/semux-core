@@ -6,7 +6,7 @@
  */
 package org.semux.util;
 
-import static org.semux.core.Amount.Unit.NANO_SEM;
+import static org.semux.core.Unit.NANO_SEM;
 
 import java.io.UnsupportedEncodingException;
 

@@ -9,8 +9,8 @@ package org.semux.core.state;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Unit.NANO_SEM;
 
 import java.util.Map;
 

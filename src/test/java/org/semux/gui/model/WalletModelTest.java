@@ -17,8 +17,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.NANO_SEM;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Unit.NANO_SEM;
 
 import java.awt.event.ActionListener;
 import java.util.Arrays;

@@ -6,7 +6,6 @@
  */
 package org.semux.gui.dialog;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

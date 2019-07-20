@@ -10,8 +10,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
+import static org.semux.core.Unit.NANO_SEM;
+import static org.semux.core.Unit.SEM;
 
 import org.junit.Rule;
 import org.junit.Test;

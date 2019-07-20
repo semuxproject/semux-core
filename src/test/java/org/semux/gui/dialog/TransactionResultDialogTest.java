@@ -6,9 +6,9 @@
  */
 package org.semux.gui.dialog;
 
-import static org.semux.core.Amount.Unit.NANO_SEM;
-import static org.semux.core.Amount.Unit.SEM;
 import static org.semux.core.TransactionType.CREATE;
+import static org.semux.core.Unit.NANO_SEM;
+import static org.semux.core.Unit.SEM;
 
 import java.math.BigDecimal;
 import java.time.Instant;
