@@ -1,5 +1,45 @@
 # Change Log
 
+## [v2.0.0](https://github.com/semuxproject/semux-core/tree/v2.0.0) (2019-08-25)
+
+This release activates the virtual machine hardfork and enables HD wallet by default.
+
+**Important notice**
+
+Please backup your wallet file, `wallet.data`, and do a full-sync with the network. Note that
+the configuration file has also been updated; suggest using the new one.
+
+**Bug fixes:**
+
+- Fixed a capacity codec bug in P2P handshake (#214)
+- Fixed the invalid transaction results in database issue (#221)
+- Fixed various EVM integration issues (#182, #183, #184, #190, #209, #210, #224, #229)
+
+**Improvements:**
+
+- Updated docs (#156, #158, #193)
+- Reset the `testnet` with new keys (#175, #176)
+- No need to install JVM from now on (#225)
+
+**New features:**
+
+- Consensus
+    - Replaced the block size limit with a `20m` gas limit (#211, #213, #214)
+- Sync
+    - Added support for the experimental `FAST_SYNC` protocol (#155, #117, #228, #232)
+- Wallet
+    - Added support for HD wallet (#173, #174, #231)
+- API
+    - Bumped the version to `v2.3.0`
+    - Added `gas` and `gasPrice` in the `TransactionType` response (#226)
+    - Added the `InternalTransactionType` (#188)
+    - Updated the `/trasaction/create` and `/trasaction/call` endpoints (#194)
+    - Updated the `/compose-raw-transaction` endpoint (#195)
+    - Updated the `/transaciton-result` endpoint (#219)
+- GUI
+    - Added support for quotes in console dialog (#203)
+
+
 ## [v1.4.0](https://github.com/semuxproject/semux-core/tree/v1.4.0) (2019-04-22)
 
 This release includes incremental improvements and bugfixes since last version. Major changes
