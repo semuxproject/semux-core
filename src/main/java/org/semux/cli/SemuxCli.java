@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SemuxCli extends Launcher {
 
-    public static final boolean HD_WALLET_ENABLED = false;
+    public static final boolean ENABLE_HD_WALLET_BY_DEFAULT = false;
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxCli.class);
 
@@ -178,7 +178,7 @@ public class SemuxCli extends Launcher {
         }
 
         // in case HD wallet is enabled, make sure the seed is properly initialized.
-        if (HD_WALLET_ENABLED) {
+        if (isHdWalletEnabled().orElse(ENABLE_HD_WALLET_BY_DEFAULT)) {
             if (!wallet.isHdWalletInitialized()) {
                 initializedHdSeed(wallet);
             }
@@ -188,7 +188,7 @@ public class SemuxCli extends Launcher {
         List<Key> accounts = wallet.getAccounts();
         if (accounts.isEmpty()) {
             Key key;
-            if (HD_WALLET_ENABLED) {
+            if (isHdWalletEnabled().orElse(ENABLE_HD_WALLET_BY_DEFAULT)) {
                 key = wallet.addAccountWithNextHdKey();
             } else {
                 key = wallet.addAccountRandom();
@@ -230,7 +230,7 @@ public class SemuxCli extends Launcher {
         Wallet wallet = loadAndUnlockWallet();
 
         Key key;
-        if (HD_WALLET_ENABLED) {
+        if (isHdWalletEnabled().orElse(ENABLE_HD_WALLET_BY_DEFAULT)) {
             key = wallet.addAccountWithNextHdKey();
         } else {
             key = wallet.addAccountRandom();

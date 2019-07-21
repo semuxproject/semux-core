@@ -29,7 +29,9 @@ public enum SemuxOption {
 
     IMPORT_PRIVATE_KEY("importprivatekey"),
 
-    NETWORK("network");
+    NETWORK("network"),
+
+    HD_WALLET("hdwallet");
 
     private final String name;
 
