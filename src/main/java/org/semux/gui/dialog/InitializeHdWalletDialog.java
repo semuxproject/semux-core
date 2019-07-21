@@ -39,9 +39,9 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
         super(parent, GuiMessages.get("InitializeHdWallet"));
         this.wallet = wallet;
 
-        JLabel lblEmpty = new JLabel("");
+        JLabel lblMnemonicPhraseTip = new JLabel(GuiMessages.get("MnemonicPhraseTip"));
         JLabel lblMnemonicPhrase = new JLabel(GuiMessages.get("MnemonicPhrase") + ":");
-        JLabel lblRepeatMnemonicPhrase = new JLabel(GuiMessages.get("RepeatMnemonicPhrase") + ":");
+        JLabel lblMnemonicPhraseRepeat = new JLabel(GuiMessages.get("RepeatMnemonicPhrase") + ":");
 
         phraseField = new JTextArea();
         phraseField.setEditable(false);
@@ -59,34 +59,36 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(40)
+                    .addGap(30)
                     .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                        .addComponent(lblEmpty)
-                        .addComponent(lblRepeatMnemonicPhrase)
+                        .addComponent(lblMnemonicPhraseRepeat)
                         .addComponent(lblMnemonicPhrase))
-                    .addGap(20)
+                    .addGap(15)
                     .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(repeatPhraseField, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblMnemonicPhraseTip)
+                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(repeatPhraseField, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE)
                         .addComponent(okButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap(40, Short.MAX_VALUE))
+                    .addContainerGap(30, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(40)
+                    .addGap(30)
+                    .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblMnemonicPhraseTip))
+                    .addGap(20)
                     .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(lblMnemonicPhrase)
-                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE))
+                    .addGap(20)
                     .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblRepeatMnemonicPhrase)
+                        .addComponent(lblMnemonicPhraseRepeat)
                         .addComponent(repeatPhraseField))
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGap(20)
                     .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblEmpty)
                         .addComponent(okButton))
-                    .addContainerGap(40, Short.MAX_VALUE))
+                    .addContainerGap(30, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);
         // @formatter:on
