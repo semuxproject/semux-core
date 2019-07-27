@@ -19,9 +19,10 @@ public abstract class HttpChannelInitializer extends ChannelInitializer<SocketCh
     @Override
     public void initChannel(SocketChannel ch) {
         ChannelPipeline p = ch.pipeline();
-        p.addLast(new HttpServerCodec());
+        p.addLast(new HttpServerCodec(HttpConstants.MAX_INITIAL_LINE_LENGTH, HttpConstants.MAX_HEADER_SIZE,
+                HttpConstants.MAX_CHUNK_SIZE));
         p.addLast(new HttpServerKeepAliveHandler());
-        p.addLast(new HttpObjectAggregator(HttpHandler.MAX_BODY_SIZE));
+        p.addLast(new HttpObjectAggregator(HttpConstants.MAX_BODY_SIZE));
         p.addLast(new ChunkedWriteHandler());
         p.addLast(initHandler());
     }

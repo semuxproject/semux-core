@@ -70,8 +70,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     public static final String NOT_FOUND_RESPONSE = "{\"success\":false,\"message\":\"404 Not Found\"}";
     public static final String BAD_REQUEST_RESPONSE = "{\"success\":false,\"message\":\"400 Bad Request\"}";
 
-    public static final int MAX_BODY_SIZE = 512 * 1024; // 512KB
-
     private static final Charset CHARSET = CharsetUtil.UTF_8;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap(
@@ -122,7 +120,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         // copy collection to ensure it is writable
         Map<String, List<String>> params = new HashMap<>(new QueryStringDecoder(msg.uri(), CHARSET).parameters());
         HttpHeaders headers = msg.headers();
-        ByteBuf body = Unpooled.buffer(MAX_BODY_SIZE);
+        ByteBuf body = Unpooled.buffer(HttpConstants.MAX_BODY_SIZE);
 
         // basic authentication
         if (!checkBasicAuth(headers)) {
