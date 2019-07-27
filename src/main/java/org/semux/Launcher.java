@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -62,6 +63,8 @@ public abstract class Launcher {
     private Integer coinbase = null;
     private String password = null;
 
+    private Boolean hdWalletEnabled = null;
+
     public Launcher() {
         Option dataDirOption = Option.builder()
                 .longOpt(SemuxOption.DATA_DIR.toString())
@@ -71,23 +74,32 @@ public abstract class Launcher {
         addOption(dataDirOption);
 
         Option networkOption = Option.builder()
-                .longOpt(SemuxOption.NETWORK.toString()).desc(CliMessages.get("SpecifyNetwork"))
+                .longOpt(SemuxOption.NETWORK.toString())
+                .desc(CliMessages.get("SpecifyNetwork"))
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("name").type(String.class)
                 .build();
         addOption(networkOption);
 
         Option coinbaseOption = Option.builder()
-                .longOpt(SemuxOption.COINBASE.toString()).desc(CliMessages.get("SpecifyCoinbase"))
+                .longOpt(SemuxOption.COINBASE.toString())
+                .desc(CliMessages.get("SpecifyCoinbase"))
                 .hasArg(true).numberOfArgs(1).optionalArg(false).argName("index").type(Number.class)
                 .build();
         addOption(coinbaseOption);
 
         Option passwordOption = Option.builder()
-                .longOpt(SemuxOption.PASSWORD.toString()).desc(CliMessages.get("WalletPassword"))
-                .hasArg(true).numberOfArgs(1).optionalArg(false).argName(SemuxOption.PASSWORD.toString())
-                .type(String.class)
+                .longOpt(SemuxOption.PASSWORD.toString())
+                .desc(CliMessages.get("WalletPassword"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("password").type(String.class)
                 .build();
         addOption(passwordOption);
+
+        Option hdOption = Option.builder()
+                .longOpt(SemuxOption.HD_WALLET.toString())
+                .desc(CliMessages.get("SpecifyHDWallet"))
+                .hasArg(true).numberOfArgs(1).optionalArg(false).argName("hd").type(Boolean.class)
+                .build();
+        addOption(hdOption);
     }
 
     /**
@@ -183,6 +195,10 @@ public abstract class Launcher {
             setPassword(System.getenv(ENV_SEMUX_WALLET_PASSWORD));
         }
 
+        if (cmd.hasOption(SemuxOption.HD_WALLET.toString())) {
+            setHdWalletEnabled(Boolean.parseBoolean(cmd.getOptionValue(SemuxOption.HD_WALLET.toString())));
+        }
+
         return cmd;
     }
 
@@ -259,6 +275,14 @@ public abstract class Launcher {
      */
     protected void setPassword(String password) {
         this.password = password;
+    }
+
+    public Optional<Boolean> isHdWalletEnabled() {
+        return Optional.ofNullable(hdWalletEnabled);
+    }
+
+    public void setHdWalletEnabled(Boolean hdWalletEnabled) {
+        this.hdWalletEnabled = hdWalletEnabled;
     }
 
     /**

@@ -71,7 +71,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class SemuxGui extends Launcher {
 
-    public static final boolean HD_WALLET_ENABLED = true;
+    public static final boolean ENABLE_HD_WALLET_BY_DEFAULT = true;
 
     private static final Logger logger = LoggerFactory.getLogger(SemuxGui.class);
 
@@ -200,7 +200,7 @@ public class SemuxGui extends Launcher {
         }
 
         // in case HD wallet is enabled, make sure the seed is properly initialized.
-        if (HD_WALLET_ENABLED) {
+        if (isHdWalletEnabled().orElse(ENABLE_HD_WALLET_BY_DEFAULT)) {
             if (!wallet.isHdWalletInitialized()) {
                 initializedHdSeed(wallet);
             }
@@ -212,7 +212,7 @@ public class SemuxGui extends Launcher {
         // add an account is wallet is empty
         if (wallet.size() == 0) {
             Key key;
-            if (HD_WALLET_ENABLED) {
+            if (isHdWalletEnabled().orElse(ENABLE_HD_WALLET_BY_DEFAULT)) {
                 key = wallet.addAccountWithNextHdKey();
             } else {
                 key = wallet.addAccountRandom();

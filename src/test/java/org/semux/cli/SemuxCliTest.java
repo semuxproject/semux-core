@@ -253,7 +253,7 @@ public class SemuxCliTest {
         // verifies that a new account is added the empty wallet
         verify(wallet).unlock("oldpassword");
         verify(wallet, times(2)).getAccounts();
-        if (SemuxCli.HD_WALLET_ENABLED) {
+        if (semuxCLI.isHdWalletEnabled().orElse(SemuxCli.ENABLE_HD_WALLET_BY_DEFAULT)) {
             verify(wallet).addAccountWithNextHdKey();
         } else {
             verify(wallet).addAccountRandom();
@@ -336,7 +336,7 @@ public class SemuxCliTest {
         semuxCLI.createAccount();
 
         // verification
-        if (SemuxCli.HD_WALLET_ENABLED) {
+        if (semuxCLI.isHdWalletEnabled().orElse(SemuxCli.ENABLE_HD_WALLET_BY_DEFAULT)) {
             verify(wallet).addAccountWithNextHdKey();
         } else {
             verify(wallet).addAccountRandom();

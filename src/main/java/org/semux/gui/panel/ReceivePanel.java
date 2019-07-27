@@ -316,7 +316,7 @@ public class ReceivePanel extends JPanel implements ActionListener {
     protected void newAccount() {
         Wallet wallet = kernel.getWallet();
 
-        if (SemuxGui.HD_WALLET_ENABLED) {
+        if (gui.isHdWalletEnabled().orElse(SemuxGui.ENABLE_HD_WALLET_BY_DEFAULT)) {
             wallet.addAccountWithNextHdKey();
         } else {
             wallet.addAccountRandom();
