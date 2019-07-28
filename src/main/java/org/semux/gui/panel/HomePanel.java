@@ -52,7 +52,7 @@ public class HomePanel extends JPanel implements ActionListener {
     private static final int NUMBER_OF_TRANSACTIONS = 5;
 
     private static final EnumSet<TransactionType> FEDERATED_TRANSACTION_TYPES = EnumSet.of(TransactionType.COINBASE,
-            TransactionType.TRANSFER);
+            TransactionType.TRANSFER, TransactionType.CALL, TransactionType.CREATE);
 
     private final transient SemuxGui gui;
     private final transient WalletModel model;
