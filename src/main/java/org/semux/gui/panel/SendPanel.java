@@ -62,7 +62,7 @@ public class SendPanel extends JPanel implements ActionListener {
 
     private final JComboBox<AccountItem> selectFrom;
     private final JComboBox<AccountItem> selectTo;
-    private final JTextField txtAmount;
+    private final JTextField txtValue;
     private final JTextField txtFee;
     private final JTextField txtData;
     private final JRadioButton rdbtnText;
@@ -91,14 +91,14 @@ public class SendPanel extends JPanel implements ActionListener {
         selectTo.setName("selectTo");
         selectTo.setEditable(true);
 
-        JLabel lblAmount = new JLabel(GuiMessages.get("Amount") + ":");
-        lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
+        JLabel lblValue = new JLabel(GuiMessages.get("Value") + ":");
+        lblValue.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        txtAmount = SwingUtil.textFieldWithCopyPastePopup();
-        txtAmount.setName("txtAmount");
-        txtAmount.setColumns(10);
-        txtAmount.setActionCommand(Action.SEND.name());
-        txtAmount.addActionListener(this);
+        txtValue = SwingUtil.textFieldWithCopyPastePopup();
+        txtValue.setName("txtValue");
+        txtValue.setColumns(10);
+        txtValue.setActionCommand(Action.SEND.name());
+        txtValue.addActionListener(this);
 
         JLabel lblFee = new JLabel(GuiMessages.get("Fee") + ":");
         lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -152,25 +152,25 @@ public class SendPanel extends JPanel implements ActionListener {
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(62)
+                    .addGap(30)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                         .addComponent(lblFrom)
                         .addComponent(lblTo)
-                        .addComponent(lblAmount)
+                        .addComponent(lblValue)
                         .addComponent(lblFee)
                         .addComponent(lblData))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addGroup(groupLayout.createSequentialGroup()
                             .addComponent(btnClear)
-                            .addGap(10)
+                            .addGap(18)
                             .addComponent(btnSend))
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(selectFrom, 0, 400, Short.MAX_VALUE)
+                                .addComponent(selectFrom)
                                 .addGroup(groupLayout.createSequentialGroup()
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(txtAmount, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
+                                        .addComponent(txtValue, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
                                         .addComponent(txtFee)
                                         .addComponent(txtData))
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
@@ -188,7 +188,7 @@ public class SendPanel extends JPanel implements ActionListener {
                                     .addComponent(selectTo, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
                                     .addGap(18)
                                     .addComponent(btnAddressBook)))
-                            .addGap(59))))
+                            .addGap(30))))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
@@ -200,22 +200,22 @@ public class SendPanel extends JPanel implements ActionListener {
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblTo)
-                        .addComponent(selectTo, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectTo, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnAddressBook))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblAmount)
-                        .addComponent(txtAmount, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblValue)
+                        .addComponent(txtValue, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem1))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFee)
-                        .addComponent(txtFee, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtFee, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblSem2))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblData)
-                        .addComponent(txtData, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtData, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                         .addComponent(rdbtnText)
                         .addComponent(rdbtnHex))
                     .addGap(18)
@@ -252,12 +252,12 @@ public class SendPanel extends JPanel implements ActionListener {
         selectTo.setSelectedItem(Hex.encode(address));
     }
 
-    public Amount getAmountText() throws ParseException {
-        return SwingUtil.parseAmount(txtAmount.getText().trim());
+    public Amount getValueText() throws ParseException {
+        return SwingUtil.parseAmount(txtValue.getText().trim());
     }
 
-    public void setAmountText(Amount a) {
-        txtAmount.setText(SwingUtil.formatAmountNoUnit(a));
+    public void setValueText(Amount a) {
+        txtValue.setText(SwingUtil.formatAmountNoUnit(a));
     }
 
     public Amount getFeeText() throws ParseException {
@@ -360,7 +360,7 @@ public class SendPanel extends JPanel implements ActionListener {
     protected void send() {
         try {
             WalletAccount acc = getSelectedAccount();
-            Amount value = getAmountText();
+            Amount value = getValueText();
             Amount fee = getFeeText();
             String data = getDataText();
 
@@ -402,7 +402,7 @@ public class SendPanel extends JPanel implements ActionListener {
      */
     protected void clear() {
         setToText(Bytes.EMPTY_BYTES);
-        setAmountText(Amount.ZERO);
+        setValueText(Amount.ZERO);
         setFeeText(config.spec().minTransactionFee());
         setDataText("");
     }

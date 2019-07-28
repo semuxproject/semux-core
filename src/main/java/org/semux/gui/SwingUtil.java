@@ -287,11 +287,27 @@ public class SwingUtil {
      */
     public static JTextArea textAreaWithCopyPopup(String txt) {
         JTextArea c = new JTextArea(txt);
-        c.setBackground(null);
         c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         c.setEditable(false);
+        c.setLineWrap(true);
 
         addTextContextMenu(c, Collections.singletonList(COPY));
+        return c;
+    }
+
+    /**
+     * Generates a readonly selectable text area.
+     *
+     * @param txt
+     * @return
+     */
+    public static JTextArea textAreaWithCopyPastePopup(String txt) {
+        JTextArea c = new JTextArea(txt);
+        c.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        c.setEditable(true);
+        c.setLineWrap(true);
+
+        addTextContextMenu(c, Arrays.asList(COPY, PASTE, CUT));
         return c;
     }
 

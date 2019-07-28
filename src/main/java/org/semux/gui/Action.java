@@ -25,6 +25,8 @@ public enum Action {
 
     SHOW_RECEIVE,
 
+    SHOW_CONTRACT,
+
     SHOW_TRANSACTIONS,
 
     SHOW_DELEGATES,

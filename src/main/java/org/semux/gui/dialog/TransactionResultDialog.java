@@ -62,25 +62,23 @@ public class TransactionResultDialog extends JDialog {
 
         JTextArea returnData = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(result.getReturnData()));
         returnData.setName("returnData");
-        returnData.setLineWrap(true);
         JScrollPane returnDataPane = new JScrollPane(returnData);
 
         // TODO: replace with JSON for logs and internal transactions
         JTextArea logs = SwingUtil.textAreaWithCopyPopup(
                 result.getLogs().stream().map(LogInfo::toString).collect(Collectors.joining("\n")));
         logs.setName("logs");
-        logs.setLineWrap(true);
         JScrollPane logsPane = new JScrollPane(logs);
 
         JTextArea internalTransactions = SwingUtil.textAreaWithCopyPopup(
                 result.getInternalTransactions().stream().map(SemuxInternalTransaction::toString)
                         .collect(Collectors.joining("\n")));
         internalTransactions.setName("internalTransactions");
-        internalTransactions.setLineWrap(true);
         JScrollPane internalTransactionsPane = new JScrollPane(internalTransactions);
 
         JTextArea contractAddress = SwingUtil.textAreaWithCopyPopup(notAvailable);
         contractAddress.setName("contractAddress");
+        contractAddress.setBackground(null);
         if (tx.getType() == TransactionType.CREATE && result.getCode().isSuccess()) {
             contractAddress.setText(Hex.encode0x(HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce())));
         }
@@ -90,7 +88,7 @@ public class TransactionResultDialog extends JDialog {
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(42)
+                    .addGap(30)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                         .addComponent(lblContractAddress)
                         .addComponent(lblInternalTransactions)
@@ -112,12 +110,12 @@ public class TransactionResultDialog extends JDialog {
                         .addComponent(logsPane, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
                         .addComponent(internalTransactionsPane, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
                         .addComponent(contractAddress))
-                    .addContainerGap(19, Short.MAX_VALUE))
+                    .addContainerGap(30, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(20)
+                    .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblBlockNumber)
                         .addComponent(blockNumber))
@@ -140,7 +138,7 @@ public class TransactionResultDialog extends JDialog {
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblReturnData)
-                        .addComponent(returnDataPane, GroupLayout.PREFERRED_SIZE, 90, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(returnDataPane, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblLogs)
@@ -153,7 +151,7 @@ public class TransactionResultDialog extends JDialog {
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblContractAddress)
                         .addComponent(contractAddress))
-                    .addContainerGap(20, Short.MAX_VALUE))
+                    .addContainerGap(30, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);
         // @formatter:on
