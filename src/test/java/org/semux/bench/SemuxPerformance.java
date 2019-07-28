@@ -83,7 +83,7 @@ public class SemuxPerformance {
             params.put("to", to);
             params.put("value", "0");
             params.put("data", Hex.encode0x(data));
-            params.put("gas", "40000");
+            params.put("gas", "60000");
             params.put("gasPrice", "1");
 
             SimpleApiClient api = new SimpleApiClient(host, port, username, password);
