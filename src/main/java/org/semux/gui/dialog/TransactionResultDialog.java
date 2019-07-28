@@ -81,7 +81,7 @@ public class TransactionResultDialog extends JDialog {
 
         JTextArea contractAddress = SwingUtil.textAreaWithCopyPopup(notAvailable);
         contractAddress.setName("contractAddress");
-        if (tx.getType() == TransactionType.CREATE) {
+        if (tx.getType() == TransactionType.CREATE && result.getCode().isSuccess()) {
             contractAddress.setText(Hex.encode0x(HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce())));
         }
 
@@ -140,7 +140,7 @@ public class TransactionResultDialog extends JDialog {
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblReturnData)
-                        .addComponent(returnDataPane, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(returnDataPane, GroupLayout.PREFERRED_SIZE, 90, GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblLogs)
