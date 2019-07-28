@@ -81,9 +81,9 @@ public class SwingUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SwingUtil.class);
 
-    private static int fractionDigits = 3;
+    public static int fractionDigits = 3;
 
-    private static Unit unit = SEM;
+    public static Unit defaultUnit = SEM;
 
     private SwingUtil() {
     }
@@ -377,7 +377,7 @@ public class SwingUtil {
      * @return
      */
     public static String formatAmount(Amount a) {
-        return formatAmount(a, unit, fractionDigits, true);
+        return formatAmount(a, defaultUnit, fractionDigits, true);
     }
 
     /**
@@ -387,7 +387,7 @@ public class SwingUtil {
      * @return
      */
     public static String formatAmountNoUnit(Amount a) {
-        return formatAmount(a, unit, fractionDigits, false);
+        return formatAmount(a, defaultUnit, fractionDigits, false);
     }
 
     /**
@@ -397,7 +397,7 @@ public class SwingUtil {
      * @return
      */
     public static String formatAmountFull(Amount a) {
-        return formatAmount(a, unit, 9, true);
+        return formatAmount(a, defaultUnit, 9, true);
     }
 
     /**
@@ -420,7 +420,7 @@ public class SwingUtil {
      * @param unit
      */
     public static void setDefaultUnit(String unit) {
-        SwingUtil.unit = Unit.of(unit);
+        SwingUtil.defaultUnit = Unit.of(unit);
     }
 
     /**
@@ -443,7 +443,7 @@ public class SwingUtil {
         Unit unit = stream(Unit.values())
                 .filter(u -> str.endsWith(" " + u.symbol))
                 .findAny()
-                .orElse(SwingUtil.unit);
+                .orElse(SwingUtil.defaultUnit);
         String strNoUnit = str.replace(" " + unit.symbol, "").trim();
 
         return Amount.of(parseNumber(strNoUnit), unit);

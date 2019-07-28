@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
@@ -37,6 +40,7 @@ import org.semux.config.Config;
 import org.semux.core.Amount;
 import org.semux.core.PendingManager;
 import org.semux.core.TransactionType;
+import org.semux.core.Unit;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
@@ -51,7 +55,7 @@ import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.exception.UnreachableException;
 
-public class SendPanel extends JPanel implements ActionListener {
+public class ContractPanel extends JPanel implements ActionListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -60,15 +64,19 @@ public class SendPanel extends JPanel implements ActionListener {
     private final transient Kernel kernel;
     private final transient Config config;
 
+    private final JLabel lblTo;
+    private final JButton btnAddressBook;
+
+    private final JRadioButton rdbtnCreate;
+    private final JRadioButton rdbtnCall;
     private final JComboBox<AccountItem> selectFrom;
     private final JComboBox<AccountItem> selectTo;
     private final JTextField txtValue;
-    private final JTextField txtFee;
-    private final JTextField txtData;
-    private final JRadioButton rdbtnText;
-    private final JRadioButton rdbtnHex;
+    private final JTextField txtGas;
+    private final JTextField txtGasPrice;
+    private final JTextArea txtData;
 
-    public SendPanel(SemuxGui gui, JFrame frame) {
+    public ContractPanel(SemuxGui gui, JFrame frame) {
         this.gui = gui;
         this.model = gui.getModel();
         this.model.addListener(this);
@@ -78,18 +86,32 @@ public class SendPanel extends JPanel implements ActionListener {
 
         setBorder(new LineBorder(Color.LIGHT_GRAY));
 
+        JLabel lblType = new JLabel(GuiMessages.get("Type") + ":");
+        lblType.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        rdbtnCreate = new JRadioButton(GuiMessages.get("DeployContract"));
+        rdbtnCall = new JRadioButton(GuiMessages.get("CallContract"));
+        ButtonGroup btnGroupDataType = new ButtonGroup();
+        btnGroupDataType.add(rdbtnCreate);
+        btnGroupDataType.add(rdbtnCall);
+
         JLabel lblFrom = new JLabel(GuiMessages.get("From") + ":");
         lblFrom.setHorizontalAlignment(SwingConstants.RIGHT);
 
         selectFrom = new JComboBox<>();
         selectFrom.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
 
-        JLabel lblTo = new JLabel(GuiMessages.get("To") + ":");
+        lblTo = new JLabel(GuiMessages.get("To") + ":");
         lblTo.setHorizontalAlignment(SwingConstants.RIGHT);
 
         selectTo = SwingUtil.comboBoxWithCopyPastePopup();
         selectTo.setName("selectTo");
         selectTo.setEditable(true);
+
+        btnAddressBook = new JButton(GuiMessages.get("AddressBook"));
+        btnAddressBook.setName("btnAddressBook");
+        btnAddressBook.addActionListener(this);
+        btnAddressBook.setActionCommand(Action.SHOW_ADDRESS_BOOK.name());
 
         JLabel lblValue = new JLabel(GuiMessages.get("Value") + ":");
         lblValue.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -100,26 +122,30 @@ public class SendPanel extends JPanel implements ActionListener {
         txtValue.setActionCommand(Action.SEND.name());
         txtValue.addActionListener(this);
 
-        JLabel lblFee = new JLabel(GuiMessages.get("Fee") + ":");
-        lblFee.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblFee.setToolTipText(GuiMessages.get("FeeTip", SwingUtil.formatAmount(config.spec().minTransactionFee())));
+        JLabel lblGas = new JLabel(GuiMessages.get("Gas") + ":");
+        lblGas.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        txtFee = SwingUtil.textFieldWithCopyPastePopup();
-        txtFee.setName("txtFee");
-        txtFee.setColumns(10);
-        txtFee.setActionCommand(Action.SEND.name());
-        txtFee.addActionListener(this);
+        txtGas = SwingUtil.textFieldWithCopyPastePopup();
+        txtGas.setName("txtGas");
+        txtGas.setColumns(10);
+        txtGas.setActionCommand(Action.SEND.name());
+        txtGas.addActionListener(this);
 
-        JLabel lblData = new JLabel(GuiMessages.get("Data") + ":");
+        JLabel lblGasPrice = new JLabel(GuiMessages.get("GasPrice") + ":");
+        lblGasPrice.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        txtGasPrice = SwingUtil.textFieldWithCopyPastePopup();
+        txtGasPrice.setName("txtGasPrice");
+        txtGasPrice.setColumns(10);
+        txtGasPrice.setActionCommand(Action.SEND.name());
+        txtGasPrice.addActionListener(this);
+
+        JLabel lblData = new JLabel(GuiMessages.get("DataHex") + ":");
         lblData.setHorizontalAlignment(SwingConstants.RIGHT);
-        lblData.setToolTipText(GuiMessages.get("DataTip"));
 
-        txtData = SwingUtil.textFieldWithCopyPastePopup();
+        txtData = SwingUtil.textAreaWithCopyPastePopup(Hex.PREF);
         txtData.setName("txtData");
-        txtData.setColumns(10);
-        txtData.setActionCommand(Action.SEND.name());
-        txtData.addActionListener(this);
-        txtData.setToolTipText(GuiMessages.get("DataTip"));
+        JScrollPane dataPane = new JScrollPane(txtData);
 
         JLabel lblUnit1 = new JLabel(SwingUtil.defaultUnit.symbol);
         JLabel lblUnit2 = new JLabel(SwingUtil.defaultUnit.symbol);
@@ -134,17 +160,10 @@ public class SendPanel extends JPanel implements ActionListener {
         btnClear.addActionListener(this);
         btnClear.setActionCommand(Action.CLEAR.name());
 
-        JButton btnAddressBook = new JButton(GuiMessages.get("AddressBook"));
-        btnAddressBook.setName("btnAddressBook");
-        btnAddressBook.addActionListener(this);
-        btnAddressBook.setActionCommand(Action.SHOW_ADDRESS_BOOK.name());
-
-        rdbtnText = new JRadioButton(GuiMessages.get("Text"));
-        rdbtnText.setSelected(true);
-        rdbtnHex = new JRadioButton(GuiMessages.get("Hex"));
-        ButtonGroup btnGroupDataType = new ButtonGroup();
-        btnGroupDataType.add(rdbtnText);
-        btnGroupDataType.add(rdbtnHex);
+        rdbtnCreate.addActionListener(e -> toggleToAddress(false));
+        rdbtnCall.addActionListener(e -> toggleToAddress(true));
+        rdbtnCall.setSelected(true);
+        toggleToAddress(true);
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(this);
@@ -153,45 +172,53 @@ public class SendPanel extends JPanel implements ActionListener {
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(30)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                        .addComponent(lblType)
                         .addComponent(lblFrom)
                         .addComponent(lblTo)
                         .addComponent(lblValue)
-                        .addComponent(lblFee)
+                        .addComponent(lblGas)
+                        .addComponent(lblGasPrice)
                         .addComponent(lblData))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
                         .addGroup(groupLayout.createSequentialGroup()
                             .addComponent(btnClear)
-                            .addGap(18)
+                            .addGap(10)
                             .addComponent(btnSend))
                         .addGroup(groupLayout.createSequentialGroup()
                             .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                .addComponent(selectFrom)
                                 .addGroup(groupLayout.createSequentialGroup()
-                                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(txtValue, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
-                                        .addComponent(txtFee)
-                                        .addComponent(txtData))
-                                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                                        .addGroup(groupLayout.createSequentialGroup()
-                                            .addGap(12)
-                                            .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                                                .addComponent(lblUnit1)
-                                                .addComponent(lblUnit2)))
-                                        .addGroup(groupLayout.createSequentialGroup()
-                                            .addPreferredGap(ComponentPlacement.RELATED)
-                                            .addComponent(rdbtnText)
-                                            .addPreferredGap(ComponentPlacement.RELATED)
-                                            .addComponent(rdbtnHex))))
+                                    .addPreferredGap(ComponentPlacement.RELATED)
+                                    .addComponent(rdbtnCall)
+                                    .addPreferredGap(ComponentPlacement.RELATED)
+                                    .addComponent(rdbtnCreate))
+                                .addComponent(selectFrom)
                                 .addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
                                     .addComponent(selectTo, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
                                     .addGap(18)
-                                    .addComponent(btnAddressBook)))
-                            .addGap(30))))
+                                    .addComponent(btnAddressBook))
+                                .addGroup(groupLayout.createSequentialGroup()
+                                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+                                        .addComponent(txtValue, GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                                        .addComponent(txtGas)
+                                        .addComponent(txtGasPrice))
+                                    .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                        .addGroup(groupLayout.createSequentialGroup()
+                                            .addGap(10)
+                                            .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                                                .addComponent(lblUnit1)
+                                                .addComponent(lblUnit2)))))
+                                .addComponent(dataPane, 0, 400, Short.MAX_VALUE))))
+                    .addContainerGap(30, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
+                    .addGap(18)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                            .addComponent(lblType)
+                            .addComponent(rdbtnCreate)
+                            .addComponent(rdbtnCall))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblFrom)
@@ -208,15 +235,17 @@ public class SendPanel extends JPanel implements ActionListener {
                         .addComponent(lblUnit1))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(lblFee)
-                        .addComponent(txtFee, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblUnit2))
+                            .addComponent(lblGas)
+                            .addComponent(txtGas, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                    .addGap(18)
+                    .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                            .addComponent(lblGasPrice)
+                            .addComponent(txtGasPrice, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblUnit2))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblData)
-                        .addComponent(txtData, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(rdbtnText)
-                        .addComponent(rdbtnHex))
+                        .addComponent(dataPane, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(btnSend)
@@ -259,20 +288,35 @@ public class SendPanel extends JPanel implements ActionListener {
         txtValue.setText(SwingUtil.formatAmountNoUnit(a));
     }
 
-    public Amount getFee() throws ParseException {
-        return SwingUtil.parseAmount(txtFee.getText().trim());
+    public long getGas() throws ParseException {
+        BigDecimal gas = SwingUtil.parseNumber(txtGas.getText().trim());
+        return gas.longValue();
     }
 
-    public void setFee(Amount f) {
-        txtFee.setText(SwingUtil.formatAmountNoUnit(f));
+    public void setGas(long gas) {
+        txtGas.setText(SwingUtil.formatNumber(gas));
     }
 
-    public String getData() {
+    public Amount getGasPrice() throws ParseException {
+        return SwingUtil.parseAmount(txtGasPrice.getText().trim());
+    }
+
+    public void setGasPrice(Amount a) {
+        txtGasPrice.setText(SwingUtil.formatAmountNoUnit(a));
+    }
+
+    public String getDataText() {
         return txtData.getText().trim();
     }
 
-    public void setData(String dataText) {
+    public void setDataText(String dataText) {
         txtData.setText(dataText.trim());
+    }
+
+    private void toggleToAddress(boolean visible) {
+        lblTo.setVisible(visible);
+        selectTo.setVisible(visible);
+        btnAddressBook.setVisible(visible);
     }
 
     @Override
@@ -360,34 +404,37 @@ public class SendPanel extends JPanel implements ActionListener {
         try {
             WalletAccount acc = getSelectedAccount();
             Amount value = getValue();
-            Amount fee = getFee();
-            String data = getData();
+            long gas = getGas();
+            Amount gasPrice = getGasPrice();
+            String data = getDataText();
 
-            // decode0x recipient address
             byte[] to = Hex.decode0x(getTo());
-            byte[] rawData = rdbtnText.isSelected() ? Bytes.of(data) : Hex.decode0x(data);
+            byte[] rawData = Hex.decode0x(data);
+            boolean isCall = rdbtnCall.isSelected();
+            TransactionType type = isCall ? TransactionType.CALL : TransactionType.CREATE;
+            to = isCall ? to : Bytes.EMPTY_ADDRESS;
 
             if (acc == null) {
                 showErrorDialog(GuiMessages.get("SelectAccount"));
-            } else if (value.isNotPositive()) {
+            } else if (value.isNegative()) {
                 showErrorDialog(GuiMessages.get("EnterValidValue"));
-            } else if (fee.lessThan(config.spec().minTransactionFee())) {
-                showErrorDialog(GuiMessages.get("TransactionFeeTooLow"));
-            } else if (value.add(fee).greaterThan(acc.getAvailable())) {
-                showErrorDialog(GuiMessages.get("InsufficientFunds", SwingUtil.formatAmount(value.add(fee))));
+            } else if (gas < 21_000) {
+                showErrorDialog(GuiMessages.get("EnterValidGas"));
+            } else if (gasPrice.lessThan(Amount.ONE)) {
+                showErrorDialog(GuiMessages.get("EnterValidGasPrice"));
             } else if (to.length != Key.ADDRESS_LEN) {
                 showErrorDialog(GuiMessages.get("InvalidReceivingAddress"));
-            } else if (rawData.length > config.spec().maxTransactionDataSize(TransactionType.TRANSFER)) {
+            } else if (rawData.length > config.spec().maxTransactionDataSize(type)) {
                 showErrorDialog(
                         GuiMessages.get("InvalidData", config.spec().maxTransactionDataSize(TransactionType.TRANSFER)));
             } else {
                 int ret = JOptionPane.showConfirmDialog(this,
-                        GuiMessages.get("TransferInfo", SwingUtil.formatAmountFull(value), Hex.encode0x(to)),
-                        GuiMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
+                        isCall ? GuiMessages.get("CallInfo", Hex.encode0x(to)) : GuiMessages.get("CreateInfo"),
+                        isCall ? GuiMessages.get("ConfirmCall") : GuiMessages.get("ConfirmCreate"),
+                        JOptionPane.YES_NO_OPTION);
                 if (ret == JOptionPane.YES_OPTION) {
-                    TransactionType type = TransactionType.TRANSFER;
-                    PendingManager.ProcessingResult result = TransactionSender.send(kernel, acc, type, to, value, fee,
-                            rawData);
+                    PendingManager.ProcessingResult result = TransactionSender.send(kernel, acc, type, to, value,
+                            Amount.ZERO, rawData, gas, gasPrice);
                     handleTransactionResult(result);
                 }
             }
@@ -402,8 +449,9 @@ public class SendPanel extends JPanel implements ActionListener {
     protected void clear() {
         setTo(Bytes.EMPTY_BYTES);
         setValue(Amount.ZERO);
-        setFee(config.spec().minTransactionFee());
-        setData("");
+        setGas(21_000L);
+        setGasPrice(config.poolMinGasPrice());
+        setDataText("");
     }
 
     /**
