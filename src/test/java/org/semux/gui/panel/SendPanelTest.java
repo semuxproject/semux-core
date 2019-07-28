@@ -121,7 +121,7 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
 
         // fill form
         window.comboBox("selectTo").requireVisible().requireEditable().enterText(Hex.encode0x(recipient.toAddress()));
-        window.textBox("txtAmount").requireVisible().requireEditable()
+        window.textBox("txtValue").requireVisible().requireEditable()
                 .setText(toSendSEM == null ? "" : String.valueOf(toSendSEM))
                 .requireText(toSendSEM == null ? "" : String.valueOf(toSendSEM));
         window.button("btnSend").requireVisible().click();

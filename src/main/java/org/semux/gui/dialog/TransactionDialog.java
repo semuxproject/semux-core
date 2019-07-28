@@ -19,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.crypto.Hex;
@@ -33,15 +34,15 @@ public class TransactionDialog extends JDialog implements ActionListener {
 
     private JFrame parent;
     private Transaction tx;
-    private TransactionResult result;
+    private Kernel kernel;
 
-    public TransactionDialog(JFrame parent, Transaction tx, TransactionResult result) {
+    public TransactionDialog(JFrame parent, Transaction tx, Kernel kernel) {
         super(null, GuiMessages.get("Transaction"), ModalityType.MODELESS);
         setName("TransactionDialog");
 
         this.parent = parent;
         this.tx = tx;
-        this.result = result;
+        this.kernel = kernel;
 
         JLabel lblHash = new JLabel(GuiMessages.get("Hash") + ":");
         JLabel lblType = new JLabel(GuiMessages.get("Type") + ":");
@@ -191,6 +192,7 @@ public class TransactionDialog extends JDialog implements ActionListener {
 
         switch (action) {
         case SHOW_TRANSACTION_RESULT:
+            TransactionResult result = kernel.getBlockchain().getTransactionResult(tx.getHash());
             if (result != null) {
                 TransactionResultDialog dialog = new TransactionResultDialog(parent, tx, result);
                 dialog.setVisible(true);

@@ -147,7 +147,7 @@ public class MainFrame extends JFrame implements ActionListener {
         toolBar.add(btnReceive);
         toolBar.add(Box.createRigidArea(gap));
 
-        btnContract = createButton(GuiMessages.get("Contract"), "receive", Action.SHOW_CONTRACT);
+        btnContract = createButton(GuiMessages.get("Contract"), "contract", Action.SHOW_CONTRACT);
         btnContract.setMnemonic(KeyEvent.VK_C);
         toolBar.add(btnContract);
         toolBar.add(Box.createRigidArea(gap));

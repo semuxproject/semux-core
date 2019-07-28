@@ -26,7 +26,7 @@ public class TransactionDialogTestApplication extends BaseTestApplication {
         super();
         gui = new SemuxGui(walletModel, kernelMock);
         TransactionResult result = new TransactionResult(TransactionResult.Code.SUCCESS);
-        transactionDialog = new TransactionDialog(this, tx, result);
+        transactionDialog = new TransactionDialog(this, tx, gui.getKernel());
         transactionDialog.setVisible(true);
     }
 }
