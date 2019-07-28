@@ -34,7 +34,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.semux.core.Transaction;
-import org.semux.core.TransactionResult;
 import org.semux.gui.Action;
 import org.semux.gui.SemuxGui;
 import org.semux.gui.SwingUtil;
@@ -89,8 +88,7 @@ public class TransactionsPanel extends JPanel implements ActionListener {
                 if (me.getClickCount() == 2 && row != -1) {
                     Transaction tx = tableModel.getRow(sourceTable.convertRowIndexToModel(row));
                     if (tx != null) {
-                        TransactionResult result = gui.getKernel().getBlockchain().getTransactionResult(tx.getHash());
-                        TransactionDialog dialog = new TransactionDialog(frame, tx, result);
+                        TransactionDialog dialog = new TransactionDialog(frame, tx, gui.getKernel());
                         dialog.setVisible(true);
                     }
                 }

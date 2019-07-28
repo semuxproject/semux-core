@@ -19,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
+import org.semux.Kernel;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.crypto.Hex;
@@ -33,15 +34,15 @@ public class TransactionDialog extends JDialog implements ActionListener {
 
     private JFrame parent;
     private Transaction tx;
-    private TransactionResult result;
+    private Kernel kernel;
 
-    public TransactionDialog(JFrame parent, Transaction tx, TransactionResult result) {
+    public TransactionDialog(JFrame parent, Transaction tx, Kernel kernel) {
         super(null, GuiMessages.get("Transaction"), ModalityType.MODELESS);
         setName("TransactionDialog");
 
         this.parent = parent;
         this.tx = tx;
-        this.result = result;
+        this.kernel = kernel;
 
         JLabel lblHash = new JLabel(GuiMessages.get("Hash") + ":");
         JLabel lblType = new JLabel(GuiMessages.get("Type") + ":");
@@ -58,12 +59,15 @@ public class TransactionDialog extends JDialog implements ActionListener {
 
         JTextArea hash = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getHash()));
         hash.setName("hashText");
+        hash.setBackground(null);
         JLabel type = new JLabel(tx.getType().name());
         type.setName("typeText");
         JTextArea from = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getFrom()));
         from.setName("fromText");
+        from.setBackground(null);
         JTextArea to = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getTo()));
         to.setName("toText");
+        to.setBackground(null);
         JLabel value = new JLabel(SwingUtil.formatAmount((tx.getValue())));
         value.setName("valueText");
         JLabel fee = new JLabel(SwingUtil.formatAmount((tx.getFee())));
@@ -74,22 +78,21 @@ public class TransactionDialog extends JDialog implements ActionListener {
         timestamp.setName("timestampText");
         JTextArea data = SwingUtil.textAreaWithCopyPopup(Hex.encode0x(tx.getData()));
         data.setName("dataText");
-        data.setLineWrap(true);
         JScrollPane dataScroll = new JScrollPane(data);
         JLabel gas = new JLabel(SwingUtil.formatNumber(tx.getGas()));
         gas.setName("gasText");
         JLabel gasPrice = new JLabel(SwingUtil.formatAmount(tx.getGasPrice()));
         gasPrice.setName("gasPriceText");
-        JButton display = SwingUtil
-                .createDefaultButton(GuiMessages.get("Display"), this, Action.SHOW_TRANSACTION_RESULT);
-        display.setName("display");
+        JButton showResult = SwingUtil
+                .createDefaultButton(GuiMessages.get("ShowResult"), this, Action.SHOW_TRANSACTION_RESULT);
+        showResult.setName("display");
 
         // @formatter:off
         GroupLayout groupLayout = new GroupLayout(getContentPane());
         groupLayout.setHorizontalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(42)
+                    .addGap(30)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
                         .addComponent(lblTransactionResult)
                         .addComponent(lblGasPrice)
@@ -116,13 +119,13 @@ public class TransactionDialog extends JDialog implements ActionListener {
                         .addComponent(dataScroll, GroupLayout.PREFERRED_SIZE, 450, GroupLayout.PREFERRED_SIZE)
                         .addComponent(gas)
                         .addComponent(gasPrice)
-                        .addComponent(display))
-                    .addContainerGap(19, Short.MAX_VALUE))
+                        .addComponent(showResult))
+                    .addContainerGap(30, Short.MAX_VALUE))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
-                    .addGap(20)
+                    .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblHash)
                         .addComponent(hash))
@@ -169,8 +172,8 @@ public class TransactionDialog extends JDialog implements ActionListener {
                     .addPreferredGap(ComponentPlacement.UNRELATED)
                     .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
                         .addComponent(lblTransactionResult)
-                        .addComponent(display))
-                    .addContainerGap(20, Short.MAX_VALUE))
+                        .addComponent(showResult))
+                    .addContainerGap(30, Short.MAX_VALUE))
         );
         getContentPane().setLayout(groupLayout);
         // @formatter:on
@@ -189,6 +192,7 @@ public class TransactionDialog extends JDialog implements ActionListener {
 
         switch (action) {
         case SHOW_TRANSACTION_RESULT:
+            TransactionResult result = kernel.getBlockchain().getTransactionResult(tx.getHash());
             if (result != null) {
                 TransactionResultDialog dialog = new TransactionResultDialog(parent, tx, result);
                 dialog.setVisible(true);

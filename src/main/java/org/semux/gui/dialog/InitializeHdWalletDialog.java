@@ -17,7 +17,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.LayoutStyle;
 
 import org.semux.core.Wallet;
 import org.semux.crypto.bip39.MnemonicGenerator;
