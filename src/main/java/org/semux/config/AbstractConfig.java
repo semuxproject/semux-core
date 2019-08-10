@@ -51,7 +51,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // =========================
     // Chain spec
     // =========================
-    protected long maxBlockGasLimit = 20_000_000L; // 20m gas
+    protected long maxBlockGasLimit = 30_000_000L; // 30m gas
     protected Amount minTransactionFee = Amount.of(5, MILLI_SEM);
     protected Amount minDelegateBurnAmount = Amount.of(1000, SEM);
     protected long nonVMTransactionGasCost = 5_000L;
