@@ -6,11 +6,6 @@
  */
 package org.semux.vm.client;
 
-import static org.semux.vm.client.Conversion.weiToAmount;
-
-import java.math.BigInteger;
-import java.util.Arrays;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.chainspec.ConstantinoplePrecompiledContracts;
@@ -20,15 +15,25 @@ import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.util.Pair;
 import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
+import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
+
+import java.math.BigInteger;
+import java.util.Arrays;
+
+import static org.semux.vm.client.Conversion.weiToAmount;
 
 public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContracts {
 
     private static final Vote vote = new Vote();
     private static final Unvote unvote = new Unvote();
+    private static final GetVotes getVotes = new GetVotes();
+    private static final GetVote getVote = new GetVote();
 
     private static final DataWord voteAddr = DataWord.of(100);
     private static final DataWord unvoteAddr = DataWord.of(101);
+    private static final DataWord getVotesAddr = DataWord.of(102);
+    private static final DataWord getVoteAddr = DataWord.of(103);
 
     private static final Pair<Boolean, byte[]> success = new Pair<>(true, ArrayUtils.EMPTY_BYTE_ARRAY);
     private static final Pair<Boolean, byte[]> failure = new Pair<>(false, ArrayUtils.EMPTY_BYTE_ARRAY);
@@ -40,6 +45,10 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
             return vote;
         } else if (address.equals(unvoteAddr)) {
             return unvote;
+        } else if (address.equals(getVotesAddr)) {
+            return getVotes;
+        } else if (address.equals(getVoteAddr)) {
+            return getVote;
         }
         return super.getContractForAddress(address);
     }
@@ -104,6 +113,62 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                     as.adjustLocked(from, value.negate());
                     return success;
                 }
+            }
+
+            return failure;
+        }
+    }
+
+    public static class GetVotes implements PrecompiledContract {
+
+        @Override
+        public long getGasForData(byte[] bytes) {
+            return 500L;
+        }
+
+        @Override
+        public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
+            if (context.getData().length != 32) {
+                return failure;
+            }
+            Repository track = context.getTrack();
+            if (track instanceof SemuxRepository) {
+                SemuxRepository semuxTrack = (SemuxRepository) track;
+                DelegateState ds = semuxTrack.getDelegateState();
+
+                Delegate delegate = ds.getDelegateByAddress(context.getData());
+                if (delegate == null) {
+                    return failure;
+                }
+                return Pair.of(true, DataWord.of(delegate.getVotes().toLong()).getData());
+            }
+
+            return failure;
+        }
+    }
+
+    public static class GetVote implements PrecompiledContract {
+
+        @Override
+        public long getGasForData(byte[] bytes) {
+            return 500L;
+        }
+
+        @Override
+        public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
+            if (context.getData().length != 32 + 32) {
+                return failure;
+            }
+            Repository track = context.getTrack();
+            if (track instanceof SemuxRepository) {
+                SemuxRepository semuxTrack = (SemuxRepository) track;
+                DelegateState ds = semuxTrack.getDelegateState();
+                byte[] voter = Arrays.copyOfRange(context.getData(), 0, 32);
+                byte[] delegate = Arrays.copyOfRange(context.getData(), 32, 64);
+
+                Amount votes = ds.getVote(voter, delegate);
+
+                return Pair.of(true, DataWord.of(votes.toLong()).getData());
             }
 
             return failure;
