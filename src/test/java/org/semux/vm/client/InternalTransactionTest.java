@@ -60,7 +60,7 @@ public class InternalTransactionTest {
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
 
-        doReturn(true).when(chain).isForkActivated(any(), anyLong());
+        doReturn(true).when(chain).isForkActivated(any());
     }
 
     // pragma solidity ^0.5.0;

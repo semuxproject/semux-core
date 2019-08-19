@@ -8,8 +8,10 @@ package org.semux.config;
 
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.chainspec.Spec;
 import org.semux.core.Amount;
+import org.semux.core.Fork;
 import org.semux.core.TransactionType;
 
 /**
@@ -94,4 +96,13 @@ public interface ChainSpec {
      * @return
      */
     Spec vmSpec();
+
+    /**
+     * Returns the fork signaling period, also the fork activation check period.
+     *
+     * @param fork
+     *            the fork
+     * @return the start and end block numbers, inclusive
+     */
+    Pair<Long, Long> getForkSignalingPeriod(Fork fork);
 }

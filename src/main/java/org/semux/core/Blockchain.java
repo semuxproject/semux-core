@@ -199,16 +199,15 @@ public interface Blockchain {
     void addListener(BlockchainListener listener);
 
     /**
-     * Returns whether a fork is activated at the given height.
+     * Returns whether a fork has been activated.
      *
      * @param fork
-     * @param height
      */
-    boolean isForkActivated(Fork fork, long height);
+    boolean isForkActivated(Fork fork, long number);
 
     /**
      * Returns whether a fork has been activated.
-     * 
+     *
      * @param fork
      */
     boolean isForkActivated(Fork fork);

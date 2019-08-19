@@ -398,7 +398,7 @@ public class BlockchainImpl implements Blockchain {
             // [5] update validator statistics
             List<String> validators = getValidators();
             String primary = config.spec().getPrimaryValidator(validators, number, 0,
-                    forks.isActivated(UNIFORM_DISTRIBUTION));
+                    this.isForkActivated(UNIFORM_DISTRIBUTION));
             adjustValidatorStats(block.getCoinbase(), StatsType.FORGED, 1);
             if (primary.equals(Hex.encode(block.getCoinbase()))) {
                 adjustValidatorStats(Hex.decode0x(primary), StatsType.HIT, 1);
@@ -420,7 +420,7 @@ public class BlockchainImpl implements Blockchain {
             listener.onBlockAdded(block);
         }
 
-        activateForks(number + 1);
+        activateForks();
     }
 
     @Override
@@ -636,28 +636,39 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
-    public boolean isForkActivated(Fork fork) {
-        return forks.isActivated(fork);
+    public boolean isForkActivated(Fork fork, long number) {
+        return forks.isActivated(fork, number);
     }
 
     @Override
-    public boolean isForkActivated(Fork fork, long height) {
-        return forks.isActivated(fork, height);
+    public boolean isForkActivated(Fork fork) {
+        // the latest block has been imported, we should check the
+        // fork status at latest_block + 1.
+        return forks.isActivated(fork, getLatestBlockNumber() + 1);
     }
 
     @Override
     public byte[] constructBlockHeaderDataField() {
         Set<Fork> set = new HashSet<>();
-        if (config.forkUniformDistributionEnabled()
-                && !forks.isActivated(UNIFORM_DISTRIBUTION)
-                && latestBlock.getNumber() + 1 <= UNIFORM_DISTRIBUTION.activationDeadline) {
-            set.add(UNIFORM_DISTRIBUTION);
+
+        if (config.forkUniformDistributionEnabled()) {
+            Fork fork = UNIFORM_DISTRIBUTION;
+            Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
+            long number = getLatestBlockNumber() + 1;
+
+            if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
+                set.add(fork);
+            }
         }
 
-        if (config.forkVirtualMachineEnabled()
-                && !forks.isActivated(VIRTUAL_MACHINE)
-                && latestBlock.getNumber() + 1 <= VIRTUAL_MACHINE.activationDeadline) {
-            set.add(VIRTUAL_MACHINE);
+        if (config.forkVirtualMachineEnabled()) {
+            Fork fork = VIRTUAL_MACHINE;
+            Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
+            long number = getLatestBlockNumber() + 1;
+
+            if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
+                set.add(fork);
+            }
         }
 
         return set.isEmpty() ? new byte[0]
@@ -826,13 +837,13 @@ public class BlockchainImpl implements Blockchain {
     /**
      * Attempt to activate pending forks at current height.
      */
-    protected void activateForks(long height) {
+    protected void activateForks() {
         if (config.forkUniformDistributionEnabled()
-                && forks.activateFork(UNIFORM_DISTRIBUTION, height)) {
+                && forks.activateFork(UNIFORM_DISTRIBUTION)) {
             setActivatedForks(forks.getActivatedForks());
         }
         if (config.forkVirtualMachineEnabled()
-                && forks.activateFork(VIRTUAL_MACHINE, height)) {
+                && forks.activateFork(VIRTUAL_MACHINE)) {
             setActivatedForks(forks.getActivatedForks());
         }
     }
@@ -851,7 +862,6 @@ public class BlockchainImpl implements Blockchain {
             for (int i = 0; i < numberOfForks; i++) {
                 Fork.Activation activation = Fork.Activation.fromBytes(simpleDecoder.readBytes());
                 activations.put(activation.fork, activation);
-                logger.info("fork {} activated at block # {}", activation.fork.name, activation.activatedAt);
             }
         }
         return activations;

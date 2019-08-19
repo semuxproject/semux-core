@@ -66,7 +66,7 @@ public class SemuxBftTest {
         bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         bft.validators = validators;
         bft.chain = mock(Blockchain.class);
-        when(bft.chain.isForkActivated(eq(UNIFORM_DISTRIBUTION), anyLong())).thenReturn(false);
+        when(bft.chain.isForkActivated(eq(UNIFORM_DISTRIBUTION))).thenReturn(false);
         when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
 
         testIsPrimaryConsecutiveValidatorProbability(bft);
@@ -81,7 +81,7 @@ public class SemuxBftTest {
         bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
         bft.validators = validators;
         bft.chain = mock(Blockchain.class);
-        when(bft.chain.isForkActivated(eq(UNIFORM_DISTRIBUTION), anyLong())).thenReturn(true);
+        when(bft.chain.isForkActivated(eq(UNIFORM_DISTRIBUTION))).thenReturn(true);
         when(bft.isPrimary(anyLong(), anyInt(), anyString())).thenCallRealMethod();
 
         testIsPrimaryConsecutiveValidatorProbability(bft);

@@ -162,7 +162,7 @@ public class BlockHeaderData {
                 throw new UnreachableException("There must not be more than 8 pending forks.");
             }
 
-            pendingForks = Arrays.stream(forks).map(f -> f.number).collect(Collectors.toSet());
+            pendingForks = Arrays.stream(forks).map(f -> f.id).collect(Collectors.toSet());
         }
 
         public ForkSignalSet(byte[] bytes) {
@@ -179,7 +179,7 @@ public class BlockHeaderData {
         }
 
         boolean signalingFork(Fork fork) {
-            return pendingForks.contains(fork.number);
+            return pendingForks.contains(fork.id);
         }
 
         byte[] toBytes() {

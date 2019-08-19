@@ -60,7 +60,7 @@ public class PrecompiledContractTest {
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
 
-        doReturn(true).when(chain).isForkActivated(any(), anyLong());
+        doReturn(true).when(chain).isForkActivated(any());
     }
 
     // pragma solidity ^0.4.14;

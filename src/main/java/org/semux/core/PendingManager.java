@@ -321,6 +321,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         if (tx.isVMTransaction() && !kernel.getBlockchain().isForkActivated(Fork.VIRTUAL_MACHINE)) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
         }
+
         // reject VM transaction with low gas price
         if (tx.isVMTransaction() && tx.getGasPrice().lessThan(kernel.getConfig().poolMinGasPrice())) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_FEE);

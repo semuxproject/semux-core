@@ -70,7 +70,7 @@ public class VmTransactionTest {
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
 
-        doReturn(true).when(chain).isForkActivated(any(), anyLong());
+        doReturn(true).when(chain).isForkActivated(any());
 
         block = new SemuxBlock(
                 new BlockHeader(1, Bytes.random(20), Bytes.random(32), System.currentTimeMillis(),

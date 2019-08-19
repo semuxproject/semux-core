@@ -37,14 +37,11 @@ public class UniformDistForkSyncingTest extends SyncingTest {
         Fork fork = mock(Fork.class);
         TestUtils.setInternalState(fork, "number", (short) 1, Fork.class);
         TestUtils.setInternalState(fork, "name", "UNIFORM_DISTRIBUTION", Fork.class);
-        TestUtils.setInternalState(fork, "activationBlocks", 0, Fork.class);
-        TestUtils.setInternalState(fork, "activationBlocksLookup", 0, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "number", fork.number, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "name", fork.name, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "activationBlocks", fork.activationBlocks, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "activationBlocksLookup", fork.activationBlocksLookup,
-                Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "activationDeadline", fork.activationDeadline,
+        TestUtils.setInternalState(fork, "blocksRequired", 0, Fork.class);
+        TestUtils.setInternalState(fork, "blocksToCheck", 0, Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "number", fork.id, Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksRequired", fork.blocksRequired, Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksToCheck", fork.blocksToCheck,
                 Fork.class);
 
         // disable the fork on kernel3 (validator)
