@@ -48,7 +48,7 @@ public class MainnetConfig extends AbstractConfig {
         super(dataDir, Network.MAINNET, Constants.MAINNET_VERSION);
 
         this.forkUniformDistributionEnabled = true;
-        this.forkVirtualMachineEnabled = false;
+        this.forkVirtualMachineEnabled = true;
     }
 
     @Override
