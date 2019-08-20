@@ -23,11 +23,6 @@ public interface DatabaseFactory {
     Database getDB(DatabaseName name);
 
     /**
-     * Open resources.
-     */
-    void open() throws IOException;
-
-    /**
      * Close all opened resources.
      */
     void close();

@@ -220,38 +220,25 @@ public class LeveldbDatabase implements Database {
         private final EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
 
         private final File dataDir;
-        private final AtomicBoolean open;
 
         public LeveldbFactory(File dataDir) {
             this.dataDir = dataDir;
-            this.open = new AtomicBoolean(false);
-
-            open();
-        }
-
-        @Override
-        public void open() {
-            if (open.compareAndSet(false, true)) {
-                for (DatabaseName name : DatabaseName.values()) {
-                    File file = new File(dataDir.getAbsolutePath(), name.toString().toLowerCase(Locale.ROOT));
-                    databases.put(name, new LeveldbDatabase(file));
-                }
-            }
         }
 
         @Override
         public Database getDB(DatabaseName name) {
-            open();
-            return databases.get(name);
+            return databases.computeIfAbsent(name, k -> {
+                File file = new File(dataDir.getAbsolutePath(), k.toString().toLowerCase(Locale.ROOT));
+                return new LeveldbDatabase(file);
+            });
         }
 
         @Override
         public void close() {
-            if (open.compareAndSet(true, false)) {
-                for (Database db : databases.values()) {
-                    db.close();
-                }
+            for (Database db : databases.values()) {
+                db.close();
             }
+            databases.clear();
         }
 
         @Override

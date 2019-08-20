@@ -10,7 +10,11 @@ import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Fork.VIRTUAL_MACHINE;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,14 +47,11 @@ import org.semux.db.Database;
 import org.semux.db.DatabaseFactory;
 import org.semux.db.DatabaseName;
 import org.semux.db.LeveldbDatabase;
-import org.semux.db.Migration;
-import org.semux.event.PubSub;
 import org.semux.event.PubSubFactory;
 import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
-import org.semux.util.TimeUtil;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class BlockchainImpl implements Blockchain {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImpl.class);
 
-    protected static final int DATABASE_VERSION = 1;
+    protected static final int DATABASE_VERSION = 2;
 
     protected static final byte TYPE_LATEST_BLOCK_NUMBER = 0x00;
     protected static final byte TYPE_VALIDATORS = 0x01;
@@ -133,16 +134,19 @@ public class BlockchainImpl implements Blockchain {
     public BlockchainImpl(Config config, Genesis genesis, DatabaseFactory dbFactory) {
         this.config = config;
         this.genesis = genesis;
-        openDb(dbFactory);
+        openDb(config, dbFactory);
     }
 
-    private synchronized void openDb(DatabaseFactory factory) {
-        this.indexDB = factory.getDB(DatabaseName.INDEX);
-        this.blockDB = factory.getDB(DatabaseName.BLOCK);
+    private synchronized void openDb(Config config, DatabaseFactory dbFactory) {
+        // upgrade if possible
+        upgradeDatabase(config, dbFactory);
 
-        this.accountState = new AccountStateImpl(factory.getDB(DatabaseName.ACCOUNT));
-        this.delegateState = new DelegateStateImpl(this, factory.getDB(DatabaseName.DELEGATE),
-                factory.getDB(DatabaseName.VOTE));
+        this.indexDB = dbFactory.getDB(DatabaseName.INDEX);
+        this.blockDB = dbFactory.getDB(DatabaseName.BLOCK);
+
+        this.accountState = new AccountStateImpl(dbFactory.getDB(DatabaseName.ACCOUNT));
+        this.delegateState = new DelegateStateImpl(this, dbFactory.getDB(DatabaseName.DELEGATE),
+                dbFactory.getDB(DatabaseName.VOTE));
 
         // checks if the database needs to be initialized
         byte[] number = indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
@@ -150,18 +154,12 @@ public class BlockchainImpl implements Blockchain {
         // load the activate forks from database
         forks = new ActivatedForks(this, config, getActivatedForks());
 
-        // initialize the database for the first time
         if (number == null || number.length == 0) {
+            // initialize the database for the first time
             initializeDb();
-            return;
-        }
-
-        // load the latest block
-        latestBlock = getBlock(Bytes.toLong(number));
-
-        // checks if the database needs to be upgraded
-        if (getDatabaseVersion() == 0) {
-            upgradeDb0(factory);
+        } else {
+            // load the latest block
+            latestBlock = getBlock(Bytes.toLong(number));
         }
     }
 
@@ -218,12 +216,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public Block getBlock(long number) {
-        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER_BY_NUMBER, Bytes.of(number)));
-        byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS_BY_NUMBER, Bytes.of(number)));
-        byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(number)));
-        byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES_BY_NUMBER, Bytes.of(number)));
-
-        return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
+        return getBlock(blockDB, number);
     }
 
     @Override
@@ -572,12 +565,7 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     protected int getDatabaseVersion() {
-        byte[] versionBytes = indexDB.get(Bytes.of(TYPE_DATABASE_VERSION));
-        if (versionBytes == null || versionBytes.length == 0) {
-            return 0;
-        } else {
-            return Bytes.toInt(versionBytes);
-        }
+        return Bytes.toInt(getDatabaseVersion(indexDB));
     }
 
     /**
@@ -881,94 +869,92 @@ public class BlockchainImpl implements Blockchain {
         indexDB.put(Bytes.of(TYPE_ACTIVATED_FORKS), simpleEncoder.toBytes());
     }
 
-    /**
-     * Upgrade this database from version 0 to version 1.
-     *
-     * @param dbFactory
-     */
-    private void upgradeDb0(DatabaseFactory dbFactory) {
-        // run the migration
-        new MigrationBlockDbVersion001().migrate(config, dbFactory);
-        // reload this blockchain database
-        openDb(dbFactory);
-    }
+    private static void upgradeDatabase(Config config, DatabaseFactory dbFactory) {
+        byte[] version = getDatabaseVersion(dbFactory.getDB(DatabaseName.INDEX));
 
-    /**
-     * A temporary blockchain for database migration. This class implements a
-     * lightweight version of
-     * ${@link org.semux.core.Blockchain#importBlock(Block,boolean)} to migrate
-     * blocks from an existing database to the latest schema.
-     */
-    private class MigrationBlockchain extends BlockchainImpl {
-        private MigrationBlockchain(Config config, DatabaseFactory dbFactory) {
-            super(config, dbFactory);
-        }
-
-        public void applyBlock(Block block) {
-            // [0] execute transactions against local state
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
-            transactionExecutor.execute(block.getTransactions(), getAccountState(), getDelegateState(),
-                    new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this, 0);
-
-            // [1] apply block reward and tx fees
-            Amount reward = Block.getBlockReward(block, config);
-
-            if (reward.isPositive()) {
-                getAccountState().adjustAvailable(block.getCoinbase(), reward);
-            }
-            // [2] commit the updates
-            getAccountState().commit();
-            getDelegateState().commit();
-            // [3] add block to chain
-            addBlock(block);
+        if (version != null && Bytes.toInt(version) < BlockchainImpl.DATABASE_VERSION) {
+            upgrade(config, dbFactory);
         }
     }
 
-    /**
-     * Database migration from version 0 to version 1. The migration process creates
-     * a temporary ${@link MigrationBlockchain} then migrates all blocks from an
-     * existing blockchain database to the created temporary blockchain database.
-     * Once all blocks have been successfully migrated, the existing blockchain
-     * database is replaced by the migrated temporary blockchain database.
-     */
-    private class MigrationBlockDbVersion001 implements Migration {
-        private final PubSub pubSub = PubSubFactory.getDefault();
+    private static void upgrade(Config config, DatabaseFactory dbFactory) {
+        try {
+            logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
 
-        @Override
-        public void migrate(Config config, DatabaseFactory dbFactory) {
-            try {
-                logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
-                // recreate block db in a temporary folder
-                String dbName = dbFactory.getDataDir().getFileName().toString();
-                Path tempPath = dbFactory
-                        .getDataDir()
-                        .resolveSibling(dbName + "_tmp_" + TimeUtil.currentTimeMillis());
-                LeveldbDatabase.LeveldbFactory tempDb = new LeveldbDatabase.LeveldbFactory(tempPath.toFile());
-                MigrationBlockchain migrationBlockchain = new MigrationBlockchain(config, tempDb);
-                final long latestBlockNumber = getLatestBlockNumber();
-                for (long i = 1; i <= latestBlockNumber; i++) {
-                    migrationBlockchain.applyBlock(getBlock(i));
-                    if (i % 1000 == 0) {
-                        pubSub.publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
-                        logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
-                    }
+            Path dataDir = dbFactory.getDataDir();
+            String dataDirName = dataDir.getFileName().toString();
+
+            // setup temp chain
+            Path tempPath = dataDir.resolveSibling(dataDirName + "-temp");
+            delete(tempPath);
+            LeveldbDatabase.LeveldbFactory tempDbFactory = new LeveldbDatabase.LeveldbFactory(tempPath.toFile());
+            BlockchainImpl tempChain = new BlockchainImpl(config, tempDbFactory);
+
+            // import all blocks
+            Database indexDB = dbFactory.getDB(DatabaseName.INDEX);
+            Database blockDB = dbFactory.getDB(DatabaseName.BLOCK);
+            byte[] bytes = getLatestBlockNumber(indexDB);
+            long latestBlockNumber = (bytes == null) ? 0 : Bytes.toLong(bytes);
+            for (long i = 1; i <= latestBlockNumber; i++) {
+                tempChain.importBlock(getBlock(blockDB, i), false);
+                if (i % 1000 == 0) {
+                    PubSubFactory.getDefault().publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
+                    logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
                 }
-                dbFactory.close();
-                tempDb.close();
-                // move the existing database to backup folder then replace the database folder
-                // with the upgraded database
-                Path backupPath = dbFactory
-                        .getDataDir()
-                        .resolveSibling(
-                                dbFactory.getDataDir().getFileName().toString() + "_bak_"
-                                        + TimeUtil.currentTimeMillis());
-                dbFactory.moveTo(backupPath);
-                tempDb.moveTo(dbFactory.getDataDir());
-                dbFactory.open();
-                logger.info("Database upgraded to version 1.");
-            } catch (IOException e) {
-                logger.error("Failed to run migration " + MigrationBlockDbVersion001.class, e);
             }
+
+            // close both database factory
+            dbFactory.close();
+            tempDbFactory.close();
+
+            // swap the database folders
+            Path backupPath = dataDir.resolveSibling(dataDirName + "-backup");
+            dbFactory.moveTo(backupPath);
+            tempDbFactory.moveTo(dataDir);
+            delete(backupPath); // delete old database to save space.
+
+            logger.info("Database upgraded");
+        } catch (IOException e) {
+            logger.error("Failed to upgrade database", e);
         }
+    }
+
+    // THE FOLLOWING TYPE ID SHOULD NEVER CHANGE
+
+    private static Block getBlock(Database blockDB, long number) {
+        byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER_BY_NUMBER, Bytes.of(number)));
+        byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS_BY_NUMBER, Bytes.of(number)));
+        byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(number)));
+        byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES_BY_NUMBER, Bytes.of(number)));
+
+        return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
+    }
+
+    private static byte[] getLatestBlockNumber(Database indexDB) {
+        return indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
+    }
+
+    private static byte[] getDatabaseVersion(Database indexDB) {
+        return indexDB.get(Bytes.of(TYPE_DATABASE_VERSION));
+    }
+
+    private static void delete(Path directory) throws IOException {
+        if (!directory.toFile().exists()) {
+            return;
+        }
+
+        Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }
