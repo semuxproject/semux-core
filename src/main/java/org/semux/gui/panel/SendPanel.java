@@ -169,7 +169,7 @@ public class SendPanel extends JPanel implements ActionListener {
                                 .addComponent(selectFrom)
                                 .addGroup(groupLayout.createSequentialGroup()
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(txtValue, GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
+                                        .addComponent(txtValue, GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
                                         .addComponent(txtFee)
                                         .addComponent(txtData))
                                     .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)

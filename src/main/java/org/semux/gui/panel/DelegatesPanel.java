@@ -155,10 +155,10 @@ public class DelegatesPanel extends JPanel implements ActionListener {
                     .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
                     .addGap(18)
                     .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
-                        .addComponent(votePanel, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
-                        .addComponent(selectFrom, GroupLayout.PREFERRED_SIZE, 210, Short.MAX_VALUE)
-                        .addComponent(label, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
-                        .addComponent(delegateRegistrationPanel, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)))
+                        .addComponent(votePanel, GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE)
+                        .addComponent(selectFrom, GroupLayout.PREFERRED_SIZE, 270, Short.MAX_VALUE)
+                        .addComponent(label, GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE)
+                        .addComponent(delegateRegistrationPanel, GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE)))
         );
         groupLayout.setVerticalGroup(
             groupLayout.createParallelGroup(Alignment.LEADING)

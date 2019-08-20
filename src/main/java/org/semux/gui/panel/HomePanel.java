@@ -90,7 +90,7 @@ public class HomePanel extends JPanel implements ActionListener {
         overview.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GuiMessages.get("Overview"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        overview.setLayout(new GridLayout(8, 2, 0, 8));
+        overview.setLayout(new GridLayout(8, 2, 0, 15));
 
         JLabel labelBestBlockNum = new JLabel(GuiMessages.get("BestBlockNum") + ":");
         labelBestBlockNum.setFont(boldFont);
@@ -161,7 +161,7 @@ public class HomePanel extends JPanel implements ActionListener {
         consensus.setBorder(new TitledBorder(
                 new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(0, 10, 10, 10)),
                 GuiMessages.get("Consensus"), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-        consensus.setLayout(new GridLayout(5, 2, 0, 8));
+        consensus.setLayout(new GridLayout(5, 2, 0, 15));
         consensus.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 
         JLabel labelPrimaryValidator = new JLabel(GuiMessages.get("PrimaryValidator") + ":");
