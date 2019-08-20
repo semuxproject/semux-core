@@ -49,7 +49,7 @@ If you find a bug, please submit it to [issues](https://github.com/semuxproject/
 ## Wallet Localization
 
 If you want to add new language, review/update existing translation or help to finish specific translations, you can join and do that by following link:
-https://crowdin.com/project/semux
+https://crowdin.com/project/semux-core
 
 
 ## License

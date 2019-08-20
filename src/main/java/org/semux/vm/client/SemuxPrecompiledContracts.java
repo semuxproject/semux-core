@@ -6,6 +6,11 @@
  */
 package org.semux.vm.client;
 
+import static org.semux.vm.client.Conversion.weiToAmount;
+
+import java.math.BigInteger;
+import java.util.Arrays;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.chainspec.ConstantinoplePrecompiledContracts;
@@ -17,11 +22,6 @@ import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
-
-import java.math.BigInteger;
-import java.util.Arrays;
-
-import static org.semux.vm.client.Conversion.weiToAmount;
 
 public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContracts {
 
