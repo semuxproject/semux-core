@@ -35,11 +35,10 @@ public class UniformDistForkSyncingTest extends SyncingTest {
 
         // forcibly activate the fork
         Fork fork = mock(Fork.class);
-        TestUtils.setInternalState(fork, "number", (short) 1, Fork.class);
-        TestUtils.setInternalState(fork, "name", "UNIFORM_DISTRIBUTION", Fork.class);
-        TestUtils.setInternalState(fork, "blocksRequired", 0, Fork.class);
-        TestUtils.setInternalState(fork, "blocksToCheck", 0, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "number", fork.id, Fork.class);
+        TestUtils.setInternalState(fork, "id", (short) 1, Fork.class);
+        TestUtils.setInternalState(fork, "blocksRequired", 1, Fork.class);
+        TestUtils.setInternalState(fork, "blocksToCheck", 2, Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "id", fork.id, Fork.class);
         TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksRequired", fork.blocksRequired, Fork.class);
         TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksToCheck", fork.blocksToCheck,
                 Fork.class);

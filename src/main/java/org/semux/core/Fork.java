@@ -47,17 +47,9 @@ public enum Fork implements Comparable<Fork> {
         this.blocksToCheck = blocksToCheck;
     }
 
-    public byte[] toBytes() {
-        SimpleEncoder simpleEncoder = new SimpleEncoder();
-        simpleEncoder.writeShort(id);
-        return simpleEncoder.toBytes();
-    }
-
-    public static Fork fromBytes(byte[] bytes) {
-        SimpleDecoder simpleDecoder = new SimpleDecoder(bytes);
-        short n = simpleDecoder.readShort();
+    public static Fork of(short id) {
         for (Fork f : Fork.values()) {
-            if (f.id == n) {
+            if (f.id == id) {
                 return f;
             }
         }
@@ -76,16 +68,16 @@ public enum Fork implements Comparable<Fork> {
         }
 
         public byte[] toBytes() {
-            SimpleEncoder simpleEncoder = new SimpleEncoder();
-            simpleEncoder.writeBytes(fork.toBytes());
-            simpleEncoder.writeLong(effectiveFrom);
-            return simpleEncoder.toBytes();
+            SimpleEncoder encoder = new SimpleEncoder();
+            encoder.writeShort(fork.id);
+            encoder.writeLong(effectiveFrom);
+            return encoder.toBytes();
         }
 
         public static Activation fromBytes(byte[] bytes) {
-            SimpleDecoder simpleDecoder = new SimpleDecoder(bytes);
-            Fork fork = Fork.fromBytes(simpleDecoder.readBytes());
-            long activatedAt = simpleDecoder.readLong();
+            SimpleDecoder decoder = new SimpleDecoder(bytes);
+            Fork fork = Fork.of(decoder.readShort());
+            long activatedAt = decoder.readLong();
             return new Activation(fork, activatedAt);
         }
     }

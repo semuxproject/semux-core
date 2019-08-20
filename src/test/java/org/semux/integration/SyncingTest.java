@@ -12,7 +12,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
 import static org.semux.core.Unit.SEM;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -127,7 +126,7 @@ public class SyncingTest {
     }
 
     @Test
-    public void testSync() throws IOException {
+    public void testSync() {
         // validators has forged the n-th block
         await().atMost(60, SECONDS).until(() -> kernel1.getBlockchain().getLatestBlockNumber() >= targetHeight()
                 && kernel2.getBlockchain().getLatestBlockNumber() >= targetHeight()

@@ -83,54 +83,57 @@ public class ActivatedForks {
      *
      * @param fork
      *            An instance of ${@link Fork} to check.
-     * @param number
-     *            The current block number
+     * @param height
+     *            A blockchain height to check.
      * @return
      */
-    public boolean isActivated(Fork fork, final long number) {
+    public boolean isActivated(Fork fork, final long height) {
+        assert (fork.blocksRequired > 0);
+        assert (fork.blocksToCheck > 0);
+
         // checks whether the fork has been activated and recorded in database
         if (activatedForks.containsKey(fork)) {
-            return number >= activatedForks.get(fork).effectiveFrom;
+            return height >= activatedForks.get(fork).effectiveFrom;
         }
 
         // checks whether the local blockchain has reached the fork activation
         // checkpoint
         if (config.manuallyActivatedForks().containsKey(fork)) {
-            return number >= config.manuallyActivatedForks().get(fork);
+            return height >= config.manuallyActivatedForks().get(fork);
         }
 
         // returns memoized result of fork activation lookup at current height
-        ForkActivationMemory currentHeightActivationMemory = forkActivationMemoryCache
-                .getIfPresent(ImmutablePair.of(fork, number));
-        if (currentHeightActivationMemory != null) {
-            return currentHeightActivationMemory.activatedBlocks >= fork.blocksRequired;
+        ForkActivationMemory current = forkActivationMemoryCache.getIfPresent(ImmutablePair.of(fork, height));
+        if (current != null) {
+            return current.activatedBlocks >= fork.blocksRequired;
         }
 
-        // search:
+        // block range to search:
         // from (number - 1)
         // to (number - fork.blocksToCheck)
-        final long higherBound = Math.max(0, number - 1);
-        final long lowerBound = Math.max(0, number - fork.blocksToCheck);
+        long higherBound = Math.max(0, height - 1);
+        long lowerBound = Math.max(0, height - fork.blocksToCheck);
         long activatedBlocks = 0;
 
-        // O(1) dynamic-programming lookup, see the definition of ForkActivationMemory
-        ForkActivationMemory forkActivationMemory = forkActivationMemoryCache
-                .getIfPresent(ImmutablePair.of(fork, number - 1));
-        if (forkActivationMemory != null) {
-            activatedBlocks = forkActivationMemory.activatedBlocks -
-                    (forkActivationMemory.lowerBoundActivated && lowerBound > 1 ? 1 : 0) +
-                    (chain.getBlockHeader(higherBound).getDecodedData().signalingFork(fork) ? 1 : 0);
-        } else { // O(m) traversal lookup
+        ForkActivationMemory previous = forkActivationMemoryCache.getIfPresent(ImmutablePair.of(fork, height - 1));
+        if (previous != null) {
+            // O(1) dynamic-programming lookup
+            activatedBlocks = previous.activatedBlocks
+                    - (lowerBound > 0 && previous.lowerBoundActivated ? 1 : 0)
+                    + (chain.getBlockHeader(higherBound).getDecodedData().parseForkSignals().contains(fork) ? 1 : 0);
+        } else {
+            // O(m) traversal lookup
             for (long i = higherBound; i >= lowerBound; i--) {
-                activatedBlocks += chain.getBlockHeader(i).getDecodedData().signalingFork(fork) ? 1 : 0;
+                activatedBlocks += chain.getBlockHeader(i).getDecodedData().parseForkSignals().contains(fork) ? 1 : 0;
             }
         }
 
+        logger.trace("number = {}, higher bound = {}, lower bound = {}", height, higherBound, lowerBound);
+
         // memorizes
-        forkActivationMemoryCache.put(
-                ImmutablePair.of(fork, number),
+        forkActivationMemoryCache.put(ImmutablePair.of(fork, height),
                 new ForkActivationMemory(
-                        chain.getBlockHeader(lowerBound).getDecodedData().signalingFork(fork),
+                        chain.getBlockHeader(lowerBound).getDecodedData().parseForkSignals().contains(fork),
                         activatedBlocks));
 
         // returns

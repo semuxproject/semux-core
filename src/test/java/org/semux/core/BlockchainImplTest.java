@@ -286,9 +286,10 @@ public class BlockchainImplTest {
         final Fork fork = Fork.UNIFORM_DISTRIBUTION;
         for (long i = 1; i <= fork.blocksToCheck; i++) {
             chain.addBlock(
-                    createBlock(i, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
+                    createBlock(i, coinbase, new BlockHeaderData(ForkSignalSet.of(fork)).toBytes(),
                             Collections.singletonList(tx), Collections.singletonList(res)));
 
+            // post-import check
             if (i < fork.blocksRequired) {
                 assertFalse(chain.isForkActivated(fork));
             } else {
@@ -300,7 +301,7 @@ public class BlockchainImplTest {
     @Test
     public void testForkCompatibility() {
         Fork fork = Fork.UNIFORM_DISTRIBUTION;
-        Block block = createBlock(1, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
+        Block block = createBlock(1, coinbase, new BlockHeaderData(ForkSignalSet.of(fork)).toBytes(),
                 Collections.singletonList(tx), Collections.singletonList(res));
         TestUtils.setInternalState(config, "forkUniformDistributionEnabled", false, AbstractConfig.class);
         chain = new BlockchainImpl(config, temporaryDBFactory);

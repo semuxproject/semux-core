@@ -704,6 +704,8 @@ public class SemuxBft implements BftManager {
     /**
      * Check if a node is the primary for the specified view.
      *
+     * @param height
+     *            a specific height
      * @param view
      *            a specific view
      * @param peerId

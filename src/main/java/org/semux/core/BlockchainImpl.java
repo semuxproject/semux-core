@@ -565,7 +565,7 @@ public class BlockchainImpl implements Blockchain {
      * @return
      */
     protected int getDatabaseVersion() {
-        return Bytes.toInt(getDatabaseVersion(indexDB));
+        return getDatabaseVersion(indexDB);
     }
 
     /**
@@ -659,8 +659,7 @@ public class BlockchainImpl implements Blockchain {
             }
         }
 
-        return set.isEmpty() ? new byte[0]
-                : BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(set.toArray(new Fork[0]))).toBytes();
+        return set.isEmpty() ? new BlockHeaderData().toBytes() : new BlockHeaderData(ForkSignalSet.of(set)).toBytes();
     }
 
     @Override
@@ -870,9 +869,8 @@ public class BlockchainImpl implements Blockchain {
     }
 
     private static void upgradeDatabase(Config config, DatabaseFactory dbFactory) {
-        byte[] version = getDatabaseVersion(dbFactory.getDB(DatabaseName.INDEX));
-
-        if (version != null && Bytes.toInt(version) < BlockchainImpl.DATABASE_VERSION) {
+        if (getLatestBlockNumber(dbFactory.getDB(DatabaseName.INDEX)) != null
+                && getDatabaseVersion(dbFactory.getDB(DatabaseName.INDEX)) < BlockchainImpl.DATABASE_VERSION) {
             upgrade(config, dbFactory);
         }
     }
@@ -934,8 +932,9 @@ public class BlockchainImpl implements Blockchain {
         return indexDB.get(Bytes.of(TYPE_LATEST_BLOCK_NUMBER));
     }
 
-    private static byte[] getDatabaseVersion(Database indexDB) {
-        return indexDB.get(Bytes.of(TYPE_DATABASE_VERSION));
+    private static int getDatabaseVersion(Database indexDB) {
+        byte[] version = indexDB.get(Bytes.of(TYPE_DATABASE_VERSION));
+        return version == null ? 0 : Bytes.toInt(version);
     }
 
     private static void delete(Path directory) throws IOException {

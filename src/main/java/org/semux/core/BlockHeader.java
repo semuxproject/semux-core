@@ -152,7 +152,7 @@ public class BlockHeader {
     }
 
     public BlockHeaderData getDecodedData() {
-        return BlockHeaderData.fromBytes(data);
+        return new BlockHeaderData(data);
     }
 
     public byte[] toBytes() {
