@@ -230,9 +230,7 @@ public class TransactionExecutor {
                 }
                 case CALL:
                 case CREATE:
-                    // Note: the second parameter should be height = block number + 1; here we're
-                    // checking if the fork is enabled at the end of last block.
-                    if (!chain.isForkActivated(Fork.VIRTUAL_MACHINE, block.getNumber())) {
+                    if (!chain.isForkActivated(Fork.VIRTUAL_MACHINE)) {
                         result.setCode(Code.INVALID_TYPE);
                         break;
                     }

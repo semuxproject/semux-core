@@ -284,39 +284,24 @@ public class BlockchainImplTest {
     @Test
     public void testForkActivated() {
         final Fork fork = Fork.UNIFORM_DISTRIBUTION;
-        for (long i = 1; i <= fork.activationBlocksLookup; i++) {
+        for (long i = 1; i <= fork.blocksToCheck; i++) {
             chain.addBlock(
-                    createBlock(i, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
+                    createBlock(i, coinbase, new BlockHeaderData(ForkSignalSet.of(fork)).toBytes(),
                             Collections.singletonList(tx), Collections.singletonList(res)));
 
-            if (i <= fork.activationBlocks) {
-                for (long j = 0; j <= i; j++) {
-                    assertFalse(chain.isForkActivated(fork, i));
-                }
+            // post-import check
+            if (i < fork.blocksRequired) {
+                assertFalse(chain.isForkActivated(fork));
             } else {
-                for (long j = i; j > fork.activationBlocks; j--) {
-                    assertTrue(chain.isForkActivated(fork, j));
-                }
-
-                for (long j = fork.activationBlocks; j >= 0; j--) {
-                    assertFalse(chain.isForkActivated(fork, j));
-                }
+                assertTrue(chain.isForkActivated(fork));
             }
-        }
-
-        for (long i = 0; i <= fork.activationBlocks; i++) {
-            assertFalse(chain.isForkActivated(fork, i));
-        }
-
-        for (long i = fork.activationBlocks + 1; i <= fork.activationBlocksLookup; i++) {
-            assertTrue(chain.isForkActivated(fork, i));
         }
     }
 
     @Test
     public void testForkCompatibility() {
         Fork fork = Fork.UNIFORM_DISTRIBUTION;
-        Block block = createBlock(1, coinbase, BlockHeaderData.v1(new BlockHeaderData.ForkSignalSet(fork)).toBytes(),
+        Block block = createBlock(1, coinbase, new BlockHeaderData(ForkSignalSet.of(fork)).toBytes(),
                 Collections.singletonList(tx), Collections.singletonList(res));
         TestUtils.setInternalState(config, "forkUniformDistributionEnabled", false, AbstractConfig.class);
         chain = new BlockchainImpl(config, temporaryDBFactory);

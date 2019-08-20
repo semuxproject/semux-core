@@ -23,10 +23,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.chainspec.Spec;
 import org.semux.Network;
 import org.semux.config.exception.ConfigException;
 import org.semux.core.Amount;
+import org.semux.core.Fork;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hash;
 import org.semux.net.Capability;
@@ -271,6 +273,26 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     @Override
     public Spec vmSpec() {
         return new SemuxSpec();
+    }
+
+    @Override
+    public Pair<Long, Long> getForkSignalingPeriod(Fork fork) {
+        switch (this.network()) {
+        case MAINNET:
+            if (fork == Fork.UNIFORM_DISTRIBUTION) {
+                return Pair.of(1L, 500000L);
+            } else if (fork == Fork.VIRTUAL_MACHINE) {
+                return Pair.of(1500001L, 2000000L);
+            }
+        case TESTNET:
+        case DEVNET:
+            if (fork == Fork.UNIFORM_DISTRIBUTION) {
+                return Pair.of(1L, 500000L);
+            } else if (fork == Fork.VIRTUAL_MACHINE) {
+                return Pair.of(1L, 500000L);
+            }
+        }
+        return null;
     }
 
     @Override

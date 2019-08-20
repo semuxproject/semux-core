@@ -9,7 +9,6 @@ package org.semux.vm.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.semux.core.Amount.ONE;
@@ -60,7 +59,7 @@ public class PrecompiledContractTest {
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
 
-        doReturn(true).when(chain).isForkActivated(any(), anyLong());
+        doReturn(true).when(chain).isForkActivated(any());
     }
 
     // pragma solidity ^0.4.14;

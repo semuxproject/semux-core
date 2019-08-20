@@ -24,7 +24,6 @@ public class TemporaryDatabaseRule extends TemporaryFolder implements DatabaseFa
     @Override
     public void before() throws Throwable {
         create();
-        open();
     }
 
     @Override
@@ -34,11 +33,11 @@ public class TemporaryDatabaseRule extends TemporaryFolder implements DatabaseFa
     }
 
     @Override
-    public void open() {
-        for (DatabaseName name : DatabaseName.values()) {
-            File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + name.toString().toLowerCase());
-            databases.put(name, new LeveldbDatabase(file));
-        }
+    public Database getDB(DatabaseName name) {
+        return databases.computeIfAbsent(name, k -> {
+            File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + k.toString().toLowerCase());
+            return new LeveldbDatabase(file);
+        });
     }
 
     @Override
@@ -51,10 +50,5 @@ public class TemporaryDatabaseRule extends TemporaryFolder implements DatabaseFa
     @Override
     public Path getDataDir() {
         return super.getRoot().toPath();
-    }
-
-    @Override
-    public Database getDB(DatabaseName name) {
-        return databases.get(name);
     }
 }

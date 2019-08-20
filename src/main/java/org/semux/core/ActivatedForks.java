@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.semux.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,14 +61,17 @@ public class ActivatedForks {
      * Tries to activate a fork.
      *
      * @param fork
-     * @param height
      */
-    public boolean activateFork(Fork fork, long height) {
-        if (!isActivated(fork, height - 1)
-                && height <= fork.activationDeadline
-                && isActivated(fork, height)) {
-            activatedForks.put(fork, new Fork.Activation(fork, height));
-            logger.info("Fork {} has been activated at block height {}", fork, height);
+    public boolean activateFork(Fork fork) {
+        Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
+
+        long number = chain.getLatestBlockNumber();
+        if (number >= period.getLeft()
+                && number <= period.getRight()
+                && !isActivated(fork, number)
+                && isActivated(fork, number + 1)) {
+            activatedForks.put(fork, new Fork.Activation(fork, number + 1));
+            logger.info("Fork {} has been activated; it wil be effective from #{}", fork, number + 1);
             return true;
         }
 
@@ -84,69 +88,62 @@ public class ActivatedForks {
      * @return
      */
     public boolean isActivated(Fork fork, final long height) {
+        assert (fork.blocksRequired > 0);
+        assert (fork.blocksToCheck > 0);
+
         // checks whether the fork has been activated and recorded in database
         if (activatedForks.containsKey(fork)) {
-            return height >= activatedForks.get(fork).activatedAt;
+            return height >= activatedForks.get(fork).effectiveFrom;
         }
 
         // checks whether the local blockchain has reached the fork activation
         // checkpoint
         if (config.manuallyActivatedForks().containsKey(fork)) {
-            return config.manuallyActivatedForks().get(fork) <= height;
+            return height >= config.manuallyActivatedForks().get(fork);
         }
 
         // returns memoized result of fork activation lookup at current height
-        ForkActivationMemory currentHeightActivationMemory = forkActivationMemoryCache
-                .getIfPresent(ImmutablePair.of(fork, height));
-        if (currentHeightActivationMemory != null) {
-            return currentHeightActivationMemory.activatedBlocks >= fork.activationBlocks;
+        ForkActivationMemory current = forkActivationMemoryCache.getIfPresent(ImmutablePair.of(fork, height));
+        if (current != null) {
+            return current.activatedBlocks >= fork.blocksRequired;
         }
 
-        // sets boundaries:
-        // lookup from (height - 1)
-        // to (height - fork.activationBlocksLookup)
-        final long higherBound = Math.max(0, height - 1);
-        final long lowerBound = Math.min(Math.max(height - fork.activationBlocksLookup, 1), higherBound);
+        // block range to search:
+        // from (number - 1)
+        // to (number - fork.blocksToCheck)
+        long higherBound = Math.max(0, height - 1);
+        long lowerBound = Math.max(0, height - fork.blocksToCheck);
         long activatedBlocks = 0;
 
-        // O(1) dynamic-programming lookup, see the definition of ForkActivationMemory
-        ForkActivationMemory forkActivationMemory = forkActivationMemoryCache
-                .getIfPresent(ImmutablePair.of(fork, height - 1));
-        if (forkActivationMemory != null) {
-            activatedBlocks = forkActivationMemory.activatedBlocks -
-                    (forkActivationMemory.lowerBoundActivated && lowerBound > 1 ? 1 : 0) +
-                    (chain.getBlockHeader(higherBound).getDecodedData().signalingFork(fork) ? 1 : 0);
-        } else { // O(m) traversal lookup
+        ForkActivationMemory previous = forkActivationMemoryCache.getIfPresent(ImmutablePair.of(fork, height - 1));
+        if (previous != null) {
+            // O(1) dynamic-programming lookup
+            activatedBlocks = previous.activatedBlocks
+                    - (lowerBound > 0 && previous.lowerBoundActivated ? 1 : 0)
+                    + (chain.getBlockHeader(higherBound).getDecodedData().parseForkSignals().contains(fork) ? 1 : 0);
+        } else {
+            // O(m) traversal lookup
             for (long i = higherBound; i >= lowerBound; i--) {
-                activatedBlocks += chain.getBlockHeader(i).getDecodedData().signalingFork(fork) ? 1 : 0;
+                activatedBlocks += chain.getBlockHeader(i).getDecodedData().parseForkSignals().contains(fork) ? 1 : 0;
             }
         }
 
+        logger.trace("number = {}, higher bound = {}, lower bound = {}", height, higherBound, lowerBound);
+
         // memorizes
-        forkActivationMemoryCache.put(
-                ImmutablePair.of(fork, height),
+        forkActivationMemoryCache.put(ImmutablePair.of(fork, height),
                 new ForkActivationMemory(
-                        chain.getBlockHeader(lowerBound).getDecodedData().signalingFork(fork),
+                        chain.getBlockHeader(lowerBound).getDecodedData().parseForkSignals().contains(fork),
                         activatedBlocks));
 
         // returns
-        boolean activated = activatedBlocks >= fork.activationBlocks;
+        boolean activated = activatedBlocks >= fork.blocksRequired;
         if (activatedBlocks > 0) {
-            logger.debug("Fork: name = {}, status = {} / {}, require = {}, activated = {}",
-                    fork.name, activatedBlocks, fork.activationBlocksLookup, fork.activationBlocks, activated);
+            logger.debug("Fork: name = {}, requirement = {} / {}, progress = {}",
+                    fork.name(), fork.blocksRequired, fork.blocksToCheck, activatedBlocks);
         }
 
         return activated;
-    }
-
-    /**
-     * Returns whether a fork has been activated.
-     *
-     * @param fork
-     * @return
-     */
-    public boolean isActivated(Fork fork) {
-        return isActivated(fork, chain.getLatestBlockNumber() + 1);
     }
 
     /**
@@ -161,7 +158,7 @@ public class ActivatedForks {
     /**
      * <code>
      * ForkActivationMemory[height].lowerBoundActivated =
-     * forkActivated(height - ${@link Fork#activationBlocksLookup})
+     * forkActivated(height - ${@link Fork#blocksToCheck})
      *
      * ForkActivationMemory[height].activatedBlocks =
      * ForkActivationMemory[height - 1].activatedBlocks -
@@ -173,7 +170,7 @@ public class ActivatedForks {
 
         /**
          * Whether the fork is activated at height
-         * <code>(current height -{@link Fork#activationBlocksLookup})</code>.
+         * <code>(current height -{@link Fork#blocksToCheck})</code>.
          */
         public final boolean lowerBoundActivated;
 

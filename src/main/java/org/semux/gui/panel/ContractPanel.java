@@ -40,7 +40,6 @@ import org.semux.config.Config;
 import org.semux.core.Amount;
 import org.semux.core.PendingManager;
 import org.semux.core.TransactionType;
-import org.semux.core.Unit;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;

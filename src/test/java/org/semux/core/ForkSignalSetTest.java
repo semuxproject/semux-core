@@ -30,7 +30,7 @@ public class ForkSignalSetTest {
     public static void beforeClass() {
         for (short i = 1; i <= 8; i++) {
             Fork a = mock(Fork.class);
-            TestUtils.setInternalState(a, "number", i, Fork.class);
+            TestUtils.setInternalState(a, "id", i, Fork.class);
             eightPendingForks[i - 1] = a;
         }
 
@@ -40,23 +40,23 @@ public class ForkSignalSetTest {
     @Test
     public void testForkSignalSetCodec_onePendingFork() {
         // test decoding
-        BlockHeaderData.ForkSignalSet set = new BlockHeaderData.ForkSignalSet(onePendingForkEncoded);
-        assertTrue(set.signalingFork(onePendingFork[0]));
+        ForkSignalSet set = ForkSignalSet.fromBytes(onePendingForkEncoded);
+        assertTrue(set.contains(onePendingFork[0]));
 
         // test encoding
-        assertArrayEquals(onePendingForkEncoded, new BlockHeaderData.ForkSignalSet(onePendingFork).toBytes());
+        assertArrayEquals(onePendingForkEncoded, ForkSignalSet.of(onePendingFork).toBytes());
     }
 
     @Test
     public void testForkSignalSetCodec_eightPendingForks() {
         // test decoding
-        BlockHeaderData.ForkSignalSet set = new BlockHeaderData.ForkSignalSet(eightPendingForksEncoded);
+        ForkSignalSet set = ForkSignalSet.fromBytes(eightPendingForksEncoded);
         for (Fork f : eightPendingForks) {
-            set.signalingFork(f);
+            set.contains(f);
         }
 
         // test encoding
-        set = new BlockHeaderData.ForkSignalSet(eightPendingForks);
-        assertThat(set.toBytes()).hasSize(BlockHeaderData.ForkSignalSet.MAX_SIZE).isEqualTo(eightPendingForksEncoded);
+        set = ForkSignalSet.of(eightPendingForks);
+        assertThat(set.toBytes()).hasSize(ForkSignalSet.MAX_PENDING_FORKS * 2 + 1).isEqualTo(eightPendingForksEncoded);
     }
 }

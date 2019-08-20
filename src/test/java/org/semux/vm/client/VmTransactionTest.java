@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Unit.SEM;
@@ -70,7 +69,7 @@ public class VmTransactionTest {
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
 
-        doReturn(true).when(chain).isForkActivated(any(), anyLong());
+        doReturn(true).when(chain).isForkActivated(any());
 
         block = new SemuxBlock(
                 new BlockHeader(1, Bytes.random(20), Bytes.random(32), System.currentTimeMillis(),
