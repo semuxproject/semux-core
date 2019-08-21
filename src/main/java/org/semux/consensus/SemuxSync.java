@@ -440,6 +440,10 @@ public class SemuxSync implements SyncManager {
                             toDownload.add(n);
                             handleInvalidBlock(p.getKey(), p.getValue());
                         }
+
+                        if (n == checkpoint) {
+                            logger.info("{}", p.getLeft());
+                        }
                     }
                     current.set(chain.getLatestBlockNumber() + 1);
                 }
