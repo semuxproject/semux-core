@@ -45,6 +45,7 @@ import org.semux.core.SyncManager;
 import org.semux.net.Capability;
 import org.semux.net.Channel;
 import org.semux.net.ChannelManager;
+import org.semux.net.Peer;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockMessage;
@@ -95,16 +96,20 @@ public class SemuxSync implements SyncManager {
 
     // task queues
     private AtomicLong latestQueuedTask = new AtomicLong();
-    private TreeSet<Long> toDownload = new TreeSet<>();
-    private Map<Long, Long> toComplete = new HashMap<>();
-    private TreeSet<Pair<Block, Channel>> toProcess = new TreeSet<>(
-            Comparator.comparingLong(o -> o.getKey().getNumber()));
-    private TreeSet<Pair<Block, Channel>> currentSet = new TreeSet<>(
-            Comparator.comparingLong(o -> o.getKey().getNumber()));
-    private TreeMap<Long, Pair<Block, Channel>> toFinalize = new TreeMap<>();
 
-    private long lastBlockInSet;
-    private boolean fastSync;
+    // Blocks to download
+    private TreeSet<Long> toDownload = new TreeSet<>();
+
+    // Blocks which were requested but haven't been received
+    private Map<Long, Long> toReceive = new HashMap<>();
+
+    // Blocks which were received but haven't been validated
+    private TreeSet<Pair<Block, Channel>> toValidate = new TreeSet<>(
+            Comparator.comparingLong(o -> o.getKey().getNumber()));
+
+    // Blocks which were validated but haven't been imported
+    private TreeMap<Long, Pair<Block, Channel>> toImport = new TreeMap<>();
+
     private final Object lock = new Object();
 
     // current and target heights
@@ -142,22 +147,21 @@ public class SemuxSync implements SyncManager {
             // [1] set up queues
             synchronized (lock) {
                 toDownload.clear();
-                toComplete.clear();
-                toProcess.clear();
-                currentSet.clear();
-                toFinalize.clear();
+                toReceive.clear();
+                toValidate.clear();
+                toImport.clear();
 
                 begin.set(chain.getLatestBlockNumber() + 1);
                 current.set(chain.getLatestBlockNumber() + 1);
                 target.set(targetHeight);
                 latestQueuedTask.set(chain.getLatestBlockNumber());
-                fastSync = false;
                 growToDownloadQueue();
             }
 
             // [2] start tasks
-            ScheduledFuture<?> download = timer1.scheduleAtFixedRate(this::download, 0, 5, TimeUnit.MILLISECONDS);
-            ScheduledFuture<?> process = timer2.scheduleAtFixedRate(this::process, 0, 5, TimeUnit.MILLISECONDS);
+            long period = config.syncFastSync() ? 1 : 5;
+            ScheduledFuture<?> download = timer1.scheduleAtFixedRate(this::download, 0, period, TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> process = timer2.scheduleAtFixedRate(this::process, 0, period, TimeUnit.MILLISECONDS);
 
             // [3] wait until the sync is done
             while (isRunning.get()) {
@@ -200,8 +204,8 @@ public class SemuxSync implements SyncManager {
             if (toDownload.remove(block.getNumber())) {
                 growToDownloadQueue();
             }
-            toComplete.remove(block.getNumber());
-            toProcess.add(Pair.of(block, channel));
+            toReceive.remove(block.getNumber());
+            toValidate.add(Pair.of(block, channel));
         }
     }
 
@@ -262,8 +266,17 @@ public class SemuxSync implements SyncManager {
         }
     }
 
-    private boolean support(String[] capabilities, Capability capability) {
-        return Stream.of(capabilities).anyMatch(c -> capability.name().equals(c));
+    private boolean isFastSyncSupported(Peer peer) {
+        return Stream.of(peer.getCapabilities()).anyMatch(c -> Capability.FAST_SYNC.name().equals(c));
+    }
+
+    private boolean skipVotes(long blockNumber) {
+        long interval = config.spec().getValidatorUpdateInterval();
+
+        boolean isPivotBlock = (blockNumber % interval == 0);
+        boolean isSafeBlock = (blockNumber < target.get() - interval);
+
+        return !isPivotBlock && isSafeBlock;
     }
 
     private void download() {
@@ -274,7 +287,7 @@ public class SemuxSync implements SyncManager {
         synchronized (lock) {
             // filter all expired tasks
             long now = TimeUtil.currentTimeMillis();
-            Iterator<Entry<Long, Long>> itr = toComplete.entrySet().iterator();
+            Iterator<Entry<Long, Long>> itr = toReceive.entrySet().iterator();
             while (itr.hasNext()) {
                 Entry<Long, Long> entry = itr.next();
 
@@ -286,7 +299,7 @@ public class SemuxSync implements SyncManager {
             }
 
             // quit if too many unfinished jobs
-            if (toComplete.size() > MAX_PENDING_JOBS) {
+            if (toReceive.size() > MAX_PENDING_JOBS) {
                 logger.trace("Max pending jobs reached");
                 return;
             }
@@ -298,58 +311,56 @@ public class SemuxSync implements SyncManager {
             Long task = toDownload.first();
 
             // quit if too many pending blocks
-            int pendingBlocks = toProcess.size() + currentSet.size() + toFinalize.size();
-            if (pendingBlocks > MAX_PENDING_BLOCKS && task > toProcess.first().getKey().getNumber()) {
+            int pendingBlocks = toValidate.size() + toImport.size();
+            if (pendingBlocks > MAX_PENDING_BLOCKS && task > toValidate.first().getKey().getNumber()) {
                 logger.trace("Max pending blocks reached");
                 return;
             }
 
             // get idle channels
             List<Channel> channels = channelMgr.getIdleChannels().stream()
-                    .filter(channel -> channel.getRemotePeer().getLatestBlockNumber() >= task)
+                    .filter(channel -> {
+                        Peer peer = channel.getRemotePeer();
+                        // the peer has the block
+                        return peer.getLatestBlockNumber() >= task
+                                // AND is not banned
+                                && !badPeers.contains(peer.getPeerId())
+                        // AND supports FAST_SYNC if we enabled this protocol
+                                && (!config.syncFastSync() || isFastSyncSupported(peer));
+                    })
                     .collect(Collectors.toList());
-            logger.trace("Idle peers = {}", channels.size());
+            logger.trace("Qualified idle peers = {}", channels.size());
 
             // quit if no idle channels.
             if (channels.isEmpty()) {
                 return;
             }
-
-            // pick a random channel
+            // otherwise, pick a random channel
             Channel c = channels.get(random.nextInt(channels.size()));
 
-            // request the block
-            if (c.getRemotePeer().getLatestBlockNumber() >= task
-                    && !badPeers.contains(c.getRemotePeer().getPeerId())) {
-
-                if (config.syncFastSync() && support(c.getRemotePeer().getCapabilities(), Capability.FAST_SYNC)) {
-                    boolean skipVotes = fastSync
-                            && (task % config.spec().getValidatorUpdateInterval()) != 0
-                            && task < target.get() - 5 * config.spec().getValidatorUpdateInterval(); // safe guard
-
-                    if (skipVotes) {
-                        logger.trace("Requesting block #{} from {}:{}, HEADER + TRANSACTIONS", task, c.getRemoteIp(),
-                                c.getRemotePort());
-                        c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
-                                BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS)));
-                    } else {
-                        logger.trace("Requesting block #{} from {}:{}, HEADER + TRANSACTIONS + VOTES", task,
-                                c.getRemoteIp(), c.getRemotePort());
-                        c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
-                                BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS, BlockPart.VOTES)));
-                    }
-                } else {
-                    // for older clients
-                    logger.trace("Requesting block #{} from {}:{}, FULL BLOCK", task, c.getRemoteIp(),
+            if (config.syncFastSync()) { // use FAST_SYNC protocol
+                if (skipVotes(task)) {
+                    logger.trace("Requesting block #{} from {}:{}, HEADER + TRANSACTIONS", task,
+                            c.getRemoteIp(),
                             c.getRemotePort());
-                    c.getMessageQueue().sendMessage(new GetBlockMessage(task));
+                    c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
+                            BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS)));
+                } else {
+                    logger.trace("Requesting block #{} from {}:{}, HEADER + TRANSACTIONS + VOTES", task,
+                            c.getRemoteIp(), c.getRemotePort());
+                    c.getMessageQueue().sendMessage(new GetBlockPartsMessage(task,
+                            BlockPart.encode(BlockPart.HEADER, BlockPart.TRANSACTIONS, BlockPart.VOTES)));
                 }
-
-                if (toDownload.remove(task)) {
-                    growToDownloadQueue();
-                }
-                toComplete.put(task, TimeUtil.currentTimeMillis());
+            } else { // use old protocol
+                logger.trace("Requesting block #{} from {}:{}, FULL BLOCK", task, c.getRemoteIp(),
+                        c.getRemotePort());
+                c.getMessageQueue().sendMessage(new GetBlockMessage(task));
             }
+
+            if (toDownload.remove(task)) {
+                growToDownloadQueue();
+            }
+            toReceive.put(task, TimeUtil.currentTimeMillis());
         }
     }
 
@@ -393,131 +404,83 @@ public class SemuxSync implements SyncManager {
             return; // This is important because stop() only notify
         }
 
-        // Perform fast sync only if all blocks in current validator sets have been
-        // forged
-        synchronized (lock) {
-            if (!fastSync) {
-                // fastSync value is updated at the beginning of each set
-                if (latest % config.spec().getValidatorUpdateInterval() == 0) {
-                    if (target.get() >= latest + config.spec().getValidatorUpdateInterval()) {
-                        toFinalize.clear();
-                        currentSet.clear();
-                        lastBlockInSet = latest + config.spec().getValidatorUpdateInterval();
-                        fastSync = true;
-                    }
-                }
-            }
+        // find the check point
+        long checkpoint = latest + 1;
+        while (skipVotes(checkpoint)) {
+            checkpoint++;
         }
 
-        Pair<Block, Channel> pair = null;
         synchronized (lock) {
-            // If not all hashes in current validator set were validated
-            if (fastSync && toFinalize.size() < lastBlockInSet - latest) {
-                // Add missing blocks to currentSet
-                Iterator<Pair<Block, Channel>> blocksToProcessIterator = toProcess.iterator();
-                while (blocksToProcessIterator.hasNext()) {
-                    Pair<Block, Channel> p = blocksToProcessIterator.next();
-                    if (p.getKey().getNumber() <= latest) {
-                        blocksToProcessIterator.remove();
-                    } else if (p.getKey().getNumber() <= lastBlockInSet) {
-                        blocksToProcessIterator.remove();
-                        currentSet.add(p);
-                    } else {
-                        break;
-                    }
-                }
+            // Add missing blocks to currentBlockBatch
+            Iterator<Pair<Block, Channel>> iterator = toValidate.iterator();
+            while (iterator.hasNext()) {
+                Pair<Block, Channel> p = iterator.next();
+                long n = p.getKey().getNumber();
 
-                // Validate remaining block hashes in current set
-                validateSetHashes();
-                return;
-            }
-
-            Iterator<Pair<Block, Channel>> blocksToApplyIterator;
-            // Check if next block is ready to be applied to the chain
-            if (fastSync) {
-                blocksToApplyIterator = toFinalize.values().iterator();
-            } else {
-                blocksToApplyIterator = toProcess.iterator();
-            }
-            while (blocksToApplyIterator.hasNext()) {
-                Pair<Block, Channel> p = blocksToApplyIterator.next();
-                // In case a normal sync is performed, toProcess might contain blocks which
-                // already have been applied to the chain
-                if (p.getKey().getNumber() <= latest) {
-                    blocksToApplyIterator.remove();
-                } else if (p.getKey().getNumber() == latest + 1) {
-                    toFinalize.remove(p.getKey().getNumber());
-                    toProcess.remove(p);
-                    pair = p;
-                    break;
+                if (n <= latest) {
+                    iterator.remove();
+                } else if (n <= checkpoint) {
+                    iterator.remove();
+                    toImport.put(n, p);
                 } else {
                     break;
                 }
             }
-        }
 
-        // Validate and apply block to the chain
-        if (pair != null) {
-            Block block = pair.getKey();
-            boolean validateVotes = !fastSync; // If fastSync is true, skip vote validation
+            if (toImport.size() >= checkpoint - latest) {
+                // Validate the block hashes
+                boolean valid = validateBlockHashes(latest + 1, checkpoint);
 
-            if (chain.importBlock(block, validateVotes)) {
-                // update current height
-                current.set(block.getNumber() + 1);
-
-                synchronized (lock) {
-                    if (toDownload.remove(block.getNumber())) {
-                        growToDownloadQueue();
+                if (valid) {
+                    for (long n = latest + 1; n <= checkpoint; n++) {
+                        Pair<Block, Channel> p = toImport.remove(n);
+                        boolean imported = chain.importBlock(p.getKey(), false);
+                        if (!imported) {
+                            // This should never happen
+                            toDownload.add(n);
+                            handleInvalidBlock(p.getKey(), p.getValue());
+                        }
                     }
-                    toComplete.remove(block.getNumber());
-                    if (block.getNumber() == lastBlockInSet) {
-                        logger.info("{}", block); // Log last block in set
-                        fastSync = false;
-                    } else if (!fastSync) {
-                        logger.info("{}", block); // Log all blocks
-                    }
+                    current.set(chain.getLatestBlockNumber() + 1);
                 }
-            } else {
-                handleInvalidBlock(block, pair.getValue());
             }
         }
     }
 
-    protected void validateSetHashes() {
+    /**
+     * Validate block hashes in the toImport set.
+     *
+     * Assuming that the whole block range is available in the set.
+     *
+     * @param from
+     *            the start block number, inclusive
+     * @param to
+     *            the end block number, inclusive
+     */
+    protected boolean validateBlockHashes(long from, long to) {
         synchronized (lock) {
-            Iterator<Pair<Block, Channel>> iterator = currentSet.descendingIterator();
-            while (iterator.hasNext()) {
-                Pair<Block, Channel> p = iterator.next();
-                if (toFinalize.containsKey(p.getKey().getNumber())) {
-                    iterator.remove();
-                } else {
-                    Pair<Block, Channel> child = toFinalize.get(p.getKey().getNumber() + 1);
-                    if (child != null) {
-                        // Validate block header and compare its hash against its child parent hash
-                        if (Arrays.equals(child.getKey().getParentHash(), p.getKey().getHash()) &&
-                                p.getKey().getHeader().validate()) {
-                            toFinalize.put(p.getKey().getNumber(), p);
-                            iterator.remove();
-                        } else {
-                            handleInvalidBlock(p.getKey(), p.getValue());
-                            return;
-                        }
-                    } else if (p.getKey().getNumber() == lastBlockInSet) {
-                        iterator.remove();
+            // Validate votes for the last block in set
+            Pair<Block, Channel> checkpoint = toImport.get(to);
+            Block block = checkpoint.getKey();
+            if (!chain.validateBlockVotes(block)) {
+                handleInvalidBlock(block, checkpoint.getValue());
+                return false;
+            }
 
-                        Block block = p.getKey(); // Validate votes for last block in set
-                        if (chain.validateBlockVotes(block)) {
-                            toFinalize.put(block.getNumber(), p);
-                            toComplete.remove(block.getNumber());
-                        } else {
-                            handleInvalidBlock(block, p.getValue());
-                            return;
-                        }
-                    } else {
-                        return;
-                    }
+            for (long n = to - 1; n >= from; n--) {
+                Pair<Block, Channel> current = toImport.get(n);
+                Pair<Block, Channel> child = toImport.get(n + 1);
+
+                if (!Arrays.equals(current.getKey().getHash(), child.getKey().getParentHash())) {
+                    toImport.remove(n);
+                    toDownload.add(n);
+
+                    handleInvalidBlock(current.getKey(), current.getValue());
+                    return false;
                 }
             }
+
+            return true;
         }
     }
 
@@ -534,10 +497,9 @@ public class SemuxSync implements SyncManager {
                 block.getNumber());
         synchronized (lock) {
             toDownload.add(block.getNumber());
-            toComplete.remove(block.getNumber());
-            currentSet.remove(Pair.of(block, channel));
-            toFinalize.remove(block.getNumber(), Pair.of(block, channel));
-            toProcess.remove(Pair.of(block, channel));
+            toReceive.remove(block.getNumber());
+            toImport.remove(block.getNumber(), Pair.of(block, channel));
+            toValidate.remove(Pair.of(block, channel));
         }
 
         badPeers.add(channel.getRemotePeer().getPeerId());

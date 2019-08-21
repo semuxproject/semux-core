@@ -779,7 +779,7 @@ public final class SemuxApiImpl implements SemuxApi {
         resp.setSuccess(false);
         resp.setMessage(message);
 
-        logger.info("Bad request: {}", message);
+        logger.error("Bad request: {}", message);
         return Response.status(BAD_REQUEST).entity(resp).build();
     }
 
