@@ -322,10 +322,7 @@ public class SemuxSync implements SyncManager {
             if (c.getRemotePeer().getLatestBlockNumber() >= task
                     && !badPeers.contains(c.getRemotePeer().getPeerId())) {
 
-                if (config.syncFastSync()
-                // TODO: enable this following check
-                /* && support(c.getRemotePeer().getCapabilities(), Capability.FAST_SYNC) */
-                ) {
+                if (config.syncFastSync() && support(c.getRemotePeer().getCapabilities(), Capability.FAST_SYNC)) {
                     boolean skipVotes = fastSync
                             && (task % config.spec().getValidatorUpdateInterval()) != 0
                             && task < target.get() - 5 * config.spec().getValidatorUpdateInterval(); // safe guard

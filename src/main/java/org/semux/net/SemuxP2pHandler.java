@@ -143,7 +143,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
 
         // To developer: set 0 to test old handshake, or set 1 to test new handshake.
 
-        return Math.random() < 0.5;
+        return Math.random() < 1;
     }
 
     @Override

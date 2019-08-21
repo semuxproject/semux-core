@@ -21,7 +21,7 @@
     <Loggers>
         <Logger name="org.semux.api" level="INFO" />
         <Logger name="org.semux.core" level="INFO" />
-        <Logger name="org.semux.consensus" level="DEBUG" />
+        <Logger name="org.semux.consensus" level="INFO" />
         <Logger name="org.semux.db" level="INFO" />
         <Logger name="org.semux.net" level="INFO" />
         <Logger name="org.semux.vm" level="INFO" />
