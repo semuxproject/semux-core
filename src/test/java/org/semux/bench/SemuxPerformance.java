@@ -102,7 +102,7 @@ public class SemuxPerformance {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         username = ConsoleUtil.readPassword("Please enter your API username: ");
         password = ConsoleUtil.readPassword("Please enter your API password: ");
 
@@ -114,13 +114,17 @@ public class SemuxPerformance {
         while (true) {
             int n = Integer.parseInt(ConsoleUtil.readLine("# transactions to send: ").trim());
             if (n > 0) {
-                switch (type) {
-                case "transfer":
-                    testTransfer(n);
-                    break;
-                case "call":
-                    testCall(n);
-                    break;
+                try {
+                    switch (type) {
+                    case "transfer":
+                        testTransfer(n);
+                        break;
+                    case "call":
+                        testCall(n);
+                        break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             } else {
                 break;
