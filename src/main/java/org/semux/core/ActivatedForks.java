@@ -139,7 +139,7 @@ public class ActivatedForks {
         // returns
         boolean activated = activatedBlocks >= fork.blocksRequired;
         if (activatedBlocks > 0) {
-            logger.info("Fork: name = {}, requirement = {} / {}, progress = {}",
+            logger.debug("Fork: name = {}, requirement = {} / {}, progress = {}",
                     fork.name(), fork.blocksRequired, fork.blocksToCheck, activatedBlocks);
         }
 
