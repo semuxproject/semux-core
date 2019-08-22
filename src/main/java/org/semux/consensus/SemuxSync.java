@@ -411,7 +411,7 @@ public class SemuxSync implements SyncManager {
         }
 
         synchronized (lock) {
-            // Add missing blocks to currentBlockBatch
+            // Move blocks from validate queue to import queue if within range
             Iterator<Pair<Block, Channel>> iterator = toValidate.iterator();
             while (iterator.hasNext()) {
                 Pair<Block, Channel> p = iterator.next();
@@ -436,9 +436,8 @@ public class SemuxSync implements SyncManager {
                         Pair<Block, Channel> p = toImport.remove(n);
                         boolean imported = chain.importBlock(p.getKey(), false);
                         if (!imported) {
-                            // This should never happen
-                            toDownload.add(n);
                             handleInvalidBlock(p.getKey(), p.getValue());
+                            break;
                         }
 
                         if (n == checkpoint) {
@@ -476,9 +475,6 @@ public class SemuxSync implements SyncManager {
                 Pair<Block, Channel> child = toImport.get(n + 1);
 
                 if (!Arrays.equals(current.getKey().getHash(), child.getKey().getParentHash())) {
-                    toImport.remove(n);
-                    toDownload.add(n);
-
                     handleInvalidBlock(current.getKey(), current.getValue());
                     return false;
                 }
@@ -500,10 +496,12 @@ public class SemuxSync implements SyncManager {
         logger.info("Invalid block, peer = {}:{}, block # = {}", a.getAddress().getHostAddress(), a.getPort(),
                 block.getNumber());
         synchronized (lock) {
+            // add to the request queue
             toDownload.add(block.getNumber());
+
             toReceive.remove(block.getNumber());
-            toImport.remove(block.getNumber(), Pair.of(block, channel));
             toValidate.remove(Pair.of(block, channel));
+            toImport.remove(block.getNumber());
         }
 
         badPeers.add(channel.getRemotePeer().getPeerId());
