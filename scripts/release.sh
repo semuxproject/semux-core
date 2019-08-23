@@ -1,41 +1,43 @@
 #!/bin/sh
 
-commit=`git rev-parse --short=7 HEAD`
-version=`cat pom.xml | grep '^    <version>.*</version>$' | awk -F'[><]' '{print $3}'`
-version="$version-$commit"
+# Change the work directory
+cd "$(dirname "$0")/.."
+
+# Extract the name, version and revision
 name=semux
+version=`cat pom.xml | grep '^    <version>.*</version>$' | awk -F'[><]' '{print $3}'`
+revision=`git rev-parse --short=7 HEAD`
+label="$version-$revision"
 
-# change work directory
-cd "$(dirname "$0")/../"
-
-# build
+# Make a clean build
 mvn clean install -DskipTests || exit
 
-# go to dist
+# Navigate to the dist folder
 cd dist
 
-# Windows
-WINDIST=${name}-windows-${version}
-WINBALL=${WINDIST}.zip
-mv windows ${WINDIST}
-zip -r ${WINBALL} ${WINDIST} || exit
+# Make a Windows release
+folder=$name-windows-$label
+archive=$folder.zip
+mv windows $folder
+zip -r $archive $folder || exit
+sha256sum $archive > $archive.sha256 || exit
+gpg --detach-sign --armor $archive || exit
+rm -fr $folder || exit
 
-# Linux
-LINUXDIST=${name}-linux-${version}
-LINUXBALL=${name}-linux-${version}.tar.gz
-mv linux ${LINUXDIST}
-tar -czvf ${LINUXBALL} ${LINUXDIST} || exit
+# Make a Linux release
+folder=$name-linux-$label
+archive=$folder.tar.gz
+mv linux $folder
+tar -czvf $archive $folder || exit
+sha256sum $archive > $archive.sha256 || exit
+gpg --detach-sign --armor $archive || exit
+rm -fr $folder || exit
 
-# macOS
-MACDIST=${name}-macos-${version}
-MACBALL=${name}-macos-${version}.tar.gz
-mv macos ${MACDIST}
-tar -czvf ${MACBALL} ${MACDIST} || exit
-
-# Checksum
-sha256sum *.tar.gz *.zip > sha256.txt
-
-# clean
-rm -r ${name}-windows-${version}
-rm -r ${name}-linux-${version} 
-rm -r ${name}-macos-${version}
+# Make a macOS release
+folder=$name-macos-$label
+archive=$folder.tar.gz
+mv macos $folder
+tar -czvf $archive $folder || exit
+sha256sum $archive > $archive.sha256 || exit
+gpg --detach-sign --armor $archive || exit
+rm -fr $folder || exit
