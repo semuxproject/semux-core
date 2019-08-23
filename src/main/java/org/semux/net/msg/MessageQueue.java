@@ -86,8 +86,8 @@ public class MessageQueue {
      * Returns if this message queue is idle.
      *
      * NOTE that requests are no longer kept in the queue after we send them out.
-     * even through the message queue is idle, from our perspective, the peer
-     * may still be busy responding our requests.
+     * even through the message queue is idle, from our perspective, the peer may
+     * still be busy responding our requests.
      *
      * @return true if message queues are empty, otherwise false
      */
