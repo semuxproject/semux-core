@@ -23,6 +23,7 @@ import org.semux.net.SemuxChannelInitializer;
 import org.semux.net.msg.p2p.PingMessage;
 import org.semux.net.msg.p2p.PongMessage;
 import org.semux.rules.KernelRule;
+import org.semux.util.TimeUtil;
 
 public class MessageQueueTest {
 
@@ -64,10 +65,10 @@ public class MessageQueueTest {
         client.connect(remoteNode, ci).sync();
 
         long maxWaitTime = 30_000;
-        long startTime = System.currentTimeMillis();
+        long startTime = TimeUtil.currentTimeMillis();
         while (kernel2.getChannelManager().getActiveChannels().isEmpty()) {
             Thread.sleep(100);
-            if (System.currentTimeMillis() - startTime > maxWaitTime) {
+            if (TimeUtil.currentTimeMillis() - startTime > maxWaitTime) {
                 fail("Took too long to connect peers");
             }
         }

@@ -67,7 +67,7 @@ public class PendingManager implements Runnable, BlockchainListener {
     private static final int QUEUE_SIZE_LIMIT = 128 * 1024;
     private static final int VALID_TXS_LIMIT = 16 * 1024;
     private static final int LARGE_NONCE_TXS_LIMIT = 32 * 1024;
-    private static final int PROCESSED_TXS_LIMIT = 256 * 1024;
+    private static final int PROCESSED_TXS_LIMIT = 128 * 1024;
 
     private final Kernel kernel;
     private final BlockStore blockStore;
@@ -291,7 +291,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
             // process the transaction
             int accepted = processTransaction(entry.getValue(), false, false).accepted;
-            processedTxs.put(entry.getKey(), System.currentTimeMillis());
+            processedTxs.put(entry.getKey(), TimeUtil.currentTimeMillis());
 
             // include one tx per call
             if (accepted > 0) {
@@ -422,7 +422,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         Block prevBlock = chain.getLatestBlock();
         BlockHeader blockHeader = new BlockHeader(
                 prevBlock.getNumber() + 1,
-                new Key().toAddress(), prevBlock.getHash(), System.currentTimeMillis(), Bytes.EMPTY_BYTES,
+                new Key().toAddress(), prevBlock.getHash(), TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES,
                 Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
         return new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
     }

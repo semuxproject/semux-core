@@ -35,7 +35,6 @@ import org.semux.core.SyncManager;
 import org.semux.net.NodeManager.Node;
 import org.semux.net.msg.Message;
 import org.semux.net.msg.MessageQueue;
-import org.semux.net.msg.MessageWrapper;
 import org.semux.net.msg.ReasonCode;
 import org.semux.net.msg.consensus.BlockHeaderMessage;
 import org.semux.net.msg.consensus.BlockMessage;
@@ -213,7 +212,6 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, Message msg) throws InterruptedException {
         logger.trace("Received message: {}", msg);
-        MessageWrapper request = msgQueue.onMessageReceived(msg);
 
         switch (msg.getCode()) {
         /* p2p */
@@ -232,7 +230,7 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
             onPing();
             break;
         case PONG:
-            onPong(request);
+            onPong();
             break;
         case GET_NODES:
             onGetNodes();
@@ -338,14 +336,17 @@ public class SemuxP2pHandler extends SimpleChannelInboundHandler<Message> {
         onHandshakeDone(peer);
     }
 
+    private long lastPing;
+
     protected void onPing() {
         PongMessage pong = new PongMessage();
         msgQueue.sendMessage(pong);
+        lastPing = TimeUtil.currentTimeMillis();
     }
 
-    protected void onPong(MessageWrapper request) {
-        if (request != null) {
-            long latency = TimeUtil.currentTimeMillis() - request.getLastTimestamp();
+    protected void onPong() {
+        if (lastPing > 0) {
+            long latency = TimeUtil.currentTimeMillis() - lastPing;
             channel.getRemotePeer().setLatency(latency);
         }
     }

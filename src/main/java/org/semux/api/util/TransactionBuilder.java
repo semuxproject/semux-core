@@ -15,6 +15,7 @@ import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
 
 /**
  * This is a builder class for building transactions required by Semux API with
@@ -266,7 +267,7 @@ public class TransactionBuilder {
 
         Long timestamp = this.timestamp;
         if (timestamp == null) {
-            timestamp = System.currentTimeMillis();
+            timestamp = TimeUtil.currentTimeMillis();
         }
 
         byte[] data = this.data;

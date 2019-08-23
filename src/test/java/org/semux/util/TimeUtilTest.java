@@ -42,7 +42,7 @@ public class TimeUtilTest {
 
     @Test
     public void testNtpTime() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = TimeUtil.currentTimeMillis();
         long offset = TimeUtil.getTimeOffsetFromNtp();
         // ensure the time is within the actual time offset.
         Assert.assertTrue(Math.abs(currentTime + offset - TimeUtil.currentTimeMillis()) < 1000);

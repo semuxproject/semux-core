@@ -90,7 +90,7 @@ public class PrecompiledContractTest {
         as.setCode(to, contract);
 
         SemuxBlock block = new SemuxBlock(
-                new BlockHeader(123, Bytes.random(20), Bytes.random(20), System.currentTimeMillis(),
+                new BlockHeader(123, Bytes.random(20), Bytes.random(20), TimeUtil.currentTimeMillis(),
                         Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
                 config.spec().maxBlockGasLimit());
         as.adjustAvailable(from, Amount.of(1000, SEM));

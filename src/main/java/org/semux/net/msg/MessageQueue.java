@@ -32,7 +32,7 @@ public class MessageQueue {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageQueue.class);
 
-    private static final ScheduledExecutorService timer = Executors.newScheduledThreadPool(2, new ThreadFactory() {
+    private static final ScheduledExecutorService timer = Executors.newScheduledThreadPool(4, new ThreadFactory() {
         private final AtomicInteger cnt = new AtomicInteger(0);
 
         public Thread newThread(Runnable r) {
@@ -42,9 +42,8 @@ public class MessageQueue {
 
     private final Config config;
 
-    private final Queue<MessageWrapper> requests = new ConcurrentLinkedQueue<>();
-    private final Queue<MessageWrapper> responses = new ConcurrentLinkedQueue<>();
-    private final Queue<MessageWrapper> prioritizedResponses = new ConcurrentLinkedQueue<>();
+    private final Queue<Message> queue = new ConcurrentLinkedQueue<>();
+    private final Queue<Message> prioritized = new ConcurrentLinkedQueue<>();
 
     private ChannelHandlerContext ctx;
     private ScheduledFuture<?> timerTask;
@@ -73,7 +72,7 @@ public class MessageQueue {
             } catch (Exception t) {
                 logger.error("Exception in MessageQueue", t);
             }
-        }, 1, 1, TimeUnit.MILLISECONDS);
+        }, 10, 10, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -86,7 +85,11 @@ public class MessageQueue {
     /**
      * Returns if this message queue is idle.
      *
-     * @return true if request/response queues are empty, otherwise false
+     * NOTE that requests are no longer kept in the queue after we send them out.
+     * even through the message queue is idle, from our perspective, the peer
+     * may still be busy responding our requests.
+     *
+     * @return true if message queues are empty, otherwise false
      */
     public boolean isIdle() {
         return size() == 0;
@@ -115,41 +118,17 @@ public class MessageQueue {
      *         false
      */
     public boolean sendMessage(Message msg) {
-        int maxQueueSize = config.netMaxMessageQueueSize();
-        if (size() >= maxQueueSize) {
+        if (size() >= config.netMaxMessageQueueSize()) {
             disconnect(ReasonCode.MESSAGE_QUEUE_FULL);
             return false;
         }
 
-        if (msg.getResponseMessageClass() != null) {
-            requests.add(new MessageWrapper(msg));
+        if (config.netPrioritizedMessages().contains(msg.getCode())) {
+            prioritized.add(msg);
         } else {
-            if (config.netPrioritizedMessages().contains(msg.getCode())) {
-                prioritizedResponses.add(new MessageWrapper(msg));
-            } else {
-                responses.add(new MessageWrapper(msg));
-            }
+            queue.add(msg);
         }
         return true;
-    }
-
-    /**
-     * Notifies this message queue that a new message has been received.
-     *
-     * @param msg
-     */
-    public MessageWrapper onMessageReceived(Message msg) {
-        if (requests.peek() != null) {
-            MessageWrapper mw = requests.peek();
-            Message m = mw.getMessage();
-
-            if (m.getResponseMessageClass() != null && msg.getClass() == m.getResponseMessageClass()) {
-                mw.answer();
-                return mw;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -158,39 +137,25 @@ public class MessageQueue {
      * @return
      */
     public int size() {
-        return requests.size() + responses.size() + prioritizedResponses.size();
+        return queue.size() + prioritized.size();
     }
 
     protected void nudgeQueue() {
-        removeAnsweredMessage(requests.peek());
-
-        // send responses
-        sendToWire(prioritizedResponses.poll());
-        sendToWire(responses.poll());
-
-        // send requests
-        sendToWire(requests.peek());
-    }
-
-    protected void removeAnsweredMessage(MessageWrapper mw) {
-        if (mw != null && mw.isAnswered()) {
-            requests.remove();
+        // 1000 / 10 * 5 = 500 messages per second
+        int n = Math.min(5, size());
+        if (n == 0) {
+            return;
         }
-    }
 
-    protected void sendToWire(MessageWrapper mw) {
-        if (mw != null && mw.getRetries() == 0) {
-            Message msg = mw.getMessage();
+        // write out n messages
+        for (int i = 0; i < n; i++) {
+            Message msg = !prioritized.isEmpty() ? prioritized.poll() : queue.poll();
 
             logger.trace("Wiring message: {}", msg);
-            ctx.writeAndFlush(msg).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-            logger.trace("Message {} to {} took {} ms", msg.code, ctx.channel().remoteAddress(),
-                    TimeUtil.currentTimeMillis() - mw.getLastTimestamp());
-
-            if (msg.getResponseMessageClass() != null) {
-                mw.increaseRetries();
-                mw.saveTime();
-            }
+            ctx.write(msg).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
+
+        // flush
+        ctx.flush();
     }
 }

@@ -60,7 +60,7 @@ public class PeerServer {
 
         try {
             bossGroup = new NioEventLoopGroup(1, factory);
-            workerGroup = new NioEventLoopGroup(0, factory);
+            workerGroup = new NioEventLoopGroup(4, factory);
 
             ServerBootstrap b = new ServerBootstrap();
 

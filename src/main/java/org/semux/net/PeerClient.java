@@ -73,7 +73,7 @@ public class PeerClient {
         this.port = port;
         this.coinbase = coinbase;
 
-        this.workerGroup = new NioEventLoopGroup(0, factory);
+        this.workerGroup = new NioEventLoopGroup(4, factory);
     }
 
     /**

@@ -72,7 +72,7 @@ public class VmTransactionTest {
         doReturn(true).when(chain).isForkActivated(any());
 
         block = new SemuxBlock(
-                new BlockHeader(1, Bytes.random(20), Bytes.random(32), System.currentTimeMillis(),
+                new BlockHeader(1, Bytes.random(20), Bytes.random(32), TimeUtil.currentTimeMillis(),
                         Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
                 config.spec().maxBlockGasLimit());
     }
