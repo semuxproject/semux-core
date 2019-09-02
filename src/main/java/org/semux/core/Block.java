@@ -204,21 +204,32 @@ public class Block {
      * @return
      */
     public boolean validateResults(BlockHeader header, List<TransactionResult> results) {
+        long number = header.getNumber();
+
         // validate results
         for (int i = 0; i < results.size(); i++) {
             TransactionResult result = results.get(i);
             if (result.getCode().isRejected()) {
-                logger.warn("Transaction #{} rejected: code = {}", i, result.getCode());
+                logger.warn("Transaction #{} in block #{} rejected: code = {}", i, number, result.getCode());
                 return false;
             }
         }
+
+        // ======== shitty fix begins ========
+        // TODO: replace with hashes
+        if (number == 1646369 || number == 1646386 || number == 1646391) {
+            // Call to pre-compiled contract failed
+            return true;
+        }
+        // ======== shitty fix ends ========
 
         // validate results root
         byte[] root = MerkleUtil.computeResultsRoot(results);
         boolean rootMatches = Arrays.equals(root, header.getResultsRoot());
         if (!rootMatches) {
-            logger.warn("Transaction results Merkle root doesn't match");
+            logger.warn("Transaction result root doesn't match in block #{}", number);
         }
+
         return rootMatches;
     }
 
