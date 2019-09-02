@@ -27,7 +27,6 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionReceipt;
-import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.semux.Kernel;
 import org.semux.api.util.TransactionBuilder;
@@ -639,43 +638,10 @@ public final class SemuxApiImpl implements SemuxApi {
         return doTransaction(TransactionType.UNVOTE, from, to, value, fee, nonce, null, null, null);
     }
 
-    private TransactionReceipt executeTransactionLocally(String to, String from, String value, String nonce,
-            String data, String gas, String gasPrice) {
-        TransactionBuilder transactionBuilder = new TransactionBuilder(kernel)
-                .withType("CALL")
-                .withTo(to)
-                .withFrom(from)
-                .withValue(value)
-                .withNonce(nonce)
-                .withData(data);
-
-        if (gas == null) {
-            transactionBuilder.withGas(Long.toString(kernel.getConfig().spec().maxBlockGasLimit()));
-        }
-        if (gasPrice == null) {
-            transactionBuilder.withGasPrice("1");
-        }
-
-        SemuxTransaction transaction = new SemuxTransaction(transactionBuilder.buildUnsigned());
-        SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(),
-                kernel.getConfig().spec().maxBlockGasLimit());
-        Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState(),
-                kernel.getBlockchain().getDelegateState());
-        ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
-        BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
-        long gasUsedInBlock = 0;
-
-        org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
-                transaction, block, repository, blockStore,
-                kernel.getConfig().spec().vmSpec(), invokeFactory, gasUsedInBlock, true);
-
-        return executor.run();
-    }
-
     @Override
     public Response localCall(String to, String from, String value, String nonce, String data, String gas,
             String gasPrice) {
-        TransactionReceipt receipt = executeTransactionLocally(to, from, value, nonce, data, gas, gasPrice);
+        TransactionReceipt receipt = doLocalCall(to, from, value, nonce, data, gas, gasPrice);
         if (receipt == null || !receipt.isSuccess()) {
             return badRequest("Failed to call");
         } else {
@@ -688,7 +654,7 @@ public final class SemuxApiImpl implements SemuxApi {
     @Override
     public Response estimateGas(String to, String from, String value, String nonce, String data, String gas,
             String gasPrice) {
-        TransactionReceipt receipt = executeTransactionLocally(to, from, value, nonce, data, gas, gasPrice);
+        TransactionReceipt receipt = doLocalCall(to, from, value, nonce, data, gas, gasPrice);
         if (receipt == null || !receipt.isSuccess()) {
             return badRequest("Failed to estimate the gas usage");
         } else {
@@ -846,6 +812,33 @@ public final class SemuxApiImpl implements SemuxApi {
         } catch (IllegalArgumentException ex) {
             return badRequest(ex.getMessage());
         }
+    }
+
+    private TransactionReceipt doLocalCall(String to, String from, String value, String nonce, String data, String gas,
+            String gasPrice) {
+
+        TransactionType type = TransactionType.CALL;
+        String fee = "0";
+        gas = (gas != null) ? gas : Long.toString(kernel.getConfig().spec().maxBlockGasLimit());
+        gasPrice = (gasPrice != null) ? gasPrice : "1";
+        from = (from != null) ? from : kernel.getCoinbase().toAddressString();
+
+        Transaction tx = getTransaction(type, from, to, value, fee, nonce, data, gas, gasPrice);
+
+        // simulated environment
+        SemuxTransaction transaction = new SemuxTransaction(tx);
+        SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(),
+                kernel.getConfig().spec().maxBlockGasLimit());
+        Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState(),
+                kernel.getBlockchain().getDelegateState());
+        BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
+
+        // execute transaction
+        org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
+                transaction, block, repository, blockStore,
+                kernel.getConfig().spec().vmSpec(), new ProgramInvokeFactoryImpl(), 0, true);
+
+        return executor.run();
     }
 
     private static final String IP_ADDRESS_PATTERN = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
