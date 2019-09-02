@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Network;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
@@ -136,6 +137,11 @@ public class Block {
             return false;
         }
 
+        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
+            logger.warn("Header coinbase was a reserved address");
+            return false;
+        }
+
         return true;
     }
 
@@ -199,9 +205,10 @@ public class Block {
      */
     public boolean validateResults(BlockHeader header, List<TransactionResult> results) {
         // validate results
-        for (TransactionResult result : results) {
+        for (int i = 0; i < results.size(); i++) {
+            TransactionResult result = results.get(i);
             if (result.getCode().isRejected()) {
-                logger.warn("Transaction result does not match for " + result.toString());
+                logger.warn("Transaction #{} rejected: code = {}", i, result.getCode());
                 return false;
             }
         }
@@ -210,7 +217,7 @@ public class Block {
         byte[] root = MerkleUtil.computeResultsRoot(results);
         boolean rootMatches = Arrays.equals(root, header.getResultsRoot());
         if (!rootMatches) {
-            logger.warn("Merkle root does not match expected");
+            logger.warn("Transaction results Merkle root doesn't match");
         }
         return rootMatches;
     }

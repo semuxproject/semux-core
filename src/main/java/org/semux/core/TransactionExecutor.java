@@ -45,7 +45,6 @@ public class TransactionExecutor {
     private static final boolean TRACE_VM = false;
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
-
     private static final boolean[] delegateNameAllowedChars = new boolean[256];
     private static PrintStream tracer;
 
@@ -95,6 +94,7 @@ public class TransactionExecutor {
     public TransactionExecutor(Config config, BlockStore blockStore) {
         this.config = config;
         this.blockStore = blockStore;
+
     }
 
     /**
@@ -300,7 +300,7 @@ public class TransactionExecutor {
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
-                config.spec().vmSpec(), invokeFactory, gasUsedInBlock, false);
+                config.spec().vmSpec(), invokeFactory, gasUsedInBlock);
 
         TransactionReceipt summary = executor.run();
 

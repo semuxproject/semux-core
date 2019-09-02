@@ -666,22 +666,21 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public boolean importBlock(Block block, boolean validateVotes) {
-        AccountState as = this.getAccountState().track();
-        DelegateState ds = this.getDelegateState().track();
-        return validateBlock(block, as, ds, validateVotes) && applyBlock(block, as, ds);
+        AccountState asTrack = this.getAccountState().track();
+        DelegateState dsTrack = this.getDelegateState().track();
+        return validateBlock(block, asTrack, dsTrack, validateVotes) && applyBlock(block, asTrack, dsTrack);
     }
 
     /**
      * Validate the block. Votes are validated only if validateVotes is true.
      *
      * @param block
-     * @param asSnapshot
-     * @param dsSnapshot
+     * @param asTrack
+     * @param dsTrack
      * @param validateVotes
      * @return
      */
-    protected boolean validateBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot,
-            boolean validateVotes) {
+    protected boolean validateBlock(Block block, AccountState asTrack, DelegateState dsTrack, boolean validateVotes) {
         try {
             BlockHeader header = block.getHeader();
             List<Transaction> transactions = block.getTransactions();
@@ -693,7 +692,8 @@ public class BlockchainImpl implements Blockchain {
                 return false;
             }
 
-            // validate checkpoint
+            // [?] additional checks by block importer
+            // - check points
             if (config.checkpoints().containsKey(header.getNumber()) &&
                     !Arrays.equals(header.getHash(), config.checkpoints().get(header.getNumber()))) {
                 logger.error("Checkpoint validation failed, checkpoint is {} => {}, getting {}", header.getNumber(),
@@ -702,19 +702,11 @@ public class BlockchainImpl implements Blockchain {
                 return false;
             }
 
-            // blocks should never be forged by coinbase magic account
-            if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
-                logger.error("A block forged by the coinbase magic account is not allowed");
-                return false;
-            }
-
-            // [2] check transactions; receipts are not validated because they will be
-            // replaced later
+            // [2] check transactions
             if (!block.validateTransactions(header, transactions, config.network())) {
-                logger.error("Invalid block transactions");
+                logger.error("Invalid transactions");
                 return false;
             }
-
             if (transactions.stream().anyMatch(tx -> this.hasTransaction(tx.getHash()))) {
                 logger.error("Duplicated transaction hash is not allowed");
                 return false;
@@ -722,11 +714,10 @@ public class BlockchainImpl implements Blockchain {
 
             // [3] evaluate transactions
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
-            List<TransactionResult> results = transactionExecutor.execute(transactions, asSnapshot, dsSnapshot,
+            List<TransactionResult> results = transactionExecutor.execute(transactions, asTrack, dsTrack,
                     new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this, 0);
-
             if (!block.validateResults(header, results)) {
-                logger.error("Invalid transactions");
+                logger.error("Invalid transaction results");
                 return false;
             }
             block.setResults(results); // overwrite the results
@@ -790,17 +781,17 @@ public class BlockchainImpl implements Blockchain {
         return true;
     }
 
-    protected boolean applyBlock(Block block, AccountState asSnapshot, DelegateState dsSnapshot) {
+    protected boolean applyBlock(Block block, AccountState asTrack, DelegateState dsTrack) {
         // [5] apply block reward and tx fees
         Amount reward = Block.getBlockReward(block, config);
 
         if (reward.isPositive()) {
-            asSnapshot.adjustAvailable(block.getCoinbase(), reward);
+            asTrack.adjustAvailable(block.getCoinbase(), reward);
         }
 
         // [6] commit the updates
-        asSnapshot.commit();
-        dsSnapshot.commit();
+        asTrack.commit();
+        dsTrack.commit();
 
         ReentrantReadWriteLock.WriteLock writeLock = this.stateLock.writeLock();
         writeLock.lock();
@@ -896,6 +887,7 @@ public class BlockchainImpl implements Blockchain {
                 if (!result) {
                     break;
                 }
+
                 if (i % 1000 == 0) {
                     PubSubFactory.getDefault().publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
                     logger.info("Loaded {} / {} blocks", i, latestBlockNumber);

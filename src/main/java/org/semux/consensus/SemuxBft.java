@@ -104,9 +104,6 @@ public class SemuxBft implements BftManager {
 
     protected Key coinbase;
 
-    protected AccountState accountState;
-    protected DelegateState delegateState;
-
     protected Timer timer;
     protected Broadcaster broadcaster;
     protected BlockingQueue<Event> events = new LinkedBlockingQueue<>();
@@ -139,9 +136,6 @@ public class SemuxBft implements BftManager {
         this.pendingMgr = kernel.getPendingManager();
         this.syncMgr = kernel.getSyncManager();
         this.coinbase = kernel.getCoinbase();
-
-        this.accountState = chain.getAccountState();
-        this.delegateState = chain.getDelegateState();
 
         this.timer = new Timer();
         this.broadcaster = new Broadcaster();
@@ -751,6 +745,9 @@ public class SemuxBft implements BftManager {
      * @return the proposed block
      */
     protected Block proposeBlock() {
+        AccountState asTrack = chain.getAccountState().track();
+        DelegateState dsTrack = chain.getDelegateState().track();
+
         long t1 = TimeUtil.currentTimeMillis();
 
         // construct block template
@@ -769,8 +766,6 @@ public class SemuxBft implements BftManager {
         final List<Transaction> includedTxs = new ArrayList<>();
         final List<TransactionResult> includedResults = new ArrayList<>();
 
-        AccountState as = accountState.track();
-        DelegateState ds = delegateState.track();
         TransactionExecutor exec = new TransactionExecutor(config, blockStore);
         SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
@@ -785,7 +780,7 @@ public class SemuxBft implements BftManager {
             }
 
             // re-evaluate the transaction
-            TransactionResult result = exec.execute(tx, as, ds, semuxBlock, chain, 0);
+            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, chain, 0);
             if (result.getCode().isAcceptable()) {
                 long gasUsed = tx.isVMTransaction() ? result.getGasUsed() : config.spec().nonVMTransactionGasCost();
                 includedTxs.add(tx);
@@ -814,6 +809,9 @@ public class SemuxBft implements BftManager {
      */
     protected boolean validateBlockProposal(BlockHeader header, List<Transaction> transactions) {
         try {
+            AccountState asTrack = chain.getAccountState().track();
+            DelegateState dsTrack = chain.getDelegateState().track();
+
             Block block = new Block(header, transactions);
             long t1 = TimeUtil.currentTimeMillis();
 
@@ -824,49 +822,38 @@ public class SemuxBft implements BftManager {
                 return false;
             }
 
+            // [?] additional checks by consensus
+            // - disallow block time drifting;
+            // - restrict the coinbase to be the proposer
             if (header.getTimestamp() - TimeUtil.currentTimeMillis() > config.bftMaxBlockTimeDrift()) {
                 logger.warn("A block in the future is not allowed");
                 return false;
             }
-
-            if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
-                logger.warn("A block forged by the coinbase magic account is not allowed");
-                return false;
-            }
-
             if (!Arrays.equals(header.getCoinbase(), proposal.getSignature().getAddress())) {
                 logger.warn("The coinbase should always equal to the proposer's address");
                 return false;
             }
 
-            // [2] check transactions and results (skipped)
+            // [2] check transactions
             List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
-
             if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
-                logger.warn("Invalid block transactions");
+                logger.warn("Invalid transactions");
                 return false;
             }
-
             if (transactions.stream().anyMatch(tx -> chain.hasTransaction(tx.getHash()))) {
                 logger.warn("Duplicated transaction hash is not allowed");
                 return false;
             }
 
-            AccountState as = accountState.track();
-            DelegateState ds = delegateState.track();
-            TransactionExecutor exec = new TransactionExecutor(config, blockStore);
-
             // [3] evaluate transactions
-            // When we are applying or validating block, we do not track transactions
-            // against our own local limit, only when proposing
-            List<TransactionResult> results = exec.execute(transactions, as, ds,
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
+            List<TransactionResult> results = transactionExecutor.execute(transactions, asTrack, dsTrack,
                     new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain, 0);
-            block.setResults(results);
-
             if (!block.validateResults(header, results)) {
-                logger.warn("Invalid transactions");
+                logger.error("Invalid transaction results");
                 return false;
             }
+            block.setResults(results); // overwrite the results
 
             long t2 = TimeUtil.currentTimeMillis();
             logger.debug("Block validation: # txs = {}, time = {} ms", transactions.size(), t2 - t1);
