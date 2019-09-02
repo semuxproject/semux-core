@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -302,31 +303,37 @@ public class TransactionExecutor {
                 transaction, block, repository, blockStore,
                 config.spec().vmSpec(), invokeFactory, gasUsedInBlock);
 
-        TransactionReceipt summary = executor.run();
+        TransactionReceipt receipt = executor.run();
 
-        if (summary == null) {
+        if (receipt == null) {
             result.setCode(Code.INVALID);
         } else {
-            if (tracer != null) {
-                tracer.println();
-                tracer.println(Hex.encode(tx.getHash()));
-                tracer.println(summary);
-                tracer.flush();
-            }
+            // ======== shitty fix begins ========
+            // TODO: respect REVERT by forking?
+            long gasUsed = receipt.isSuccess() ? receipt.getGasUsed() : tx.getGas();
+            as.adjustAvailable(tx.getFrom(), tx.getGasPrice().multiply(gasUsed - receipt.getGasUsed()).negate());
+            // ======== shitty fix ends ========
 
-            result.setCode(summary.isSuccess() ? Code.SUCCESS : Code.FAILURE);
-            result.setReturnData(summary.getReturnData());
-            for (LogInfo log : summary.getLogs()) {
+            // build result based on the transaction receipt by VM
+            result.setCode(receipt.isSuccess() ? Code.SUCCESS : Code.FAILURE);
+            result.setReturnData(receipt.getReturnData());
+            for (LogInfo log : receipt.getLogs()) {
                 result.addLog(log);
             }
-
-            result.setGas(tx.getGas(), tx.getGasPrice(), summary.getGasUsed());
-
+            result.setGas(tx.getGas(), tx.getGasPrice(), gasUsed);
             result.setBlockNumber(block.getNumber());
-            result.setInternalTransactions(summary.getInternalTransactions()
+            result.setInternalTransactions(receipt.getInternalTransactions()
                     .stream()
                     .map(SemuxInternalTransaction::new)
                     .collect(Collectors.toList()));
+
+            // log the transaction result
+            if (tracer != null) {
+                tracer.println();
+                tracer.println(Hex.encode(tx.getHash()));
+                tracer.println(result);
+                tracer.flush();
+            }
         }
     }
 
