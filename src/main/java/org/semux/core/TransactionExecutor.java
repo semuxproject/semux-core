@@ -6,6 +6,10 @@
  */
 package org.semux.core;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,7 +27,9 @@ import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
+import org.semux.util.SystemUtil;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxInternalTransaction;
 import org.semux.vm.client.SemuxRepository;
@@ -36,13 +42,25 @@ import org.slf4j.LoggerFactory;
  */
 public class TransactionExecutor {
 
+    private static final boolean TRACE_VM = false;
+
     private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
 
-    private static final boolean[] valid = new boolean[256];
+    private static final boolean[] delegateNameAllowedChars = new boolean[256];
+    private static PrintStream tracer;
 
     static {
         for (byte b : Bytes.of("abcdefghijklmnopqrstuvwxyz0123456789_")) {
-            valid[b & 0xff] = true;
+            delegateNameAllowedChars[b & 0xff] = true;
+        }
+
+        if (TRACE_VM) {
+            try {
+                tracer = new PrintStream(new FileOutputStream(new File("trace.txt"), true));
+            } catch (FileNotFoundException e) {
+                logger.error("Failed to setup VM tracer", e);
+                SystemUtil.exit(SystemUtil.Code.FAILED_TO_SETUP_TRACER);
+            }
         }
     }
 
@@ -59,7 +77,7 @@ public class TransactionExecutor {
         }
 
         for (byte b : data) {
-            if (!valid[b & 0xff]) {
+            if (!delegateNameAllowedChars[b & 0xff]) {
                 return false;
             }
         }
@@ -289,6 +307,13 @@ public class TransactionExecutor {
         if (summary == null) {
             result.setCode(Code.INVALID);
         } else {
+            if (tracer != null) {
+                tracer.println();
+                tracer.println(Hex.encode(tx.getHash()));
+                tracer.println(summary);
+                tracer.flush();
+            }
+
             result.setCode(summary.isSuccess() ? Code.SUCCESS : Code.FAILURE);
             result.setReturnData(summary.getReturnData());
             for (LogInfo log : summary.getLogs()) {
