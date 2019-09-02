@@ -640,26 +640,23 @@ public class BlockchainImpl implements Blockchain {
         Set<Fork> set = new HashSet<>();
 
         if (config.forkUniformDistributionEnabled()) {
-            Fork fork = UNIFORM_DISTRIBUTION;
-            Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
-            long number = getLatestBlockNumber() + 1;
-
-            if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
-                set.add(fork);
-            }
+            addFork(set, UNIFORM_DISTRIBUTION);
         }
 
         if (config.forkVirtualMachineEnabled()) {
-            Fork fork = VIRTUAL_MACHINE;
-            Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
-            long number = getLatestBlockNumber() + 1;
-
-            if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
-                set.add(fork);
-            }
+            addFork(set, VIRTUAL_MACHINE);
         }
 
         return set.isEmpty() ? new BlockHeaderData().toBytes() : new BlockHeaderData(ForkSignalSet.of(set)).toBytes();
+    }
+
+    private void addFork(Set<Fork> set, Fork fork) {
+        Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
+        long number = getLatestBlockNumber() + 1;
+
+        if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
+            set.add(fork);
+        }
     }
 
     @Override
@@ -875,7 +872,7 @@ public class BlockchainImpl implements Blockchain {
         }
     }
 
-    private static void upgrade(Config config, DatabaseFactory dbFactory) {
+    public static void upgrade(Config config, DatabaseFactory dbFactory) {
         try {
             logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
 

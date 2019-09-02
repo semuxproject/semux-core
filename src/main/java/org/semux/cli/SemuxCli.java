@@ -20,12 +20,15 @@ import org.semux.Launcher;
 import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.config.exception.ConfigException;
+import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis;
 import org.semux.core.Wallet;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.bip39.MnemonicGenerator;
+import org.semux.db.DatabaseFactory;
+import org.semux.db.LeveldbDatabase;
 import org.semux.exception.LauncherException;
 import org.semux.message.CliMessages;
 import org.semux.net.filter.exception.IpFilterJsonParseException;
@@ -112,6 +115,12 @@ public class SemuxCli extends Launcher {
                 .hasArg(true).optionalArg(false).argName("key").type(String.class)
                 .build();
         addOption(importPrivateKeyOption);
+
+        Option reindexOption = Option.builder()
+                .longOpt(SemuxOption.REINDEX.toString())
+                .desc(CliMessages.get("ReindexDescription"))
+                .build();
+        addOption(reindexOption);
     }
 
     public void start(String[] args) throws ParseException, IOException {
@@ -142,6 +151,9 @@ public class SemuxCli extends Launcher {
         } else if (cmd.hasOption(SemuxOption.IMPORT_PRIVATE_KEY.toString())) {
             importPrivateKey(cmd.getOptionValue(SemuxOption.IMPORT_PRIVATE_KEY.toString()).trim());
 
+        } else if (cmd.hasOption(SemuxOption.REINDEX.toString())) {
+            reindex();
+
         } else {
             start();
         }
@@ -155,6 +167,12 @@ public class SemuxCli extends Launcher {
 
     protected void printVersion() {
         System.out.println(Constants.CLIENT_VERSION);
+    }
+
+    protected void reindex() {
+        Config config = getConfig();
+        DatabaseFactory dbFactory = new LeveldbDatabase.LeveldbFactory(config.databaseDir());
+        BlockchainImpl.upgrade(config, dbFactory);
     }
 
     protected void start() throws IOException {

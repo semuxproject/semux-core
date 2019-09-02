@@ -71,7 +71,7 @@ public class ActivatedForks {
                 && !isActivated(fork, number)
                 && isActivated(fork, number + 1)) {
             activatedForks.put(fork, new Fork.Activation(fork, number + 1));
-            logger.info("Fork {} has been activated; it wil be effective from #{}", fork, number + 1);
+            logger.info("Fork {} has been activated and will be effective from #{}", fork, number + 1);
             return true;
         }
 
