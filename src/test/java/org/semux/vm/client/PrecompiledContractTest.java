@@ -16,9 +16,6 @@ import static org.semux.core.Amount.ONE;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Unit.SEM;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

@@ -21,7 +21,6 @@ import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.config.Config;
-import org.semux.config.Constants;
 import org.semux.consensus.SemuxBft.Event.Type;
 import org.semux.consensus.exception.SemuxBftException;
 import org.semux.core.BftManager;

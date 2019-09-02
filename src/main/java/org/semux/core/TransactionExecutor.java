@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -207,6 +206,7 @@ public class TransactionExecutor {
                             && value.add(fee).lessThanOrEqual(available)) {
                         if (ds.register(from, data)) {
                             as.adjustAvailable(from, value.add(fee).negate());
+                            as.adjustAvailable(to, value);
                         } else {
                             result.setCode(Code.INVALID_DELEGATING);
                         }

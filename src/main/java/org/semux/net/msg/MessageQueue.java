@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semux.config.Config;
 import org.semux.net.msg.p2p.DisconnectMessage;
-import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
