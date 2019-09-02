@@ -640,26 +640,23 @@ public class BlockchainImpl implements Blockchain {
         Set<Fork> set = new HashSet<>();
 
         if (config.forkUniformDistributionEnabled()) {
-            Fork fork = UNIFORM_DISTRIBUTION;
-            Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
-            long number = getLatestBlockNumber() + 1;
-
-            if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
-                set.add(fork);
-            }
+            addFork(set, UNIFORM_DISTRIBUTION);
         }
 
         if (config.forkVirtualMachineEnabled()) {
-            Fork fork = VIRTUAL_MACHINE;
-            Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
-            long number = getLatestBlockNumber() + 1;
-
-            if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
-                set.add(fork);
-            }
+            addFork(set, VIRTUAL_MACHINE);
         }
 
         return set.isEmpty() ? new BlockHeaderData().toBytes() : new BlockHeaderData(ForkSignalSet.of(set)).toBytes();
+    }
+
+    private void addFork(Set<Fork> set, Fork fork) {
+        Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
+        long number = getLatestBlockNumber() + 1;
+
+        if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
+            set.add(fork);
+        }
     }
 
     @Override
@@ -875,7 +872,7 @@ public class BlockchainImpl implements Blockchain {
         }
     }
 
-    private static void upgrade(Config config, DatabaseFactory dbFactory) {
+    public static void upgrade(Config config, DatabaseFactory dbFactory) {
         try {
             logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
 
@@ -889,16 +886,21 @@ public class BlockchainImpl implements Blockchain {
             BlockchainImpl tempChain = new BlockchainImpl(config, tempDbFactory);
 
             // import all blocks
+            long imported = 0;
             Database indexDB = dbFactory.getDB(DatabaseName.INDEX);
             Database blockDB = dbFactory.getDB(DatabaseName.BLOCK);
             byte[] bytes = getLatestBlockNumber(indexDB);
             long latestBlockNumber = (bytes == null) ? 0 : Bytes.toLong(bytes);
             for (long i = 1; i <= latestBlockNumber; i++) {
-                tempChain.importBlock(getBlock(blockDB, i), false);
+                boolean result = tempChain.importBlock(getBlock(blockDB, i), false);
+                if (!result) {
+                    break;
+                }
                 if (i % 1000 == 0) {
                     PubSubFactory.getDefault().publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
                     logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
                 }
+                imported++;
             }
 
             // close both database factory
@@ -911,7 +913,7 @@ public class BlockchainImpl implements Blockchain {
             tempDbFactory.moveTo(dataDir);
             delete(backupPath); // delete old database to save space.
 
-            logger.info("Database upgraded");
+            logger.info("Database upgraded: found blocks = {}, imported = {}", latestBlockNumber, imported);
         } catch (IOException e) {
             logger.error("Failed to upgrade database", e);
         }

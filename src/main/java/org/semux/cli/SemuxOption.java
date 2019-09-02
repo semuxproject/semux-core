@@ -31,7 +31,9 @@ public enum SemuxOption {
 
     NETWORK("network"),
 
-    HD_WALLET("hdwallet");
+    HD_WALLET("hdwallet"),
+
+    REINDEX("reindex");
 
     private final String name;
 
