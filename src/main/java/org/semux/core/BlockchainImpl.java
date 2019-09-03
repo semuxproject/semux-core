@@ -54,6 +54,7 @@ import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
+import org.semux.vm.client.SemuxInternalTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,6 +100,8 @@ public class BlockchainImpl implements Blockchain {
     protected static final byte TYPE_TRANSACTION_COUNT_BY_ADDRESS = 0x05;
     protected static final byte TYPE_TRANSACTION_HASH_BY_ADDRESS_AND_INDEX = 0x05;
     protected static final byte TYPE_ACTIVATED_FORKS = 0x06;
+    protected static final byte TYPE_INTERNAL_TRANSACTION_COUNT_BY_ADDRESS = 0x07;
+    protected static final byte TYPE_INTERNAL_TRANSACTION_BY_ADDRESS_AND_INDEX = 0x08;
     protected static final byte TYPE_DATABASE_VERSION = (byte) 0xff;
 
     protected static final byte TYPE_BLOCK_HEADER_BY_NUMBER = 0x00;
@@ -361,6 +364,7 @@ public class BlockchainImpl implements Blockchain {
 
         for (int i = 0; i < txs.size(); i++) {
             Transaction tx = txs.get(i);
+            TransactionResult result = block.getResults().get(i);
 
             TransactionIndex index = new TransactionIndex(number, transactionIndices.getRight().get(i),
                     resultIndices.getRight().get(i));
@@ -370,6 +374,14 @@ public class BlockchainImpl implements Blockchain {
             addTransactionToAccount(tx, tx.getFrom());
             if (!Arrays.equals(tx.getFrom(), tx.getTo())) {
                 addTransactionToAccount(tx, tx.getTo());
+            }
+
+            // index internal transactions
+            for (SemuxInternalTransaction internalTx : result.getInternalTransactions()) {
+                addInternalTransactionToAccount(tx, internalTx, internalTx.getFrom());
+                if (!Arrays.equals(internalTx.getFrom(), internalTx.getTo())) {
+                    addInternalTransactionToAccount(tx, internalTx, internalTx.getTo());
+                }
             }
         }
 
@@ -557,6 +569,66 @@ public class BlockchainImpl implements Blockchain {
      */
     protected byte[] getNthTransactionIndexKey(byte[] address, int n) {
         return Bytes.merge(Bytes.of(TYPE_TRANSACTION_HASH_BY_ADDRESS_AND_INDEX), address, Bytes.of(n));
+    }
+
+    @Override
+    public int getInternalTransactionCount(byte[] address) {
+        byte[] cnt = indexDB.get(Bytes.merge(TYPE_INTERNAL_TRANSACTION_COUNT_BY_ADDRESS, address));
+        return (cnt == null) ? 0 : Bytes.toInt(cnt);
+    }
+
+    @Override
+    public List<SemuxInternalTransaction> getInternalTransactions(byte[] address, int from, int to) {
+        List<SemuxInternalTransaction> list = new ArrayList<>();
+
+        int total = getInternalTransactionCount(address);
+        for (int i = from; i < total && i < to; i++) {
+            byte[] key = getNthInternalTransactionIndexKey(address, i);
+            byte[] value = indexDB.get(key);
+            // byte[] rootTransactionHash = Arrays.copyOfRange(value, 0, 32);
+            byte[] internalTransaction = Arrays.copyOfRange(value, 32, value.length);
+            list.add(TransactionResult.deserializeInternalTransaction(internalTransaction));
+        }
+
+        return list;
+    }
+
+    /**
+     * Sets the total number of internal transaction of an account.
+     *
+     * @param address
+     * @param total
+     */
+    protected void setInternalTransactionCount(byte[] address, int total) {
+        indexDB.put(Bytes.merge(TYPE_INTERNAL_TRANSACTION_COUNT_BY_ADDRESS, address), Bytes.of(total));
+    }
+
+    /**
+     * Adds an internal transaction to an account.
+     *
+     * @param tx
+     * @param address
+     */
+    protected void addInternalTransactionToAccount(Transaction root, SemuxInternalTransaction tx, byte[] address) {
+        byte[] value = Bytes.merge(
+                root.getHash(), // root transaction hash
+                TransactionResult.serializeInternalTransaction(tx) // serialized internal transaction
+        );
+
+        int total = getInternalTransactionCount(address);
+        indexDB.put(getNthInternalTransactionIndexKey(address, total), value);
+        setInternalTransactionCount(address, total + 1);
+    }
+
+    /**
+     * Returns the N-th internal transaction index key of an account.
+     *
+     * @param address
+     * @param n
+     * @return
+     */
+    protected byte[] getNthInternalTransactionIndexKey(byte[] address, int n) {
+        return Bytes.merge(Bytes.of(TYPE_INTERNAL_TRANSACTION_BY_ADDRESS_AND_INDEX), address, Bytes.of(n));
     }
 
     /**

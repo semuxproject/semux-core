@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.semux.core.BlockchainImpl.ValidatorStats;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
+import org.semux.vm.client.SemuxInternalTransaction;
 
 public interface Blockchain {
 
@@ -154,6 +155,28 @@ public interface Blockchain {
      * @return
      */
     List<Transaction> getTransactions(byte[] address, int from, int to);
+
+    /**
+     * Returns the total number of internal transactions from/to the given address.
+     *
+     * @param address
+     *            account address
+     * @return
+     */
+    int getInternalTransactionCount(byte[] address);
+
+    /**
+     * Returns internal transactions from/to an address.
+     *
+     * @param address
+     *            account address
+     * @param from
+     *            transaction index from
+     * @param to
+     *            transaction index to
+     * @return
+     */
+    List<SemuxInternalTransaction> getInternalTransactions(byte[] address, int from, int to);
 
     /**
      * Add a block to the chain.
