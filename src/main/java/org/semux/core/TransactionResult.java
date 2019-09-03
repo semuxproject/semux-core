@@ -47,8 +47,7 @@ public class TransactionResult {
         INVALID_FORMAT(0x21),
 
         /**
-         * The transaction timestamp is incorrect. See
-         * {@link PendingManager#processTransaction(Transaction, boolean)}.
+         * The transaction timestamp is incorrect.
          */
         INVALID_TIMESTAMP(0x22),
 

@@ -6,10 +6,10 @@
  */
 package org.semux.core;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,10 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TransactionExecutor {
 
-    private static final boolean TRACE_VM = false;
-
     private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
-
     private static final boolean[] delegateNameAllowedChars = new boolean[256];
     private static PrintStream tracer;
 
@@ -54,10 +51,11 @@ public class TransactionExecutor {
             delegateNameAllowedChars[b & 0xff] = true;
         }
 
-        if (TRACE_VM) {
+        String path = System.getProperty("vm.tracer.path");
+        if (path != null) {
             try {
-                tracer = new PrintStream(new FileOutputStream(new File("trace.txt"), true));
-            } catch (FileNotFoundException e) {
+                tracer = new PrintStream(new FileOutputStream(path, false), true, StandardCharsets.UTF_8.name());
+            } catch (IOException e) {
                 logger.error("Failed to setup VM tracer", e);
                 SystemUtil.exit(SystemUtil.Code.FAILED_TO_SETUP_TRACER);
             }
@@ -95,6 +93,7 @@ public class TransactionExecutor {
     public TransactionExecutor(Config config, BlockStore blockStore) {
         this.config = config;
         this.blockStore = blockStore;
+
     }
 
     /**
@@ -206,6 +205,7 @@ public class TransactionExecutor {
                             && value.add(fee).lessThanOrEqual(available)) {
                         if (ds.register(from, data)) {
                             as.adjustAvailable(from, value.add(fee).negate());
+                            as.adjustAvailable(to, value);
                         } else {
                             result.setCode(Code.INVALID_DELEGATING);
                         }
@@ -300,33 +300,39 @@ public class TransactionExecutor {
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
-                config.spec().vmSpec(), invokeFactory, gasUsedInBlock, false);
+                config.spec().vmSpec(), invokeFactory, gasUsedInBlock);
 
-        TransactionReceipt summary = executor.run();
+        TransactionReceipt receipt = executor.run();
 
-        if (summary == null) {
+        if (receipt == null) {
             result.setCode(Code.INVALID);
         } else {
-            if (tracer != null) {
-                tracer.println();
-                tracer.println(Hex.encode(tx.getHash()));
-                tracer.println(summary);
-                tracer.flush();
-            }
+            // NOTE: currently, we do not refund for REVERT but
+            // we may consider doing so in the future
+            long gasUsed = receipt.isSuccess() ? receipt.getGasUsed() : tx.getGas();
+            Amount delta = tx.getGasPrice().multiply(gasUsed - receipt.getGasUsed());
+            as.adjustAvailable(tx.getFrom(), delta.negate());
 
-            result.setCode(summary.isSuccess() ? Code.SUCCESS : Code.FAILURE);
-            result.setReturnData(summary.getReturnData());
-            for (LogInfo log : summary.getLogs()) {
+            // build result based on the transaction receipt by VM
+            result.setCode(receipt.isSuccess() ? Code.SUCCESS : Code.FAILURE);
+            result.setReturnData(receipt.getReturnData());
+            for (LogInfo log : receipt.getLogs()) {
                 result.addLog(log);
             }
-
-            result.setGas(tx.getGas(), tx.getGasPrice(), summary.getGasUsed());
-
+            result.setGas(tx.getGas(), tx.getGasPrice(), gasUsed);
             result.setBlockNumber(block.getNumber());
-            result.setInternalTransactions(summary.getInternalTransactions()
+            result.setInternalTransactions(receipt.getInternalTransactions()
                     .stream()
                     .map(SemuxInternalTransaction::new)
                     .collect(Collectors.toList()));
+
+            // log the transaction result
+            if (tracer != null) {
+                tracer.println();
+                tracer.println(Hex.encode(tx.getHash()));
+                tracer.println(tx);
+                tracer.println(result);
+            }
         }
     }
 

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Network;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
@@ -136,6 +137,11 @@ public class Block {
             return false;
         }
 
+        if (Arrays.equals(header.getCoinbase(), Constants.COINBASE_ADDRESS)) {
+            logger.warn("Header coinbase was a reserved address");
+            return false;
+        }
+
         return true;
     }
 
@@ -198,20 +204,32 @@ public class Block {
      * @return
      */
     public boolean validateResults(BlockHeader header, List<TransactionResult> results) {
+        long number = header.getNumber();
+
         // validate results
-        for (TransactionResult result : results) {
+        for (int i = 0; i < results.size(); i++) {
+            TransactionResult result = results.get(i);
             if (result.getCode().isRejected()) {
-                logger.warn("Transaction result does not match for " + result.toString());
+                logger.warn("Transaction #{} in block #{} rejected: code = {}", i, number, result.getCode());
                 return false;
             }
+        }
+
+        // NOTE: we have to disable receipt root hash check for the following blocks.
+        // This is because transactions to unvote/vote precompiled contracts were marked
+        // as SUCCESS
+        // even though they failed.
+        if (number == 1646369 || number == 1646386 || number == 1646391) {
+            return true;
         }
 
         // validate results root
         byte[] root = MerkleUtil.computeResultsRoot(results);
         boolean rootMatches = Arrays.equals(root, header.getResultsRoot());
         if (!rootMatches) {
-            logger.warn("Merkle root does not match expected");
+            logger.warn("Transaction result root doesn't match in block #{}", number);
         }
+
         return rootMatches;
     }
 

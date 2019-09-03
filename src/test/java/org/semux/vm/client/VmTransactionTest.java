@@ -388,4 +388,75 @@ public class VmTransactionTest {
         // miner're reward is not yet given
         assertEquals(ZERO, as.getAccount(block.getCoinbase()).getAvailable());
     }
+
+    // tx: 0x31d6c6c1c5e82b286b8179f4368543fb4595beb57ee1fd2a01dbbb22f6cca9f1
+    @Test
+    public void testCallFailureRevert() {
+        Key sender = new Key();
+
+        TransactionType type = TransactionType.CREATE;
+        byte[] to = Bytes.EMPTY_ADDRESS;
+        Amount value = Amount.of(0);
+        long nonce = as.getAccount(sender.toAddress()).getNonce();
+        long timestamp = TimeUtil.currentTimeMillis();
+        byte[] data = HexUtil.fromHexString(
+                "0x608060405234801561001057600080fd5b50610165806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680633bc5de3014610046575b600080fd5b34801561005257600080fd5b5061005b6100d6565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561009b578082015181840152602081019050610080565b50505050905090810190601f1680156100c85780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60608060405190810160405280602281526020017f466972737420636f6e7472616374212053656d757820746f20746865204d6f6f81526020017f6e210000000000000000000000000000000000000000000000000000000000008152509050905600a165627a7a72305820934582d75405e634939862f4188ebbb6c2765362add401961e8f44aa91b91f040029");
+        long gas = 1000000;
+        Amount gasPrice = Amount.of(1);
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice)
+                .sign(sender);
+
+        // credit the sender some balance
+        Amount available = Amount.of(1000, SEM);
+        as.adjustAvailable(sender.toAddress(), available);
+
+        // deploy the contract
+        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
+        available = available.subtract(result.getGasPrice().multiply(result.getGasUsed()));
+        assertTrue(result.getCode().isSuccess());
+        byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
+
+        type = TransactionType.CALL;
+        to = newContractAddress;
+        nonce = as.getAccount(sender.toAddress()).getNonce();
+        data = Hex.decode0x("0x3bc5de30");
+        value = Amount.of(1, SEM);
+        tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice).sign(sender);
+
+        // call the contract
+        result = exec.execute(tx, as, ds, block, chain, 0);
+        available = available.subtract(result.getGasPrice().multiply(result.getGasUsed()));
+        logger.info("Result: {}", result);
+        assertFalse(result.getCode().isSuccess());
+        assertEquals(tx.getGas(), result.getGasUsed());
+        assertEquals(available, as.getAccount(sender.toAddress()).getAvailable());
+    }
+
+    // tx: 0x64fa2479faaeca0dcefbb57c2fc96f785336663f27726e8e7225e7dce3096452
+    @Test
+    public void testCreateFailure() {
+        Key sender = new Key();
+
+        TransactionType type = TransactionType.CREATE;
+        byte[] to = Bytes.EMPTY_ADDRESS;
+        Amount value = Amount.of(0);
+        long nonce = as.getAccount(sender.toAddress()).getNonce();
+        long timestamp = TimeUtil.currentTimeMillis();
+        byte[] data = HexUtil.fromHexString(
+                "0x608060405234801561001057600080fd5b50610165806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680633bc5de3014610046575b600080fd5b34801561005257600080fd5b5061005b6100d6565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561009b578082015181840152602081019050610080565b50505050905090810190601f1680156100c85780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60608060405190810160405280602281526020017f466972737420636f6e7472616374212053656d757820746f20746865204d6f6f81526020017f6e210000000000000000000000000000000000000000000000000000000000008152509050905600a165627a7a72305820934582d75405e634939862f4188ebbb6c2765362add401961e8f44aa91b91f040029");
+        long gas = 121000;
+        Amount gasPrice = Amount.of(200);
+        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice)
+                .sign(sender);
+
+        // credit the sender some balance
+        Amount available = Amount.of(1000, SEM);
+        as.adjustAvailable(sender.toAddress(), available);
+
+        // deploy the contract
+        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
+        assertFalse(result.getCode().isSuccess());
+        byte[] newContractAddress = HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce());
+        assertFalse(as.exists(newContractAddress));
+    }
 }

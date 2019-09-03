@@ -834,9 +834,10 @@ public final class SemuxApiImpl implements SemuxApi {
         BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
 
         // execute transaction
+        Repository track = repository.startTracking();
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
-                transaction, block, repository, blockStore,
-                kernel.getConfig().spec().vmSpec(), new ProgramInvokeFactoryImpl(), 0, true);
+                transaction, block, track, blockStore,
+                kernel.getConfig().spec().vmSpec(), new ProgramInvokeFactoryImpl(), 0);
 
         return executor.run();
     }
