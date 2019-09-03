@@ -88,7 +88,7 @@ public class BlockchainImpl implements Blockchain {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainImpl.class);
 
-    protected static final int DATABASE_VERSION = 2;
+    protected static final int DATABASE_VERSION = 3;
 
     protected static final byte TYPE_LATEST_BLOCK_NUMBER = 0x00;
     protected static final byte TYPE_VALIDATORS = 0x01;
