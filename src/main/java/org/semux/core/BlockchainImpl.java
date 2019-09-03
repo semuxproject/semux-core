@@ -859,11 +859,11 @@ public class BlockchainImpl implements Blockchain {
     private static void upgradeDatabase(Config config, DatabaseFactory dbFactory) {
         if (getLatestBlockNumber(dbFactory.getDB(DatabaseName.INDEX)) != null
                 && getDatabaseVersion(dbFactory.getDB(DatabaseName.INDEX)) < BlockchainImpl.DATABASE_VERSION) {
-            upgrade(config, dbFactory);
+            upgrade(config, dbFactory, Long.MAX_VALUE);
         }
     }
 
-    public static void upgrade(Config config, DatabaseFactory dbFactory) {
+    public static void upgrade(Config config, DatabaseFactory dbFactory, long to) {
         try {
             logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
 
@@ -882,7 +882,8 @@ public class BlockchainImpl implements Blockchain {
             Database blockDB = dbFactory.getDB(DatabaseName.BLOCK);
             byte[] bytes = getLatestBlockNumber(indexDB);
             long latestBlockNumber = (bytes == null) ? 0 : Bytes.toLong(bytes);
-            for (long i = 1; i <= latestBlockNumber; i++) {
+            long target = Math.min(latestBlockNumber, to);
+            for (long i = 1; i <= target; i++) {
                 boolean result = tempChain.importBlock(getBlock(blockDB, i), false);
                 if (!result) {
                     break;
@@ -890,7 +891,7 @@ public class BlockchainImpl implements Blockchain {
 
                 if (i % 1000 == 0) {
                     PubSubFactory.getDefault().publish(new BlockchainDatabaseUpgradingEvent(i, latestBlockNumber));
-                    logger.info("Loaded {} / {} blocks", i, latestBlockNumber);
+                    logger.info("Loaded {} / {} blocks", i, target);
                 }
                 imported++;
             }

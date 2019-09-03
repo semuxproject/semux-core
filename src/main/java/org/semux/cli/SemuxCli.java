@@ -119,6 +119,7 @@ public class SemuxCli extends Launcher {
         Option reindexOption = Option.builder()
                 .longOpt(SemuxOption.REINDEX.toString())
                 .desc(CliMessages.get("ReindexDescription"))
+                .hasArg(true).optionalArg(true).argName("to").type(String.class)
                 .build();
         addOption(reindexOption);
     }
@@ -152,7 +153,7 @@ public class SemuxCli extends Launcher {
             importPrivateKey(cmd.getOptionValue(SemuxOption.IMPORT_PRIVATE_KEY.toString()).trim());
 
         } else if (cmd.hasOption(SemuxOption.REINDEX.toString())) {
-            reindex();
+            reindex(cmd.getOptionValue(SemuxOption.REINDEX.toString()));
 
         } else {
             start();
@@ -169,10 +170,10 @@ public class SemuxCli extends Launcher {
         System.out.println(Constants.CLIENT_VERSION);
     }
 
-    protected void reindex() {
+    protected void reindex(String to) {
         Config config = getConfig();
         DatabaseFactory dbFactory = new LeveldbDatabase.LeveldbFactory(config.databaseDir());
-        BlockchainImpl.upgrade(config, dbFactory);
+        BlockchainImpl.upgrade(config, dbFactory, to == null ? Long.MAX_VALUE : Long.parseLong(to));
     }
 
     protected void start() throws IOException {

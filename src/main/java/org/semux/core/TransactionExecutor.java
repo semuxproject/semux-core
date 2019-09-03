@@ -6,10 +6,11 @@
  */
 package org.semux.core;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,8 +43,6 @@ import org.slf4j.LoggerFactory;
  */
 public class TransactionExecutor {
 
-    private static final boolean TRACE_VM = false;
-
     private static final Logger logger = LoggerFactory.getLogger(TransactionExecutor.class);
     private static final boolean[] delegateNameAllowedChars = new boolean[256];
     private static PrintStream tracer;
@@ -53,10 +52,11 @@ public class TransactionExecutor {
             delegateNameAllowedChars[b & 0xff] = true;
         }
 
-        if (TRACE_VM) {
+        String path = System.getProperty("vm.tracer.path");
+        if (path != null) {
             try {
-                tracer = new PrintStream(new FileOutputStream(new File("trace.txt"), true));
-            } catch (FileNotFoundException e) {
+                tracer = new PrintStream(new FileOutputStream(path, false), true, StandardCharsets.UTF_8.name());
+            } catch (IOException e) {
                 logger.error("Failed to setup VM tracer", e);
                 SystemUtil.exit(SystemUtil.Code.FAILED_TO_SETUP_TRACER);
             }
@@ -308,11 +308,11 @@ public class TransactionExecutor {
         if (receipt == null) {
             result.setCode(Code.INVALID);
         } else {
-            // ======== shitty fix begins ========
-            // TODO: respect REVERT by forking?
+            // NOTE: currently, we do not refund for REVERT but
+            // we may consider doing so in the future
             long gasUsed = receipt.isSuccess() ? receipt.getGasUsed() : tx.getGas();
-            as.adjustAvailable(tx.getFrom(), tx.getGasPrice().multiply(gasUsed - receipt.getGasUsed()).negate());
-            // ======== shitty fix ends ========
+            Amount delta = tx.getGasPrice().multiply(gasUsed - receipt.getGasUsed());
+            as.adjustAvailable(tx.getFrom(), delta.negate());
 
             // build result based on the transaction receipt by VM
             result.setCode(receipt.isSuccess() ? Code.SUCCESS : Code.FAILURE);
@@ -331,8 +331,8 @@ public class TransactionExecutor {
             if (tracer != null) {
                 tracer.println();
                 tracer.println(Hex.encode(tx.getHash()));
+                tracer.println(tx);
                 tracer.println(result);
-                tracer.flush();
             }
         }
     }

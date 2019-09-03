@@ -215,13 +215,12 @@ public class Block {
             }
         }
 
-        // ======== shitty fix begins ========
-        // TODO: replace with hashes
+        // NOTE: we have to disable receipt root hash check for the following blocks.
+        // This is because transactions to unvote/vote precompiled contracts were marked as SUCCESS
+        // even though they failed.
         if (number == 1646369 || number == 1646386 || number == 1646391) {
-            // Call to pre-compiled contract failed
             return true;
         }
-        // ======== shitty fix ends ========
 
         // validate results root
         byte[] root = MerkleUtil.computeResultsRoot(results);

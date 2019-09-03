@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +40,7 @@ public class DatabaseIntegrityChecker {
         DatabaseFactory dbFactory = new LeveldbDatabase.LeveldbFactory(new File(args[0]));
         PrintStream out = System.out;
         if (args.length >= 2) {
-            out = new PrintStream(new FileOutputStream(args[1]));
+            out = new PrintStream(new FileOutputStream(args[1]), true, StandardCharsets.UTF_8.name());
         }
 
         Database indexDB = dbFactory.getDB(DatabaseName.INDEX);
