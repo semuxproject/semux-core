@@ -93,7 +93,7 @@ import org.semux.api.v2.model.GetLatestBlockNumberResponse;
 import org.semux.api.v2.model.GetLatestBlockResponse;
 import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
-import org.semux.api.v2.model.GetSyncingProgressResponse;
+import org.semux.api.v2.model.GetSyncingStatusResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
 import org.semux.api.v2.model.GetTransactionResultResponse;
@@ -102,11 +102,11 @@ import org.semux.api.v2.model.GetVoteResponse;
 import org.semux.api.v2.model.GetVotesResponse;
 import org.semux.api.v2.model.InfoType;
 import org.semux.api.v2.model.InternalTransactionType;
-import org.semux.api.v2.model.ListAccountsResponse;
+import org.semux.api.v2.model.GetAccountsResponse;
 import org.semux.api.v2.model.PeerType;
 import org.semux.api.v2.model.SignMessageResponse;
 import org.semux.api.v2.model.SignRawTransactionResponse;
-import org.semux.api.v2.model.SyncingProgressType;
+import org.semux.api.v2.model.SyncingStatusType;
 import org.semux.api.v2.model.VerifyMessageResponse;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Amount;
@@ -601,7 +601,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
 
     @Test
     public void listAccountsTest() {
-        ListAccountsResponse response = api.listAccounts();
+        GetAccountsResponse response = api.getAccounts();
         assertNotNull(response);
         assertThat(response.getResult())
                 .hasSize(wallet.size())
@@ -615,7 +615,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         String from = wallet.getAccount(0).toAddressString();
         String fee = config.spec().minTransactionFee().toString();
         String data = Hex.encode(Bytes.of("test_delegate"));
-        DoTransactionResponse response = api.registerDelegate(from, data, fee, null);
+        DoTransactionResponse response = api.delegate(from, data, fee, null);
         assertNotNull(response);
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult());
@@ -969,13 +969,13 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
-    public void getSyncingProgressStoppedTest() {
+    public void getSyncingStatusStoppedTest() {
         SemuxSync semuxSync = mock(SemuxSync.class);
         when(semuxSync.isRunning()).thenReturn(false);
         kernelRule.getKernel().setSyncManager(semuxSync);
 
-        GetSyncingProgressResponse resp = api.getSyncingProgress();
-        SyncingProgressType result = resp.getResult();
+        GetSyncingStatusResponse resp = api.getSyncingStatus();
+        SyncingStatusType result = resp.getResult();
         assertTrue(resp.isSuccess());
         assertFalse(result.isSyncing());
         assertNull(result.getStartingHeight());
@@ -984,7 +984,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
     }
 
     @Test
-    public void getSyncingProgressStartedTest() {
+    public void getSyncingStatusStartedTest() {
         SemuxSync semuxSync = mock(SemuxSync.class);
         when(semuxSync.isRunning()).thenReturn(true);
         when(semuxSync.getProgress()).thenReturn(new SemuxSync.SemuxSyncProgress(
@@ -994,8 +994,8 @@ public class SemuxApiTest extends SemuxApiTestBase {
                 Duration.ofSeconds(1000)));
         kernelRule.getKernel().setSyncManager(semuxSync);
 
-        GetSyncingProgressResponse resp = api.getSyncingProgress();
-        SyncingProgressType result = resp.getResult();
+        GetSyncingStatusResponse resp = api.getSyncingStatus();
+        SyncingStatusType result = resp.getResult();
         assertTrue(resp.isSuccess());
         assertTrue(result.isSyncing());
         assertEquals("1", result.getStartingHeight());

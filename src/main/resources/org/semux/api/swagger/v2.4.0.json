@@ -701,7 +701,7 @@
                 }
             }
         },
-        "ListAccountsResponse": {
+        "GetAccountsResponse": {
             "type": "object",
             "required": [
                 "success"
@@ -1093,7 +1093,7 @@
                 }
             ]
         },
-        "GetSyncingProgressResponse": {
+        "GetSyncingStatusResponse": {
             "type": "object",
             "allOf": [
                 {
@@ -1102,13 +1102,13 @@
                 {
                     "properties": {
                         "result": {
-                            "$ref": "#/definitions/SyncingProgressType"
+                            "$ref": "#/definitions/SyncingStatusType"
                         }
                     }
                 }
             ]
         },
-        "SyncingProgressType": {
+        "SyncingStatusType": {
             "type": "object",
             "required": [
                 "syncing"
@@ -1199,7 +1199,7 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "Get info",
+                "summary": "Get node info",
                 "description": "Returns kernel info.",
                 "operationId": "getInfo",
                 "produces": [
@@ -1231,8 +1231,8 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "Get peers",
-                "description": "Returns connected peers.",
+                "summary": "Get all peers",
+                "description": "Returns all connected peers.",
                 "operationId": "getPeers",
                 "produces": [
                     "application/json"
@@ -1258,14 +1258,14 @@
                 ]
             }
         },
-        "/syncing": {
+        "/syncing-status": {
             "get": {
                 "tags": [
                     "Node"
                 ],
-                "summary": "Get syncing progress",
+                "summary": "Get syncing status",
                 "description": "Returns an object with data about the sync status",
-                "operationId": "getSyncingProgress",
+                "operationId": "getSyncingStatus",
                 "produces": [
                     "application/json"
                 ],
@@ -1274,7 +1274,7 @@
                     "200": {
                         "description": "An object about the current sync status",
                         "schema": {
-                            "$ref": "#/definitions/GetSyncingProgressResponse"
+                            "$ref": "#/definitions/GetSyncingStatusResponse"
                         }
                     },
                     "400": {
@@ -1328,7 +1328,7 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "Add node",
+                "summary": "Add a node to connect",
                 "description": "Adds a node to node manager.",
                 "operationId": "addNode",
                 "produces": [
@@ -1369,7 +1369,7 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "Add to blacklist",
+                "summary": "Add an IP to blacklist",
                 "description": "Adds an IP address to blacklist.",
                 "operationId": "addToBlacklist",
                 "produces": [
@@ -1411,7 +1411,7 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "Add to whitelist",
+                "summary": "Add an IP to whitelist",
                 "description": "Adds an IP address to whitelist.",
                 "operationId": "addToWhitelist",
                 "produces": [
@@ -1453,8 +1453,8 @@
                 "tags": [
                     "Account"
                 ],
-                "summary": "Get account",
-                "description": "Returns an account.",
+                "summary": "Get account info",
+                "description": "Returns the basic information about an account.",
                 "operationId": "getAccount",
                 "produces": [
                     "application/json"
@@ -1490,12 +1490,13 @@
                 ]
             },
             "post": {
+                "deprecated": true,
                 "tags": [
                     "Wallet"
                 ],
                 "summary": "Create or import an account",
                 "description": "Creates a new account by generating a new private key or importing an existing private key when parameter 'privateKey' is provided.",
-                "operationId": "createAccount",
+                "operationId": "createAccountDeprecated",
                 "produces": [
                     "application/json"
                 ],
@@ -1537,12 +1538,13 @@
                 ]
             },
             "delete": {
+                "deprecated": true,
                 "tags": [
                     "Wallet"
                 ],
                 "summary": "Delete account",
                 "description": "Deletes an account from this wallet.",
-                "operationId": "deleteAccount",
+                "operationId": "deleteAccountDeprecated",
                 "produces": [
                     "application/json"
                 ],
@@ -1881,7 +1883,7 @@
                 "tags": [
                     "Blockchain"
                 ],
-                "summary": "Get latest block",
+                "summary": "Get the latest block",
                 "description": "Returns the latest block.",
                 "operationId": "getLatestBlock",
                 "produces": [
@@ -1913,7 +1915,7 @@
                 "tags": [
                     "Blockchain"
                 ],
-                "summary": "Get latest block number",
+                "summary": "Get the number of the latest block",
                 "description": "Returns the number of the latest block.",
                 "operationId": "getLatestBlockNumber",
                 "produces": [
@@ -2164,8 +2166,8 @@
                 "tags": [
                     "Delegate"
                 ],
-                "summary": "Get a delegate",
-                "description": "Returns a delegate.",
+                "summary": "Get delegate info",
+                "description": "Returns the information about delegate.",
                 "operationId": "getDelegate",
                 "produces": [
                     "application/json"
@@ -2238,7 +2240,7 @@
                 "tags": [
                     "Delegate"
                 ],
-                "summary": "Get validators",
+                "summary": "Get all validators",
                 "description": "Returns a list of validators in Semux addresses.",
                 "operationId": "getValidators",
                 "produces": [
@@ -2270,7 +2272,7 @@
                 "tags": [
                     "Delegate"
                 ],
-                "summary": "Get vote",
+                "summary": "Get the vote between a delegate and a voter",
                 "description": "Returns the vote from a voter to a delegate.",
                 "operationId": "getVote",
                 "produces": [
@@ -2320,7 +2322,7 @@
                 "tags": [
                     "Delegate"
                 ],
-                "summary": "Get a delegate's votes",
+                "summary": "Get all votes of a delegate",
                 "description": "Returns all the votes to a delegate as a map of [voter address] => [votes]",
                 "operationId": "getVotes",
                 "produces": [
@@ -2362,9 +2364,9 @@
                 "tags": [
                     "Wallet"
                 ],
-                "summary": "List accounts",
+                "summary": "List all accounts in wallet",
                 "description": "Returns accounts in the wallet.",
-                "operationId": "listAccounts",
+                "operationId": "getAccounts",
                 "produces": [
                     "application/json"
                 ],
@@ -2372,7 +2374,98 @@
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/ListAccountsResponse"
+                            "$ref": "#/definitions/GetAccountsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/create-account": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Create or import an account to wallet",
+                "description": "Creates a new account by generating a new private key or importing an existing private key when parameter 'privateKey' is provided.",
+                "operationId": "createAccount",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Assigned alias to the created account.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "privateKey",
+                        "in": "query",
+                        "description": "The private key to be imported, create a new key if omitted",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{96}$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/CreateAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/delete-account": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Delete an account from wallet",
+                "description": "Deletes an account from this wallet.",
+                "operationId": "deleteAccount",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "description": "Address of the account",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteAccountResponse"
                         }
                     },
                     "400": {
@@ -2479,7 +2572,7 @@
                 "tags": [
                     "Wallet"
                 ],
-                "summary": "Create a contract",
+                "summary": "Deploy a contract",
                 "description": "Create a VM contract.",
                 "operationId": "create",
                 "produces": [
@@ -2565,7 +2658,7 @@
                 "tags": [
                     "Wallet"
                 ],
-                "summary": "Call a contract.",
+                "summary": "Call a contract",
                 "description": "Call a VM contract.",
                 "operationId": "call",
                 "produces": [
@@ -2659,7 +2752,7 @@
                 "tags": [
                     "Wallet"
                 ],
-                "summary": "Unvote",
+                "summary": "Unvote for a delegate",
                 "description": "Unvotes for a delegate.",
                 "operationId": "unvote",
                 "produces": [
@@ -2736,7 +2829,7 @@
                 "tags": [
                     "Wallet"
                 ],
-                "summary": "Vote",
+                "summary": "Vote for a delegate",
                 "description": "Votes for a delegate.",
                 "operationId": "vote",
                 "produces": [
@@ -2813,9 +2906,9 @@
                 "tags": [
                     "Wallet"
                 ],
-                "summary": "Register delegate",
+                "summary": "Register as delegate",
                 "description": "Registers as a delegate",
-                "operationId": "registerDelegate",
+                "operationId": "delegate",
                 "produces": [
                     "application/json"
                 ],
@@ -2975,7 +3068,7 @@
                 ]
             }
         },
-        "/call": {
+        "/local-call": {
             "get": {
                 "tags": [
                     "Tool"
@@ -3074,7 +3167,7 @@
                 "tags": [
                     "Tool"
                 ],
-                "summary": "Estimate gas",
+                "summary": "Estimate gas usage",
                 "description": "Estimate the gas usage of a transaction.",
                 "operationId": "estimateGas",
                 "produces": [
@@ -3358,7 +3451,7 @@
                     "Tool"
                 ],
                 "summary": "Broadcast a raw transaction",
-                "description": "Broadcasts a raw transaction to the network.",
+                "description": "Broadcasts a signed raw transaction to the network.",
                 "operationId": "broadcastRawTransaction",
                 "produces": [
                     "application/json"

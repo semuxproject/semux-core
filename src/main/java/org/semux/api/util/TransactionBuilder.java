@@ -298,7 +298,7 @@ public class TransactionBuilder {
 
     public Transaction buildSigned() {
         if (account == null) {
-            throw new IllegalArgumentException("TransactionBuilder#withFrom must be called");
+            throw new IllegalArgumentException("The sender is not specified");
         }
 
         return buildUnsigned().sign(account);

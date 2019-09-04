@@ -45,6 +45,7 @@ import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountStorageResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
 import org.semux.api.v2.model.GetAccountVotesResponse;
+import org.semux.api.v2.model.GetAccountsResponse;
 import org.semux.api.v2.model.GetBlockResponse;
 import org.semux.api.v2.model.GetDelegateResponse;
 import org.semux.api.v2.model.GetDelegatesResponse;
@@ -53,17 +54,16 @@ import org.semux.api.v2.model.GetLatestBlockNumberResponse;
 import org.semux.api.v2.model.GetLatestBlockResponse;
 import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
-import org.semux.api.v2.model.GetSyncingProgressResponse;
+import org.semux.api.v2.model.GetSyncingStatusResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
 import org.semux.api.v2.model.GetTransactionResultResponse;
 import org.semux.api.v2.model.GetValidatorsResponse;
 import org.semux.api.v2.model.GetVoteResponse;
 import org.semux.api.v2.model.GetVotesResponse;
-import org.semux.api.v2.model.ListAccountsResponse;
 import org.semux.api.v2.model.SignMessageResponse;
 import org.semux.api.v2.model.SignRawTransactionResponse;
-import org.semux.api.v2.model.SyncingProgressType;
+import org.semux.api.v2.model.SyncingStatusType;
 import org.semux.api.v2.model.VerifyMessageResponse;
 import org.semux.api.v2.server.SemuxApi;
 import org.semux.core.Block;
@@ -579,8 +579,8 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response listAccounts() {
-        ListAccountsResponse resp = new ListAccountsResponse();
+    public Response getAccounts() {
+        GetAccountsResponse resp = new GetAccountsResponse();
         resp.setResult(kernel.getWallet().getAccounts().parallelStream()
                 .map(acc -> Hex.PREF + acc.toAddressString())
                 .collect(Collectors.toList()));
@@ -670,7 +670,7 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response registerDelegate(String from, String data, String fee, String nonce) {
+    public Response delegate(String from, String data, String fee, String nonce) {
         return doTransaction(TransactionType.DELEGATE, from, null, null, fee, nonce, data, null, null);
     }
 
@@ -699,7 +699,7 @@ public final class SemuxApiImpl implements SemuxApi {
             String gasPrice) {
         TransactionReceipt receipt = doLocalCall(to, from, value, nonce, data, gas, gasPrice);
         if (receipt == null || !receipt.isSuccess()) {
-            return badRequest("Failed to call");
+            return badRequest("Failed to call locally");
         } else {
             CallResponse resp = new CallResponse();
             resp.setResult(Hex.encode0x(receipt.getReturnData()));
@@ -759,8 +759,8 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response getSyncingProgress() {
-        SyncingProgressType result = new SyncingProgressType();
+    public Response getSyncingStatus() {
+        SyncingStatusType result = new SyncingStatusType();
 
         if (kernel.getSyncManager().isRunning()) {
             SyncManager.Progress progress = kernel.getSyncManager().getProgress();
@@ -772,7 +772,7 @@ public final class SemuxApiImpl implements SemuxApi {
             result.setSyncing(false);
         }
 
-        GetSyncingProgressResponse resp = new GetSyncingProgressResponse();
+        GetSyncingStatusResponse resp = new GetSyncingStatusResponse();
         resp.setResult(result);
         return success(resp);
     }
@@ -997,5 +997,15 @@ public final class SemuxApiImpl implements SemuxApi {
         } catch (CryptoException e) {
             throw new IllegalArgumentException("Parameter `" + name + "` is not a valid hexadecimal string");
         }
+    }
+
+    @Override
+    public Response createAccountDeprecated(String name, String privateKey) {
+        return createAccount(name, privateKey);
+    }
+
+    @Override
+    public Response deleteAccountDeprecated(String address) {
+        return deleteAccount(address);
     }
 }
