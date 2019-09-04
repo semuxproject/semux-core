@@ -25,14 +25,11 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.ethereum.vm.client.BlockStore;
-import org.ethereum.vm.client.Repository;
-import org.ethereum.vm.client.TransactionReceipt;
-import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
+import org.ethereum.vm.util.HashUtil;
 import org.semux.Kernel;
 import org.semux.api.util.TransactionBuilder;
 import org.semux.api.v2.model.AddNodeResponse;
 import org.semux.api.v2.model.ApiHandlerResponse;
-import org.semux.api.v2.model.CallResponse;
 import org.semux.api.v2.model.ComposeRawTransactionResponse;
 import org.semux.api.v2.model.CreateAccountResponse;
 import org.semux.api.v2.model.DeleteAccountResponse;
@@ -45,6 +42,7 @@ import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountStorageResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
 import org.semux.api.v2.model.GetAccountVotesResponse;
+import org.semux.api.v2.model.GetAccountsResponse;
 import org.semux.api.v2.model.GetBlockResponse;
 import org.semux.api.v2.model.GetDelegateResponse;
 import org.semux.api.v2.model.GetDelegatesResponse;
@@ -53,29 +51,36 @@ import org.semux.api.v2.model.GetLatestBlockNumberResponse;
 import org.semux.api.v2.model.GetLatestBlockResponse;
 import org.semux.api.v2.model.GetPeersResponse;
 import org.semux.api.v2.model.GetPendingTransactionsResponse;
-import org.semux.api.v2.model.GetSyncingProgressResponse;
+import org.semux.api.v2.model.GetSyncingStatusResponse;
 import org.semux.api.v2.model.GetTransactionLimitsResponse;
 import org.semux.api.v2.model.GetTransactionResponse;
 import org.semux.api.v2.model.GetTransactionResultResponse;
 import org.semux.api.v2.model.GetValidatorsResponse;
 import org.semux.api.v2.model.GetVoteResponse;
 import org.semux.api.v2.model.GetVotesResponse;
-import org.semux.api.v2.model.ListAccountsResponse;
+import org.semux.api.v2.model.LocalCallResponse;
 import org.semux.api.v2.model.SignMessageResponse;
 import org.semux.api.v2.model.SignRawTransactionResponse;
-import org.semux.api.v2.model.SyncingProgressType;
+import org.semux.api.v2.model.SyncingStatusType;
+import org.semux.api.v2.model.TransactionResultType;
 import org.semux.api.v2.model.VerifyMessageResponse;
+import org.semux.api.v2.server.SemuxApi;
+import org.semux.config.Config;
+import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
+import org.semux.core.TransactionExecutor;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
 import org.semux.core.exception.WalletLockedException;
 import org.semux.core.state.Account;
+import org.semux.core.state.AccountState;
 import org.semux.core.state.Delegate;
+import org.semux.core.state.DelegateState;
 import org.semux.crypto.CryptoException;
 import org.semux.crypto.Hash;
 import org.semux.crypto.Hex;
@@ -85,8 +90,6 @@ import org.semux.net.NodeManager;
 import org.semux.net.filter.SemuxIpFilter;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
-import org.semux.vm.client.SemuxRepository;
-import org.semux.vm.client.SemuxTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -529,7 +532,10 @@ public final class SemuxApiImpl implements SemuxApi {
             }
 
             GetTransactionResultResponse resp = new GetTransactionResultResponse();
-            resp.setResult(TypeFactory.transactionResultType(tx, result, number));
+            byte[] contractAddress = (tx.getType() == TransactionType.CREATE)
+                    ? HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce())
+                    : null;
+            resp.setResult(TypeFactory.transactionResultType(result, tx.getFee(), contractAddress, number));
             return success(resp);
         } catch (NullPointerException | IllegalArgumentException e) {
             return badRequest(e.getMessage());
@@ -578,8 +584,8 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response listAccounts() {
-        ListAccountsResponse resp = new ListAccountsResponse();
+    public Response getAccounts() {
+        GetAccountsResponse resp = new GetAccountsResponse();
         resp.setResult(kernel.getWallet().getAccounts().parallelStream()
                 .map(acc -> Hex.PREF + acc.toAddressString())
                 .collect(Collectors.toList()));
@@ -669,7 +675,7 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response registerDelegate(String from, String data, String fee, String nonce) {
+    public Response delegate(String from, String data, String fee, String nonce) {
         return doTransaction(TransactionType.DELEGATE, from, null, null, fee, nonce, data, null, null);
     }
 
@@ -694,29 +700,30 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response localCall(String to, String from, String value, String nonce, String data, String gas,
-            String gasPrice) {
-        TransactionReceipt receipt = doLocalCall(to, from, value, nonce, data, gas, gasPrice);
-        if (receipt == null || !receipt.isSuccess()) {
-            return badRequest("Failed to call");
-        } else {
-            CallResponse resp = new CallResponse();
-            resp.setResult(Hex.encode0x(receipt.getReturnData()));
-            return success(resp);
-        }
+    public Response localCall(String to, String value, String data, String gas, String gasPrice) {
+        TransactionResultType result = doLocalTransaction(TransactionType.CALL, to, value, data, gas, gasPrice);
+
+        LocalCallResponse resp = new LocalCallResponse();
+        resp.setResult(result);
+        return success(resp);
     }
 
     @Override
-    public Response estimateGas(String to, String from, String value, String nonce, String data, String gas,
-            String gasPrice) {
-        TransactionReceipt receipt = doLocalCall(to, from, value, nonce, data, gas, gasPrice);
-        if (receipt == null || !receipt.isSuccess()) {
-            return badRequest("Failed to estimate the gas usage");
-        } else {
-            EstimateGasResponse resp = new EstimateGasResponse();
-            resp.setResult(Long.toString(receipt.getGasUsed()));
-            return success(resp);
-        }
+    public Response localCreate(String value, String data, String gas, String gasPrice) {
+        TransactionResultType result = doLocalTransaction(TransactionType.CREATE, null, value, data, gas, gasPrice);
+
+        LocalCallResponse resp = new LocalCallResponse();
+        resp.setResult(result);
+        return success(resp);
+    }
+
+    @Override
+    public Response estimateGas(String to, String value, String data, String gas, String gasPrice) {
+        TransactionResultType result = doLocalTransaction(TransactionType.CALL, to, value, data, gas, gasPrice);
+
+        EstimateGasResponse resp = new EstimateGasResponse();
+        resp.setResult(result.getGasUsed());
+        return success(resp);
     }
 
     @Override
@@ -758,8 +765,8 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response getSyncingProgress() {
-        SyncingProgressType result = new SyncingProgressType();
+    public Response getSyncingStatus() {
+        SyncingStatusType result = new SyncingStatusType();
 
         if (kernel.getSyncManager().isRunning()) {
             SyncManager.Progress progress = kernel.getSyncManager().getProgress();
@@ -771,7 +778,7 @@ public final class SemuxApiImpl implements SemuxApi {
             result.setSyncing(false);
         }
 
-        GetSyncingProgressResponse resp = new GetSyncingProgressResponse();
+        GetSyncingStatusResponse resp = new GetSyncingStatusResponse();
         resp.setResult(result);
         return success(resp);
     }
@@ -869,32 +876,45 @@ public final class SemuxApiImpl implements SemuxApi {
         }
     }
 
-    private TransactionReceipt doLocalCall(String to, String from, String value, String nonce, String data, String gas,
-            String gasPrice) {
+    private TransactionResultType doLocalTransaction(TransactionType type, String to, String value, String data,
+            String gas, String gasPrice) {
+        long blockGasLimit = kernel.getConfig().spec().maxBlockGasLimit();
+        Amount minGasPrice = kernel.getConfig().poolMinGasPrice();
 
-        TransactionType type = TransactionType.CALL;
-        String fee = "0";
-        gas = (gas != null) ? gas : Long.toString(kernel.getConfig().spec().maxBlockGasLimit());
-        gasPrice = (gasPrice != null) ? gasPrice : "1";
-        from = (from != null) ? from : kernel.getCoinbase().toAddressString();
+        // NOTE: The only limitation now is that we can't specify the sender.
 
-        Transaction tx = getTransaction(type, from, to, value, fee, nonce, data, gas, gasPrice);
+        // Setup the environment
+        Config config = kernel.getConfig();
+        Blockchain chain = kernel.getBlockchain();
+        AccountState asTrack = chain.getAccountState().track();
+        DelegateState dsTrack = chain.getDelegateState().track();
 
-        // simulated environment
-        SemuxTransaction transaction = new SemuxTransaction(tx);
-        SemuxBlock block = new SemuxBlock(kernel.getBlockchain().getLatestBlock().getHeader(),
-                kernel.getConfig().spec().maxBlockGasLimit());
-        Repository repository = new SemuxRepository(kernel.getBlockchain().getAccountState(),
-                kernel.getBlockchain().getDelegateState());
-        BlockStore blockStore = new SemuxBlockStore(kernel.getBlockchain());
+        // create a transaction signed by the coinbase account
+        Key sender = kernel.getCoinbase();
+        Transaction tx = new TransactionBuilder(kernel)
+                .withType(type)
+                .withFrom(sender.toAddressString())
+                .withTo(to)
+                .withValue(value)
+                .withData(data)
+                .withGas(gas != null ? gas : Long.toString(blockGasLimit))
+                .withGasPrice(gasPrice != null ? gasPrice : minGasPrice.toString())
+                .buildSigned();
 
-        // execute transaction
-        Repository track = repository.startTracking();
-        org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
-                transaction, block, track, blockStore,
-                kernel.getConfig().spec().vmSpec(), new ProgramInvokeFactoryImpl(), 0);
+        // make sure the sender has enough balance
+        asTrack.adjustAvailable(tx.getFrom(),
+                tx.getValue().add(tx.getFee()).add(tx.getGasPrice().multiply(tx.getGas())));
 
-        return executor.run();
+        // execute the transaction
+        SemuxBlock block = kernel.createEmptyBlock();
+        BlockStore blockStore = new SemuxBlockStore(chain);
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
+        TransactionResult result = exec.execute(tx, asTrack, dsTrack, block, true, 0);
+
+        byte[] contractAddress = type.equals(TransactionType.CREATE)
+                ? HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce())
+                : null;
+        return TypeFactory.transactionResultType(result, tx.getFee(), contractAddress, block.getNumber());
     }
 
     private static final String IP_ADDRESS_PATTERN = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -996,5 +1016,15 @@ public final class SemuxApiImpl implements SemuxApi {
         } catch (CryptoException e) {
             throw new IllegalArgumentException("Parameter `" + name + "` is not a valid hexadecimal string");
         }
+    }
+
+    @Override
+    public Response createAccountDeprecated(String name, String privateKey) {
+        return createAccount(name, privateKey);
+    }
+
+    @Override
+    public Response deleteAccountDeprecated(String address) {
+        return deleteAccount(address);
     }
 }

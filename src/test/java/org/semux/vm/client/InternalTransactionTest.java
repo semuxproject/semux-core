@@ -98,7 +98,7 @@ public class InternalTransactionTest {
                 gasPrice);
         tx.sign(key);
 
-        TransactionResult result = exec.execute(tx, as, ds, bh, chain, 0);
+        TransactionResult result = exec.execute(tx, as, ds, bh, chain.isVMEnabled(), 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(Amount.of(1000, SEM).subtract(Amount.of(5, SEM)),
                 as.getAccount(to).getAvailable());

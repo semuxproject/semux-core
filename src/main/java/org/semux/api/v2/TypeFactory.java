@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.ethereum.vm.LogInfo;
-import org.ethereum.vm.util.HashUtil;
 import org.semux.Kernel;
 import org.semux.api.v2.model.AccountType;
 import org.semux.api.v2.model.AccountVoteType;
@@ -162,22 +161,21 @@ public class TypeFactory {
         return txType;
     }
 
-    public static TransactionResultType transactionResultType(Transaction tx, TransactionResult result, long number) {
+    public static TransactionResultType transactionResultType(TransactionResult result, Amount fee,
+            byte[] contractAddress, long blockNumber) {
         return new TransactionResultType()
-                .blockNumber(Long.toString(number))
+                .blockNumber(Long.toString(blockNumber))
                 .code(result.getCode().name())
                 .logs(result.getLogs().stream().map(TypeFactory::logInfoType).collect(Collectors.toList()))
                 .gas(Long.toString(result.getGas()))
                 .gasUsed(String.valueOf(result.getGasUsed()))
                 .gasPrice(encodeAmount(result.getGasPrice()))
-                .fee(encodeAmount(tx.getFee()))
+                .fee(encodeAmount(fee))
                 .code(result.getCode().name())
                 .internalTransactions(result.getInternalTransactions().stream()
                         .map(TypeFactory::internalTransactionType).collect(Collectors.toList()))
                 .returnData(Hex.encode0x(result.getReturnData()))
-                .contractAddress(
-                        tx.getType().equals(CREATE) ? Hex.encode0x(HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce()))
-                                : null);
+                .contractAddress(contractAddress == null ? null : Hex.encode0x(contractAddress));
     }
 
     private static LogInfoType logInfoType(LogInfo log) {

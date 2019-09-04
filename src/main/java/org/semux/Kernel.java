@@ -24,6 +24,8 @@ import org.semux.config.Constants;
 import org.semux.consensus.SemuxBft;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.BftManager;
+import org.semux.core.Block;
+import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
 import org.semux.core.Genesis;
@@ -44,6 +46,8 @@ import org.semux.net.NodeManager;
 import org.semux.net.PeerClient;
 import org.semux.net.PeerServer;
 import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxBlock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -492,7 +496,31 @@ public class Kernel {
         return p2p;
     }
 
+    /**
+     * Returns the database factory.
+     *
+     * @return
+     */
     public DatabaseFactory getDbFactory() {
         return dbFactory;
+    }
+
+    /**
+     * Create an empty block.
+     *
+     * @return
+     */
+    public SemuxBlock createEmptyBlock() {
+        Block prevBlock = getBlockchain().getLatestBlock();
+        BlockHeader blockHeader = new BlockHeader(
+                prevBlock.getNumber() + 1,
+                new Key().toAddress(),
+                prevBlock.getHash(),
+                TimeUtil.currentTimeMillis(),
+                Bytes.EMPTY_HASH,
+                Bytes.EMPTY_HASH,
+                Bytes.EMPTY_HASH,
+                Bytes.EMPTY_BYTES);
+        return new SemuxBlock(blockHeader, getConfig().spec().maxBlockGasLimit());
     }
 }

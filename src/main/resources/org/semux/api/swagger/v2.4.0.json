@@ -701,7 +701,7 @@
                 }
             }
         },
-        "ListAccountsResponse": {
+        "GetAccountsResponse": {
             "type": "object",
             "required": [
                 "success"
@@ -1093,7 +1093,7 @@
                 }
             ]
         },
-        "GetSyncingProgressResponse": {
+        "GetSyncingStatusResponse": {
             "type": "object",
             "allOf": [
                 {
@@ -1102,13 +1102,13 @@
                 {
                     "properties": {
                         "result": {
-                            "$ref": "#/definitions/SyncingProgressType"
+                            "$ref": "#/definitions/SyncingStatusType"
                         }
                     }
                 }
             ]
         },
-        "SyncingProgressType": {
+        "SyncingStatusType": {
             "type": "object",
             "required": [
                 "syncing"
@@ -1138,7 +1138,7 @@
                 }
             }
         },
-        "CallResponse": {
+        "LocalCallResponse": {
             "type": "object",
             "required": [
                 "success"
@@ -1150,9 +1150,25 @@
                 {
                     "properties": {
                         "result": {
-                            "description": "The return data in hex",
-                            "type": "string",
-                            "pattern": "^(0x)?[0-9a-fA-F]*$"
+                            "$ref": "#/definitions/TransactionResultType"
+                        }
+                    }
+                }
+            ]
+        },
+        "LocalCreateResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/TransactionResultType"
                         }
                     }
                 }
@@ -1194,12 +1210,141 @@
         }
     },
     "paths": {
+        "/info": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get node info",
+                "description": "Returns kernel info.",
+                "operationId": "getInfo",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/peers": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get all peers",
+                "description": "Returns all connected peers.",
+                "operationId": "getPeers",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetPeersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/syncing-status": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get syncing status",
+                "description": "Returns an object with data about the sync status",
+                "operationId": "getSyncingStatus",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "An object about the current sync status",
+                        "schema": {
+                            "$ref": "#/definitions/GetSyncingStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/pending-transactions": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get pending transactions",
+                "description": "Returns all the pending transactions.",
+                "operationId": "getPendingTransactions",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetPendingTransactionsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
         "/node": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
-                "summary": "Add node",
+                "summary": "Add a node to connect",
                 "description": "Adds a node to node manager.",
                 "operationId": "addNode",
                 "produces": [
@@ -1238,9 +1383,9 @@
         "/blacklist": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
-                "summary": "Add to blacklist",
+                "summary": "Add an IP to blacklist",
                 "description": "Adds an IP address to blacklist.",
                 "operationId": "addToBlacklist",
                 "produces": [
@@ -1280,9 +1425,9 @@
         "/whitelist": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
-                "summary": "Add to whitelist",
+                "summary": "Add an IP to whitelist",
                 "description": "Adds an IP address to whitelist.",
                 "operationId": "addToWhitelist",
                 "produces": [
@@ -1322,10 +1467,10 @@
         "/account": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
-                "summary": "Get account",
-                "description": "Returns an account.",
+                "summary": "Get account info",
+                "description": "Returns the basic information about an account.",
                 "operationId": "getAccount",
                 "produces": [
                     "application/json"
@@ -1361,12 +1506,13 @@
                 ]
             },
             "post": {
+                "deprecated": true,
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Create or import an account",
                 "description": "Creates a new account by generating a new private key or importing an existing private key when parameter 'privateKey' is provided.",
-                "operationId": "createAccount",
+                "operationId": "createAccountDeprecated",
                 "produces": [
                     "application/json"
                 ],
@@ -1408,12 +1554,13 @@
                 ]
             },
             "delete": {
+                "deprecated": true,
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Delete account",
                 "description": "Deletes an account from this wallet.",
-                "operationId": "deleteAccount",
+                "operationId": "deleteAccountDeprecated",
                 "produces": [
                     "application/json"
                 ],
@@ -1448,52 +1595,10 @@
                 ]
             }
         },
-        "/delegate": {
-            "get": {
-                "tags": [
-                    "semux"
-                ],
-                "summary": "Get a delegate",
-                "description": "Returns a delegate.",
-                "operationId": "getDelegate",
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "name": "address",
-                        "in": "query",
-                        "description": "Delegate address",
-                        "required": true,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/GetDelegateResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad request",
-                        "schema": {
-                            "$ref": "#/definitions/ApiHandlerResponse"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "basicAuth": []
-                    }
-                ]
-            }
-        },
         "/account/transactions": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account transactions",
                 "description": "Returns transactions from/to an account.",
@@ -1553,7 +1658,7 @@
         "/account/internal-transactions": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account internal transactions",
                 "description": "Returns internal transactions from/to an account.",
@@ -1613,7 +1718,7 @@
         "/account/pending-transactions": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get pending transactions of the account",
                 "description": "Returns pending transactions from/to an account.",
@@ -1668,7 +1773,7 @@
         "/account/votes": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account votes",
                 "description": "Returns votes from the account.",
@@ -1710,7 +1815,7 @@
         "/account/code": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account code",
                 "description": "Returns the code of an account.",
@@ -1747,7 +1852,7 @@
         "/account/storage": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account storage",
                 "description": "Returns the storage value mapped to the given key of an account.",
@@ -1789,10 +1894,74 @@
                 }
             }
         },
+        "/latest-block": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Get the latest block",
+                "description": "Returns the latest block.",
+                "operationId": "getLatestBlock",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetLatestBlockResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/latest-block-number": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Get the number of the latest block",
+                "description": "Returns the number of the latest block.",
+                "operationId": "getLatestBlockNumber",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetLatestBlockNumberResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
         "/block-by-hash": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get block by hash",
                 "description": "Returns a block by block hash.",
@@ -1834,7 +2003,7 @@
         "/block-by-number": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get block by number",
                 "description": "Returns a block by block number.",
@@ -1874,202 +2043,10 @@
                 ]
             }
         },
-        "/delegates": {
-            "get": {
-                "tags": [
-                    "semux"
-                ],
-                "summary": "Get all delegates",
-                "description": "Returns a list of delegates.",
-                "operationId": "getDelegates",
-                "produces": [
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/GetDelegatesResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad request",
-                        "schema": {
-                            "$ref": "#/definitions/ApiHandlerResponse"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "basicAuth": []
-                    }
-                ]
-            }
-        },
-        "/info": {
-            "get": {
-                "tags": [
-                    "semux"
-                ],
-                "summary": "Get info",
-                "description": "Returns kernel info.",
-                "operationId": "getInfo",
-                "produces": [
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/GetInfoResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad request",
-                        "schema": {
-                            "$ref": "#/definitions/ApiHandlerResponse"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "basicAuth": []
-                    }
-                ]
-            }
-        },
-        "/latest-block": {
-            "get": {
-                "tags": [
-                    "semux"
-                ],
-                "summary": "Get latest block",
-                "description": "Returns the latest block.",
-                "operationId": "getLatestBlock",
-                "produces": [
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/GetLatestBlockResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad request",
-                        "schema": {
-                            "$ref": "#/definitions/ApiHandlerResponse"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "basicAuth": []
-                    }
-                ]
-            }
-        },
-        "/latest-block-number": {
-            "get": {
-                "tags": [
-                    "semux"
-                ],
-                "summary": "Get latest block number",
-                "description": "Returns the number of the latest block.",
-                "operationId": "getLatestBlockNumber",
-                "produces": [
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/GetLatestBlockNumberResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad request",
-                        "schema": {
-                            "$ref": "#/definitions/ApiHandlerResponse"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "basicAuth": []
-                    }
-                ]
-            }
-        },
-        "/peers": {
-            "get": {
-                "tags": [
-                    "semux"
-                ],
-                "summary": "Get peers",
-                "description": "Returns connected peers.",
-                "operationId": "getPeers",
-                "produces": [
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/GetPeersResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad request",
-                        "schema": {
-                            "$ref": "#/definitions/ApiHandlerResponse"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "basicAuth": []
-                    }
-                ]
-            }
-        },
-        "/pending-transactions": {
-            "get": {
-                "tags": [
-                    "semux"
-                ],
-                "summary": "Get pending transactions",
-                "description": "Returns all the pending transactions.",
-                "operationId": "getPendingTransactions",
-                "produces": [
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/GetPendingTransactionsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad request",
-                        "schema": {
-                            "$ref": "#/definitions/ApiHandlerResponse"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "basicAuth": []
-                    }
-                ]
-            }
-        },
         "/transaction": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get transaction",
                 "description": "Returns a transactions if exists.",
@@ -2111,7 +2088,7 @@
         "/transaction-result": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get transaction result",
                 "description": "Returns the result of the requested transaction.",
@@ -2153,7 +2130,7 @@
         "/transaction-limits": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get transaction limits",
                 "description": "Returns transaction limitations including minimum transaction fee and maximum transaction size.",
@@ -2200,12 +2177,86 @@
                 ]
             }
         },
+        "/delegate": {
+            "get": {
+                "tags": [
+                    "Delegate"
+                ],
+                "summary": "Get delegate info",
+                "description": "Returns the information about delegate.",
+                "operationId": "getDelegate",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "description": "Delegate address",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetDelegateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/delegates": {
+            "get": {
+                "tags": [
+                    "Delegate"
+                ],
+                "summary": "Get all delegates",
+                "description": "Returns a list of delegates.",
+                "operationId": "getDelegates",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/GetDelegatesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
         "/validators": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Delegate"
                 ],
-                "summary": "Get validators",
+                "summary": "Get all validators",
                 "description": "Returns a list of validators in Semux addresses.",
                 "operationId": "getValidators",
                 "produces": [
@@ -2235,9 +2286,9 @@
         "/vote": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Delegate"
                 ],
-                "summary": "Get vote",
+                "summary": "Get the vote between a delegate and a voter",
                 "description": "Returns the vote from a voter to a delegate.",
                 "operationId": "getVote",
                 "produces": [
@@ -2285,9 +2336,9 @@
         "/votes": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Delegate"
                 ],
-                "summary": "Get a delegate's votes",
+                "summary": "Get all votes of a delegate",
                 "description": "Returns all the votes to a delegate as a map of [voter address] => [votes]",
                 "operationId": "getVotes",
                 "produces": [
@@ -2327,11 +2378,11 @@
         "/accounts": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "List accounts",
+                "summary": "List all accounts in wallet",
                 "description": "Returns accounts in the wallet.",
-                "operationId": "listAccounts",
+                "operationId": "getAccounts",
                 "produces": [
                     "application/json"
                 ],
@@ -2339,7 +2390,7 @@
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/ListAccountsResponse"
+                            "$ref": "#/definitions/GetAccountsResponse"
                         }
                     },
                     "400": {
@@ -2356,39 +2407,39 @@
                 ]
             }
         },
-        "/sign-message": {
-            "get": {
+        "/create-account": {
+            "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "Sign a message",
-                "description": "Sign a message.",
-                "operationId": "signMessage",
+                "summary": "Create or import an account to wallet",
+                "description": "Creates a new account by generating a new private key or importing an existing private key when parameter 'privateKey' is provided.",
+                "operationId": "createAccount",
                 "produces": [
                     "application/json"
                 ],
                 "parameters": [
                     {
-                        "name": "address",
+                        "name": "name",
                         "in": "query",
-                        "description": "Signing address. The address must exist in the wallet.data of this Semux node.",
-                        "required": true,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                        "description": "Assigned alias to the created account.",
+                        "required": false,
+                        "type": "string"
                     },
                     {
-                        "name": "message",
+                        "name": "privateKey",
                         "in": "query",
-                        "description": "Message to sign in UTF-8 string",
-                        "required": true,
-                        "type": "string"
+                        "description": "The private key to be imported, create a new key if omitted",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{96}$"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/SignMessageResponse"
+                            "$ref": "#/definitions/CreateAccountResponse"
                         }
                     },
                     "400": {
@@ -2405,14 +2456,14 @@
                 ]
             }
         },
-        "/verify-message": {
-            "get": {
+        "/delete-account": {
+            "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "Verify a message",
-                "description": "Verify a signed message.",
-                "operationId": "verifyMessage",
+                "summary": "Delete an account from wallet",
+                "description": "Deletes an account from this wallet.",
+                "operationId": "deleteAccount",
                 "produces": [
                     "application/json"
                 ],
@@ -2420,32 +2471,17 @@
                     {
                         "name": "address",
                         "in": "query",
-                        "description": "Address of the message signer",
+                        "description": "Address of the account",
                         "required": true,
                         "type": "string",
                         "pattern": "^(0x)?[0-9a-fA-F]{40}$"
-                    },
-                    {
-                        "name": "message",
-                        "in": "query",
-                        "description": "Message in UTF-8 string",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "signature",
-                        "in": "query",
-                        "description": "Signature to verify",
-                        "required": true,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{192}$"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/VerifyMessageResponse"
+                            "$ref": "#/definitions/DeleteAccountResponse"
                         }
                     },
                     "400": {
@@ -2465,7 +2501,7 @@
         "/transaction/transfer": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Transfer coins",
                 "description": "Transfers coins to another address.",
@@ -2550,9 +2586,9 @@
         "/transaction/create": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "Create a contract",
+                "summary": "Deploy a contract",
                 "description": "Create a VM contract.",
                 "operationId": "create",
                 "produces": [
@@ -2636,9 +2672,9 @@
         "/transaction/call": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "Call a contract.",
+                "summary": "Call a contract",
                 "description": "Call a VM contract.",
                 "operationId": "call",
                 "produces": [
@@ -2730,9 +2766,9 @@
         "/transaction/unvote": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "Unvote",
+                "summary": "Unvote for a delegate",
                 "description": "Unvotes for a delegate.",
                 "operationId": "unvote",
                 "produces": [
@@ -2807,9 +2843,9 @@
         "/transaction/vote": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "Vote",
+                "summary": "Vote for a delegate",
                 "description": "Votes for a delegate.",
                 "operationId": "vote",
                 "produces": [
@@ -2884,11 +2920,11 @@
         "/transaction/delegate": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "Register delegate",
+                "summary": "Register as delegate",
                 "description": "Registers as a delegate",
-                "operationId": "registerDelegate",
+                "operationId": "delegate",
                 "produces": [
                     "application/json"
                 ],
@@ -2949,32 +2985,39 @@
                 ]
             }
         },
-        "/transaction/raw": {
+        "/sign-message": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
-                "summary": "Broadcast a raw transaction",
-                "description": "Broadcasts a raw transaction to the network.",
-                "operationId": "broadcastRawTransaction",
+                "summary": "Sign a message",
+                "description": "Sign a message.",
+                "operationId": "signMessage",
                 "produces": [
                     "application/json"
                 ],
                 "parameters": [
                     {
-                        "name": "raw",
+                        "name": "address",
                         "in": "query",
-                        "description": "Raw transaction encoded in hexadecimal string.",
+                        "description": "Signing address. The address must exist in the wallet.data of this Semux node.",
                         "required": true,
                         "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]+$"
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    },
+                    {
+                        "name": "message",
+                        "in": "query",
+                        "description": "Message to sign in UTF-8 string",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/DoTransactionResponse"
+                            "$ref": "#/definitions/SignMessageResponse"
                         }
                     },
                     "400": {
@@ -2991,10 +3034,60 @@
                 ]
             }
         },
-        "/call": {
+        "/sign-raw-transaction": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Sign an unsigned raw transaction",
+                "description": "Sign an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be created using /compose-raw-transaction API.",
+                "operationId": "signRawTransaction",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "raw",
+                        "in": "query",
+                        "description": "Unsigned raw transaction encoded in hexadecimal string.",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "description": "Signer's address. This address must exist in the wallet.",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/SignRawTransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/local-call": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Tool"
                 ],
                 "summary": "Make a local call",
                 "description": "Executes a new message call immediately without creating a transaction on the block chain.",
@@ -3003,14 +3096,6 @@
                     "application/json"
                 ],
                 "parameters": [
-                    {
-                        "name": "from",
-                        "in": "query",
-                        "description": "Sender's address. The address must exist in the wallet.data of this Semux node.",
-                        "required": false,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
-                    },
                     {
                         "name": "to",
                         "in": "query",
@@ -3023,15 +3108,6 @@
                         "name": "value",
                         "in": "query",
                         "description": "Amount of value to transfer in nano SEM",
-                        "required": false,
-                        "type": "string",
-                        "format": "int64",
-                        "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "nonce",
-                        "in": "query",
-                        "description": "Transaction nonce, default to sender's nonce if omitted",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -3057,7 +3133,7 @@
                     {
                         "name": "gasPrice",
                         "in": "query",
-                        "description": "The gas price in nanoSEM",
+                        "description": "The gas price in nano SEM",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -3068,7 +3144,76 @@
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/CallResponse"
+                            "$ref": "#/definitions/LocalCallResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/local-create": {
+            "get": {
+                "tags": [
+                    "Tool"
+                ],
+                "summary": "Make a local create",
+                "description": "Executes a contract deployment immediately without creating a transaction on the block chain.",
+                "operationId": "localCreate",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "Amount of value to transfer in nano SEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "description": "Transaction data encoded in hexadecimal string",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name": "gas",
+                        "in": "query",
+                        "description": "The gas limit for the call",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "gasPrice",
+                        "in": "query",
+                        "description": "The gas price in nano SEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/LocalCreateResponse"
                         }
                     },
                     "400": {
@@ -3088,23 +3233,15 @@
         "/estimate-gas": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Tool"
                 ],
-                "summary": "Estimate gas",
+                "summary": "Estimate gas usage",
                 "description": "Estimate the gas usage of a transaction.",
                 "operationId": "estimateGas",
                 "produces": [
                     "application/json"
                 ],
                 "parameters": [
-                    {
-                        "name": "from",
-                        "in": "query",
-                        "description": "Sender's address. The address must exist in the wallet.data of this Semux node.",
-                        "required": false,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
-                    },
                     {
                         "name": "to",
                         "in": "query",
@@ -3117,15 +3254,6 @@
                         "name": "value",
                         "in": "query",
                         "description": "Amount of value to transfer in nano SEM",
-                        "required": false,
-                        "type": "string",
-                        "format": "int64",
-                        "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "nonce",
-                        "in": "query",
-                        "description": "Transaction nonce, default to sender's nonce if omitted",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -3151,7 +3279,7 @@
                     {
                         "name": "gasPrice",
                         "in": "query",
-                        "description": "The gas price in SEM",
+                        "description": "The gas price in nano SEM",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -3179,10 +3307,67 @@
                 ]
             }
         },
+        "/verify-message": {
+            "get": {
+                "tags": [
+                    "Tool"
+                ],
+                "summary": "Verify a message",
+                "description": "Verify a signed message.",
+                "operationId": "verifyMessage",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "description": "Address of the message signer",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
+                    },
+                    {
+                        "name": "message",
+                        "in": "query",
+                        "description": "Message in UTF-8 string",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "signature",
+                        "in": "query",
+                        "description": "Signature to verify",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]{192}$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/VerifyMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
         "/compose-raw-transaction": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Tool"
                 ],
                 "summary": "Compose an unsigned raw transaction",
                 "description": "Compose an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be signed using /sign-raw-transaction API.",
@@ -3311,14 +3496,14 @@
                 ]
             }
         },
-        "/sign-raw-transaction": {
+        "/broadcast-raw-transaction": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Tool"
                 ],
-                "summary": "Sign an unsigned raw transaction",
-                "description": "Sign an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be created using /compose-raw-transaction API.",
-                "operationId": "signRawTransaction",
+                "summary": "Broadcast a raw transaction",
+                "description": "Broadcasts a signed raw transaction to the network.",
+                "operationId": "broadcastRawTransaction",
                 "produces": [
                     "application/json"
                 ],
@@ -3326,58 +3511,17 @@
                     {
                         "name": "raw",
                         "in": "query",
-                        "description": "Unsigned raw transaction encoded in hexadecimal string.",
+                        "description": "Raw transaction encoded in hexadecimal string.",
                         "required": true,
                         "type": "string",
                         "pattern": "^(0x)?[0-9a-fA-F]+$"
-                    },
-                    {
-                        "name": "address",
-                        "in": "query",
-                        "description": "Signer's address. This address must exist in the wallet.",
-                        "required": true,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/SignRawTransactionResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad request",
-                        "schema": {
-                            "$ref": "#/definitions/ApiHandlerResponse"
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "basicAuth": []
-                    }
-                ]
-            }
-        },
-        "/syncing": {
-            "get": {
-                "tags": [
-                    "semux"
-                ],
-                "summary": "Get syncing progress",
-                "description": "Returns an object with data about the sync status",
-                "operationId": "getSyncingProgress",
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "An object about the current sync status",
-                        "schema": {
-                            "$ref": "#/definitions/GetSyncingProgressResponse"
+                            "$ref": "#/definitions/DoTransactionResponse"
                         }
                     },
                     "400": {

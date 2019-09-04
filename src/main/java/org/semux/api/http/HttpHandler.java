@@ -11,6 +11,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaderValues.CLOSE;
 import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -53,6 +54,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -69,6 +71,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     public static final String INTERNAL_SERVER_ERROR_RESPONSE = "{\"success\":false,\"message\":\"500 Internal Server Error\"}";
     public static final String NOT_FOUND_RESPONSE = "{\"success\":false,\"message\":\"404 Not Found\"}";
     public static final String BAD_REQUEST_RESPONSE = "{\"success\":false,\"message\":\"400 Bad Request\"}";
+    public static final String FORBIDDEN_RESPONSE = "{\"success\":false,\"message\":\"403 Forbidden\"}";
 
     private static final Charset CHARSET = CharsetUtil.UTF_8;
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -122,13 +125,19 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         HttpHeaders headers = msg.headers();
         ByteBuf body = Unpooled.buffer(HttpConstants.MAX_BODY_SIZE);
 
-        // basic authentication
-        if (!checkBasicAuth(headers)) {
+        // check basic authentication
+        if (config.apiAuthEnabled() && !checkBasicAuth(headers)) {
             FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
             resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");
             resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
 
             ctx.writeAndFlush(resp);
+            return;
+        }
+
+        // check request method
+        if (config.apiAllowGetMethodsOnly() && !msg.method().equals(HttpMethod.GET)) {
+            writeJsonResponse(ctx, FORBIDDEN, FORBIDDEN_RESPONSE);
             return;
         }
 

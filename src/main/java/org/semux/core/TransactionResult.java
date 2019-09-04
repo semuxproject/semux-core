@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
-import org.ethereum.vm.OpCode;
 import org.semux.Network;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
