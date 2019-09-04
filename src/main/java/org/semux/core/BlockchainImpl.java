@@ -219,7 +219,7 @@ public class BlockchainImpl implements Blockchain {
 
     @Override
     public Block getBlock(long number) {
-        return getBlock(blockDB, number);
+        return getBlock(blockDB, number, false);
     }
 
     @Override
@@ -949,7 +949,7 @@ public class BlockchainImpl implements Blockchain {
             long latestBlockNumber = (bytes == null) ? 0 : Bytes.toLong(bytes);
             long target = Math.min(latestBlockNumber, to);
             for (long i = 1; i <= target; i++) {
-                boolean result = tempChain.importBlock(getBlock(blockDB, i), false);
+                boolean result = tempChain.importBlock(getBlock(blockDB, i, true), false);
                 if (!result) {
                     break;
                 }
@@ -979,10 +979,10 @@ public class BlockchainImpl implements Blockchain {
 
     // THE FOLLOWING TYPE ID SHOULD NEVER CHANGE
 
-    private static Block getBlock(Database blockDB, long number) {
+    private static Block getBlock(Database blockDB, long number, boolean skipResults) {
         byte[] header = blockDB.get(Bytes.merge(TYPE_BLOCK_HEADER_BY_NUMBER, Bytes.of(number)));
         byte[] transactions = blockDB.get(Bytes.merge(TYPE_BLOCK_TRANSACTIONS_BY_NUMBER, Bytes.of(number)));
-        byte[] results = blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(number)));
+        byte[] results = skipResults ? null : blockDB.get(Bytes.merge(TYPE_BLOCK_RESULTS_BY_NUMBER, Bytes.of(number)));
         byte[] votes = blockDB.get(Bytes.merge(TYPE_BLOCK_VOTES_BY_NUMBER, Bytes.of(number)));
 
         return (header == null) ? null : Block.fromComponents(header, transactions, results, votes);
