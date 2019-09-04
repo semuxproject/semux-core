@@ -65,6 +65,7 @@ import org.semux.api.v2.model.SignMessageResponse;
 import org.semux.api.v2.model.SignRawTransactionResponse;
 import org.semux.api.v2.model.SyncingProgressType;
 import org.semux.api.v2.model.VerifyMessageResponse;
+import org.semux.api.v2.server.SemuxApi;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;

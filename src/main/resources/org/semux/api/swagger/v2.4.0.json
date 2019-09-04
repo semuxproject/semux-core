@@ -1197,7 +1197,7 @@
         "/node": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
                 "summary": "Add node",
                 "description": "Adds a node to node manager.",
@@ -1238,7 +1238,7 @@
         "/blacklist": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
                 "summary": "Add to blacklist",
                 "description": "Adds an IP address to blacklist.",
@@ -1280,7 +1280,7 @@
         "/whitelist": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
                 "summary": "Add to whitelist",
                 "description": "Adds an IP address to whitelist.",
@@ -1322,7 +1322,7 @@
         "/account": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account",
                 "description": "Returns an account.",
@@ -1362,7 +1362,7 @@
             },
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Create or import an account",
                 "description": "Creates a new account by generating a new private key or importing an existing private key when parameter 'privateKey' is provided.",
@@ -1409,7 +1409,7 @@
             },
             "delete": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Delete account",
                 "description": "Deletes an account from this wallet.",
@@ -1451,7 +1451,7 @@
         "/delegate": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Delegate"
                 ],
                 "summary": "Get a delegate",
                 "description": "Returns a delegate.",
@@ -1493,7 +1493,7 @@
         "/account/transactions": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account transactions",
                 "description": "Returns transactions from/to an account.",
@@ -1553,7 +1553,7 @@
         "/account/internal-transactions": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account internal transactions",
                 "description": "Returns internal transactions from/to an account.",
@@ -1613,7 +1613,7 @@
         "/account/pending-transactions": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get pending transactions of the account",
                 "description": "Returns pending transactions from/to an account.",
@@ -1668,7 +1668,7 @@
         "/account/votes": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account votes",
                 "description": "Returns votes from the account.",
@@ -1710,7 +1710,7 @@
         "/account/code": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account code",
                 "description": "Returns the code of an account.",
@@ -1747,7 +1747,7 @@
         "/account/storage": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Account"
                 ],
                 "summary": "Get account storage",
                 "description": "Returns the storage value mapped to the given key of an account.",
@@ -1792,7 +1792,7 @@
         "/block-by-hash": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get block by hash",
                 "description": "Returns a block by block hash.",
@@ -1834,7 +1834,7 @@
         "/block-by-number": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get block by number",
                 "description": "Returns a block by block number.",
@@ -1877,7 +1877,7 @@
         "/delegates": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Delegate"
                 ],
                 "summary": "Get all delegates",
                 "description": "Returns a list of delegates.",
@@ -1909,7 +1909,7 @@
         "/info": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
                 "summary": "Get info",
                 "description": "Returns kernel info.",
@@ -1941,7 +1941,7 @@
         "/latest-block": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get latest block",
                 "description": "Returns the latest block.",
@@ -1973,7 +1973,7 @@
         "/latest-block-number": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get latest block number",
                 "description": "Returns the number of the latest block.",
@@ -2005,7 +2005,7 @@
         "/peers": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
                 "summary": "Get peers",
                 "description": "Returns connected peers.",
@@ -2037,7 +2037,7 @@
         "/pending-transactions": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
                 "summary": "Get pending transactions",
                 "description": "Returns all the pending transactions.",
@@ -2069,7 +2069,7 @@
         "/transaction": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get transaction",
                 "description": "Returns a transactions if exists.",
@@ -2111,7 +2111,7 @@
         "/transaction-result": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get transaction result",
                 "description": "Returns the result of the requested transaction.",
@@ -2153,7 +2153,7 @@
         "/transaction-limits": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Blockchain"
                 ],
                 "summary": "Get transaction limits",
                 "description": "Returns transaction limitations including minimum transaction fee and maximum transaction size.",
@@ -2203,7 +2203,7 @@
         "/validators": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Delegate"
                 ],
                 "summary": "Get validators",
                 "description": "Returns a list of validators in Semux addresses.",
@@ -2235,7 +2235,7 @@
         "/vote": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Delegate"
                 ],
                 "summary": "Get vote",
                 "description": "Returns the vote from a voter to a delegate.",
@@ -2285,7 +2285,7 @@
         "/votes": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Delegate"
                 ],
                 "summary": "Get a delegate's votes",
                 "description": "Returns all the votes to a delegate as a map of [voter address] => [votes]",
@@ -2327,7 +2327,7 @@
         "/accounts": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "List accounts",
                 "description": "Returns accounts in the wallet.",
@@ -2359,7 +2359,7 @@
         "/sign-message": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Sign a message",
                 "description": "Sign a message.",
@@ -2408,7 +2408,7 @@
         "/verify-message": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Tool"
                 ],
                 "summary": "Verify a message",
                 "description": "Verify a signed message.",
@@ -2465,7 +2465,7 @@
         "/transaction/transfer": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Transfer coins",
                 "description": "Transfers coins to another address.",
@@ -2550,7 +2550,7 @@
         "/transaction/create": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Create a contract",
                 "description": "Create a VM contract.",
@@ -2636,7 +2636,7 @@
         "/transaction/call": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Call a contract.",
                 "description": "Call a VM contract.",
@@ -2730,7 +2730,7 @@
         "/transaction/unvote": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Unvote",
                 "description": "Unvotes for a delegate.",
@@ -2807,7 +2807,7 @@
         "/transaction/vote": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Vote",
                 "description": "Votes for a delegate.",
@@ -2884,7 +2884,7 @@
         "/transaction/delegate": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Register delegate",
                 "description": "Registers as a delegate",
@@ -2952,7 +2952,7 @@
         "/transaction/raw": {
             "post": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
                 "summary": "Broadcast a raw transaction",
                 "description": "Broadcasts a raw transaction to the network.",
@@ -2994,7 +2994,7 @@
         "/call": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Tool"
                 ],
                 "summary": "Make a local call",
                 "description": "Executes a new message call immediately without creating a transaction on the block chain.",
@@ -3088,7 +3088,7 @@
         "/estimate-gas": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Tool"
                 ],
                 "summary": "Estimate gas",
                 "description": "Estimate the gas usage of a transaction.",
@@ -3182,7 +3182,7 @@
         "/compose-raw-transaction": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Tool"
                 ],
                 "summary": "Compose an unsigned raw transaction",
                 "description": "Compose an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be signed using /sign-raw-transaction API.",
@@ -3314,7 +3314,7 @@
         "/sign-raw-transaction": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Wallet"
                 ],
                 "summary": "Sign an unsigned raw transaction",
                 "description": "Sign an unsigned raw transaction then return its hexadecimal encoded string. An unsigned raw transaction can be created using /compose-raw-transaction API.",
@@ -3364,7 +3364,7 @@
         "/syncing": {
             "get": {
                 "tags": [
-                    "semux"
+                    "Node"
                 ],
                 "summary": "Get syncing progress",
                 "description": "Returns an object with data about the sync status",

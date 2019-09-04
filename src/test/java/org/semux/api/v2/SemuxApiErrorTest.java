@@ -35,6 +35,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.semux.api.ApiVersion;
 import org.semux.api.v2.model.ApiHandlerResponse;
+import org.semux.api.v2.server.SemuxApi;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;

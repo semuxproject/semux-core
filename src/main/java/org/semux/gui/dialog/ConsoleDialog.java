@@ -33,8 +33,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import org.semux.api.v2.SemuxApi;
 import org.semux.api.v2.SemuxApiImpl;
+import org.semux.api.v2.server.SemuxApi;
 import org.semux.gui.SemuxGui;
 import org.semux.message.GuiMessages;
 import org.semux.util.CircularFixedSizeList;
