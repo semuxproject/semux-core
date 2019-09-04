@@ -268,6 +268,10 @@ public class TransactionResult {
         this.internalTransactions = internalTransactions;
     }
 
+    public void addInternalTransaction(SemuxInternalTransaction internalTransaction) {
+        this.internalTransactions.add(internalTransaction);
+    }
+
     private byte[] serializeLog(LogInfo log) {
         SimpleEncoder enc = new SimpleEncoder();
         enc.writeBytes(log.getAddress());
@@ -291,41 +295,6 @@ public class TransactionResult {
             topics.add(DataWord.of(dec.readBytes()));
         }
         return new LogInfo(address, topics, data);
-    }
-
-    protected static byte[] serializeInternalTransaction(SemuxInternalTransaction tx) {
-        SimpleEncoder enc = new SimpleEncoder();
-        enc.writeBoolean(tx.isRejected());
-        enc.writeInt(tx.getDepth());
-        enc.writeInt(tx.getIndex());
-        enc.writeByte(tx.getType().val());
-        enc.writeBytes(tx.getFrom());
-        enc.writeBytes(tx.getTo());
-        enc.writeLong(tx.getNonce());
-        enc.writeAmount(tx.getValue());
-        enc.writeBytes(tx.getData());
-        enc.writeLong(tx.getGas());
-        enc.writeAmount(tx.getGasPrice());
-
-        return enc.toBytes();
-    }
-
-    protected static SemuxInternalTransaction deserializeInternalTransaction(byte[] bytes) {
-        SimpleDecoder dec = new SimpleDecoder(bytes);
-        boolean isRejected = dec.readBoolean();
-        int depth = dec.readInt();
-        int index = dec.readInt();
-        OpCode type = OpCode.code(dec.readByte());
-        byte[] from = dec.readBytes();
-        byte[] to = dec.readBytes();
-        long nonce = dec.readLong();
-        Amount value = dec.readAmount();
-        byte[] data = dec.readBytes();
-        long gas = dec.readLong();
-        Amount gasPrice = dec.readAmount();
-
-        return new SemuxInternalTransaction(isRejected, depth, index,
-                type, from, to, nonce, value, data, gas, gasPrice);
     }
 
     public static TransactionResult fromBytes(byte[] bytes) {
@@ -358,7 +327,7 @@ public class TransactionResult {
             List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
             n = dec.readInt();
             for (int i = 0; i < n; i++) {
-                internalTransactions.add(deserializeInternalTransaction(dec.readBytes()));
+                internalTransactions.add(SemuxInternalTransaction.fromBytes(dec.readBytes()));
             }
             result.setInternalTransactions(internalTransactions);
         }
@@ -387,7 +356,7 @@ public class TransactionResult {
 
         enc.writeInt(internalTransactions.size());
         for (SemuxInternalTransaction tx : internalTransactions) {
-            enc.writeBytes(serializeInternalTransaction(tx));
+            enc.writeBytes(tx.toBytes());
         }
 
         return enc.toBytes();

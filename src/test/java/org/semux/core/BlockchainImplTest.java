@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.List;
 
+import org.ethereum.vm.OpCode;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.MerkleUtil;
 import org.semux.util.TimeUtil;
+import org.semux.vm.client.SemuxInternalTransaction;
 
 public class BlockchainImplTest {
 
@@ -40,6 +42,7 @@ public class BlockchainImplTest {
 
     private Config config;
     private BlockchainImpl chain;
+    private TransactionResult res;
 
     private byte[] coinbase = Bytes.random(30);
     private byte[] prevHash = Bytes.random(32);
@@ -54,14 +57,13 @@ public class BlockchainImplTest {
     private byte[] data = Bytes.of("test");
     private long timestamp = TimeUtil.currentTimeMillis() - 60 * 1000;
     private Transaction tx = new Transaction(network, TransactionType.TRANSFER, to, value, fee, nonce, timestamp,
-            data)
-                    .sign(key);
-    private TransactionResult res = new TransactionResult();
+            data).sign(key);
 
     @Before
     public void setUp() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
+        res = new TransactionResult();
     }
 
     @Test
@@ -168,6 +170,51 @@ public class BlockchainImplTest {
 
         TransactionResult r = chain.getTransactionResult(tx.getHash());
         assertArrayEquals(res.toBytes(), r.toBytes());
+    }
+
+    @Test
+    public void testGetInternalTransaction() {
+        assertNull(chain.getTransaction(tx.getHash()));
+
+        byte[] rootTxHash = Bytes.random(32);
+        boolean rejected = true;
+        int depth = 1;
+        int index = 2;
+        OpCode type = OpCode.CALL;
+        byte[] from = Bytes.random(20);
+        byte[] to = Bytes.random(20);
+        long nonce = 3;
+        Amount value = Amount.of(4);
+        byte[] data = "data".getBytes();
+        long gas = 5;
+        Amount gasPrice = Amount.of(6);
+        SemuxInternalTransaction internalTx = new SemuxInternalTransaction(
+                rootTxHash, rejected, depth, index, type, from, to, nonce, value, data, gas, gasPrice);
+
+        // add internal transactions
+        res.addInternalTransaction(internalTx);
+        res.addInternalTransaction(internalTx);
+
+        // import a block including the transaction
+        Block newBlock = createBlock(1);
+        chain.addBlock(newBlock);
+
+        // assert the internal txs
+        assertEquals(2, chain.getInternalTransactionCount(from));
+        assertEquals(2, chain.getInternalTransactionCount(to));
+        SemuxInternalTransaction internalTx2 = chain.getInternalTransactions(from, 1, 2).get(0);
+        assertArrayEquals(rootTxHash, internalTx2.getRootTxHash());
+        assertEquals(rejected, internalTx2.isRejected());
+        assertEquals(depth, internalTx2.getDepth());
+        assertEquals(index, internalTx2.getIndex());
+        assertEquals(type, internalTx2.getType());
+        assertArrayEquals(from, internalTx2.getFrom());
+        assertArrayEquals(to, internalTx2.getTo());
+        assertEquals(nonce, internalTx2.getNonce());
+        assertEquals(value, internalTx2.getValue());
+        assertArrayEquals(data, internalTx2.getData());
+        assertEquals(gas, internalTx2.getGas());
+        assertEquals(gasPrice, internalTx2.getGasPrice());
     }
 
     @Test

@@ -66,6 +66,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
+import org.ethereum.vm.OpCode;
 import org.ethereum.vm.util.HashUtil;
 import org.junit.Test;
 import org.semux.Network;
@@ -77,6 +78,7 @@ import org.semux.api.v2.model.CreateAccountResponse;
 import org.semux.api.v2.model.DelegateType;
 import org.semux.api.v2.model.DeleteAccountResponse;
 import org.semux.api.v2.model.DoTransactionResponse;
+import org.semux.api.v2.model.GetAccountInternalTransactionsResponse;
 import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
@@ -97,6 +99,7 @@ import org.semux.api.v2.model.GetValidatorsResponse;
 import org.semux.api.v2.model.GetVoteResponse;
 import org.semux.api.v2.model.GetVotesResponse;
 import org.semux.api.v2.model.InfoType;
+import org.semux.api.v2.model.InternalTransactionType;
 import org.semux.api.v2.model.ListAccountsResponse;
 import org.semux.api.v2.model.PeerType;
 import org.semux.api.v2.model.SignMessageResponse;
@@ -119,6 +122,7 @@ import org.semux.net.Peer;
 import org.semux.net.filter.FilterRule;
 import org.semux.net.filter.SemuxIpFilter;
 import org.semux.util.Bytes;
+import org.semux.vm.client.SemuxInternalTransaction;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
 
@@ -479,6 +483,29 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals("0x", response.getResult().getReturnData());
         String address = Hex.encode0x(HashUtil.calcNewAddress(from.toAddress(), 1));
         assertEquals(address, response.getResult().getContractAddress());
+    }
+
+    @Test
+    public void getAccountInternalTransactionsTest() {
+        Key from = new Key(), to = new Key();
+        Transaction tx = createTransaction(config, CREATE, from, to, Amount.of(1, SEM), 1);
+        TransactionResult res = new TransactionResult();
+        SemuxInternalTransaction internalTx = new SemuxInternalTransaction(
+                Bytes.random(32), false, 1, 2, OpCode.CALL,
+                Bytes.random(20), Bytes.random(20), 3, Amount.of(4), "data".getBytes(),
+                5, Amount.of(6));
+        res.addInternalTransaction(internalTx);
+
+        Block block = createBlock(chain.getLatestBlockNumber() + 1, Collections.singletonList(tx),
+                Collections.singletonList(res));
+        chain.addBlock(block);
+
+        GetAccountInternalTransactionsResponse response = api.getAccountInternalTransactions(
+                Hex.encode(internalTx.getFrom()), "0", "100");
+        assertTrue(response.isSuccess());
+
+        List<InternalTransactionType> internalTxs = response.getResult();
+        assertEquals(1, internalTxs.size());
     }
 
     @Test

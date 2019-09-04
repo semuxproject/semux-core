@@ -109,7 +109,9 @@ public class TransactionResultTest {
         long blockNumber = 4;
         List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
         internalTransactions
-                .add(new SemuxInternalTransaction(false, 1, 2, OpCode.CALL, Bytes.random(20), Bytes.random(20),
+                .add(new SemuxInternalTransaction(Bytes.random(32),
+                        false, 1, 2, OpCode.CALL,
+                        Bytes.random(20), Bytes.random(20),
                         3, Amount.of(1), Bytes.random(5), 4, Amount.of(10)));
 
         TransactionResult tr1 = new TransactionResult(code, returnData, logs);
