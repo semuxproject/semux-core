@@ -38,9 +38,11 @@ import org.semux.api.v2.model.CreateAccountResponse;
 import org.semux.api.v2.model.DeleteAccountResponse;
 import org.semux.api.v2.model.DoTransactionResponse;
 import org.semux.api.v2.model.EstimateGasResponse;
+import org.semux.api.v2.model.GetAccountCodeResponse;
 import org.semux.api.v2.model.GetAccountInternalTransactionsResponse;
 import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2.model.GetAccountResponse;
+import org.semux.api.v2.model.GetAccountStorageResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
 import org.semux.api.v2.model.GetAccountVotesResponse;
 import org.semux.api.v2.model.GetBlockResponse;
@@ -225,6 +227,35 @@ public final class SemuxApiImpl implements SemuxApi {
             GetAccountResponse resp = new GetAccountResponse();
             resp.setResult(TypeFactory.accountType(account, transactionCount, internalTransactionCount,
                     pendingTransactionCount));
+            return success(resp);
+        } catch (IllegalArgumentException ex) {
+            return badRequest(ex.getMessage());
+        }
+    }
+
+    @Override
+    public Response getAccountCode(String address) {
+        try {
+            byte[] addressBytes = parseAddress(address, true);
+            byte[] code = kernel.getBlockchain().getAccountState().getCode(addressBytes);
+
+            GetAccountCodeResponse resp = new GetAccountCodeResponse();
+            resp.setResult(code == null ? null : Hex.encode0x(code));
+            return success(resp);
+        } catch (IllegalArgumentException ex) {
+            return badRequest(ex.getMessage());
+        }
+    }
+
+    @Override
+    public Response getAccountStorage(String address, String key) {
+        try {
+            byte[] addressBytes = parseAddress(address, true);
+            byte[] keyBytes = parseHex(key, true, "key");
+            byte[] storage = kernel.getBlockchain().getAccountState().getStorage(addressBytes, keyBytes);
+
+            GetAccountStorageResponse resp = new GetAccountStorageResponse();
+            resp.setResult(storage == null ? null : Hex.encode0x(storage));
             return success(resp);
         } catch (IllegalArgumentException ex) {
             return badRequest(ex.getMessage());
@@ -948,6 +979,22 @@ public final class SemuxApiImpl implements SemuxApi {
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Parameter `" + name + "` is not a valid hexadecimal string");
             }
+        }
+    }
+
+    private byte[] parseHex(String data, boolean required, String name) {
+        if (data == null) {
+            if (required) {
+                throw new IllegalArgumentException("Parameter `" + name + "` is required");
+            } else {
+                return null;
+            }
+        }
+
+        try {
+            return Hex.decode0x(data);
+        } catch (CryptoException e) {
+            throw new IllegalArgumentException("Parameter `" + name + "` is not a valid hexadecimal string");
         }
     }
 }
