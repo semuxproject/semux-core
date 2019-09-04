@@ -38,6 +38,7 @@ import org.semux.api.v2.model.CreateAccountResponse;
 import org.semux.api.v2.model.DeleteAccountResponse;
 import org.semux.api.v2.model.DoTransactionResponse;
 import org.semux.api.v2.model.EstimateGasResponse;
+import org.semux.api.v2.model.GetAccountInternalTransactionsResponse;
 import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
@@ -214,6 +215,7 @@ public final class SemuxApiImpl implements SemuxApi {
 
             Account account = kernel.getBlockchain().getAccountState().getAccount(addressBytes);
             int transactionCount = kernel.getBlockchain().getTransactionCount(account.getAddress());
+            int internalTransactionCount = kernel.getBlockchain().getInternalTransactionCount(account.getAddress());
             int pendingTransactionCount = (int) kernel.getPendingManager()
                     .getPendingTransactions().parallelStream()
                     .map(pendingTransaction -> pendingTransaction.transaction)
@@ -221,7 +223,8 @@ public final class SemuxApiImpl implements SemuxApi {
                     .count();
 
             GetAccountResponse resp = new GetAccountResponse();
-            resp.setResult(TypeFactory.accountType(account, transactionCount, pendingTransactionCount));
+            resp.setResult(TypeFactory.accountType(account, transactionCount, internalTransactionCount,
+                    pendingTransactionCount));
             return success(resp);
         } catch (IllegalArgumentException ex) {
             return badRequest(ex.getMessage());
@@ -265,6 +268,27 @@ public final class SemuxApiImpl implements SemuxApi {
             GetAccountTransactionsResponse resp = new GetAccountTransactionsResponse();
             resp.setResult(kernel.getBlockchain().getTransactions(addressBytes, fromInt, toInt).parallelStream()
                     .map(TypeFactory::transactionType)
+                    .collect(Collectors.toList()));
+            return success(resp);
+        } catch (IllegalArgumentException ex) {
+            return badRequest(ex.getMessage());
+        }
+    }
+
+    @Override
+    public Response getAccountInternalTransactions(String address, String from, String to) {
+        try {
+            byte[] addressBytes = parseAddress(address, true);
+            int fromInt = parseInt(from, true, "from");
+            int toInt = parseInt(to, true, "to");
+
+            if (toInt <= fromInt) {
+                return badRequest("Parameter `to` must be greater than `from`");
+            }
+
+            GetAccountInternalTransactionsResponse resp = new GetAccountInternalTransactionsResponse();
+            resp.setResult(kernel.getBlockchain().getInternalTransactions(addressBytes, fromInt, toInt).parallelStream()
+                    .map(TypeFactory::internalTransactionType)
                     .collect(Collectors.toList()));
             return success(resp);
         } catch (IllegalArgumentException ex) {

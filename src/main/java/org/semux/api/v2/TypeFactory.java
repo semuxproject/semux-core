@@ -44,13 +44,15 @@ import org.semux.vm.client.SemuxInternalTransaction;
 
 public class TypeFactory {
 
-    public static AccountType accountType(Account account, int transactionCount, int pendingTransactionCount) {
+    public static AccountType accountType(Account account, int transactionCount, int internalTransactionCount,
+            int pendingTransactionCount) {
         return new AccountType()
                 .address(Hex.encode0x(account.getAddress()))
                 .available(encodeAmount(account.getAvailable()))
                 .locked(encodeAmount(account.getLocked()))
                 .nonce(String.valueOf(account.getNonce()))
                 .transactionCount(transactionCount)
+                .internalTransactionCount(internalTransactionCount)
                 .pendingTransactionCount(pendingTransactionCount);
     }
 
@@ -186,8 +188,9 @@ public class TypeFactory {
                         .collect(Collectors.toList()));
     }
 
-    private static InternalTransactionType internalTransactionType(SemuxInternalTransaction it) {
+    public static InternalTransactionType internalTransactionType(SemuxInternalTransaction it) {
         return new InternalTransactionType()
+                .rootTransactionHash(Hex.encode0x(it.getRootTxHash()))
                 .rejected(it.isRejected())
                 .depth(Integer.toString(it.getDepth()))
                 .index(Integer.toString(it.getIndex()))
