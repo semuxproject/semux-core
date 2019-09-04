@@ -78,9 +78,11 @@ import org.semux.api.v2.model.CreateAccountResponse;
 import org.semux.api.v2.model.DelegateType;
 import org.semux.api.v2.model.DeleteAccountResponse;
 import org.semux.api.v2.model.DoTransactionResponse;
+import org.semux.api.v2.model.GetAccountCodeResponse;
 import org.semux.api.v2.model.GetAccountInternalTransactionsResponse;
 import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
 import org.semux.api.v2.model.GetAccountResponse;
+import org.semux.api.v2.model.GetAccountStorageResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
 import org.semux.api.v2.model.GetAccountVotesResponse;
 import org.semux.api.v2.model.GetBlockResponse;
@@ -113,6 +115,7 @@ import org.semux.core.Genesis;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
+import org.semux.core.state.AccountState;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
 import org.semux.crypto.Hex;
@@ -281,6 +284,33 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertThat(resp.getResult().get(0))
                 .hasFieldOrPropertyWithValue("votes", "1")
                 .hasFieldOrPropertyWithValue("delegate.address", Hex.encode0x(delegates.get(0).getAddress()));
+    }
+
+    @Test
+    public void getAccountCodeAndStorageTest() {
+        Key acc = new Key();
+        byte[] code = "code".getBytes();
+        byte[] key = "key".getBytes();
+        byte[] value = "value".getBytes();
+        AccountState as = chain.getAccountState();
+
+        GetAccountCodeResponse respCode = api.getAccountCode(Hex.encode(acc.toAddress()));
+        GetAccountStorageResponse respStorage = api.getAccountStorage(Hex.encode(acc.toAddress()), Hex.encode(key));
+        assertTrue(respCode.isSuccess());
+        assertTrue(respStorage.isSuccess());
+        assertNull(respCode.getResult());
+        assertNull(respStorage.getResult());
+
+        // update the code and storage
+        as.putStorage(acc.toAddress(), key, value);
+        as.setCode(acc.toAddress(), code);
+
+        respCode = api.getAccountCode(Hex.encode(acc.toAddress()));
+        respStorage = api.getAccountStorage(Hex.encode(acc.toAddress()), Hex.encode(key));
+        assertTrue(respCode.isSuccess());
+        assertTrue(respStorage.isSuccess());
+        assertEquals(Hex.encode0x(code), respCode.getResult());
+        assertEquals(Hex.encode0x(value), respStorage.getResult());
     }
 
     @Test
