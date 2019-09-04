@@ -323,7 +323,7 @@ public class TransactionExecutor {
             result.setBlockNumber(block.getNumber());
             result.setInternalTransactions(receipt.getInternalTransactions()
                     .stream()
-                    .map(SemuxInternalTransaction::new)
+                    .map(it -> new SemuxInternalTransaction(tx.getHash(), it))
                     .collect(Collectors.toList()));
 
             // log the transaction result

@@ -585,9 +585,7 @@ public class BlockchainImpl implements Blockchain {
         for (int i = from; i < total && i < to; i++) {
             byte[] key = getNthInternalTransactionIndexKey(address, i);
             byte[] value = indexDB.get(key);
-            // byte[] rootTransactionHash = Arrays.copyOfRange(value, 0, 32);
-            byte[] internalTransaction = Arrays.copyOfRange(value, 32, value.length);
-            list.add(TransactionResult.deserializeInternalTransaction(internalTransaction));
+            list.add(SemuxInternalTransaction.fromBytes(value));
         }
 
         return list;
@@ -610,13 +608,8 @@ public class BlockchainImpl implements Blockchain {
      * @param address
      */
     protected void addInternalTransactionToAccount(Transaction root, SemuxInternalTransaction tx, byte[] address) {
-        byte[] value = Bytes.merge(
-                root.getHash(), // root transaction hash
-                TransactionResult.serializeInternalTransaction(tx) // serialized internal transaction
-        );
-
         int total = getInternalTransactionCount(address);
-        indexDB.put(getNthInternalTransactionIndexKey(address, total), value);
+        indexDB.put(getNthInternalTransactionIndexKey(address, total), tx.toBytes());
         setInternalTransactionCount(address, total + 1);
     }
 
