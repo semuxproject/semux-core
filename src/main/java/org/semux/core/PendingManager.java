@@ -23,7 +23,6 @@ import org.ethereum.vm.client.BlockStore;
 import org.semux.Kernel;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.DelegateState;
-import org.semux.crypto.Key;
 import org.semux.net.Channel;
 import org.semux.net.msg.p2p.TransactionMessage;
 import org.semux.util.ByteArray;
@@ -103,7 +102,7 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         this.pendingAS = kernel.getBlockchain().getAccountState().track();
         this.pendingDS = kernel.getBlockchain().getDelegateState().track();
-        this.dummyBlock = createDummyBlock();
+        this.dummyBlock = kernel.createEmptyBlock();
 
         this.exec = Executors.newSingleThreadScheduledExecutor(factory);
     }
@@ -247,7 +246,7 @@ public class PendingManager implements Runnable, BlockchainListener {
         // reset state
         pendingAS = kernel.getBlockchain().getAccountState().track();
         pendingDS = kernel.getBlockchain().getDelegateState().track();
-        dummyBlock = createDummyBlock();
+        dummyBlock = kernel.createEmptyBlock();
 
         // clear transaction pool
         List<PendingTransaction> txs = new ArrayList<>(validTxs);
@@ -353,7 +352,7 @@ public class PendingManager implements Runnable, BlockchainListener {
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
             TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore).execute(tx,
-                    as, ds, dummyBlock, kernel.getBlockchain(), 0);
+                    as, ds, dummyBlock, kernel.getBlockchain().isVMEnabled(), 0);
 
             if (result.getCode().isAcceptable()) {
                 // commit state updates
@@ -415,16 +414,6 @@ public class PendingManager implements Runnable, BlockchainListener {
 
     private ByteArray createKey(byte[] acc, long nonce) {
         return ByteArray.of(Bytes.merge(acc, Bytes.of(nonce)));
-    }
-
-    private SemuxBlock createDummyBlock() {
-        Blockchain chain = kernel.getBlockchain();
-        Block prevBlock = chain.getLatestBlock();
-        BlockHeader blockHeader = new BlockHeader(
-                prevBlock.getNumber() + 1,
-                new Key().toAddress(), prevBlock.getHash(), TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES,
-                Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES, Bytes.EMPTY_BYTES);
-        return new SemuxBlock(blockHeader, kernel.getConfig().spec().maxBlockGasLimit());
     }
 
     /**

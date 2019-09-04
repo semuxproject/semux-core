@@ -78,6 +78,7 @@ import org.semux.api.v2.model.CreateAccountResponse;
 import org.semux.api.v2.model.DelegateType;
 import org.semux.api.v2.model.DeleteAccountResponse;
 import org.semux.api.v2.model.DoTransactionResponse;
+import org.semux.api.v2.model.EstimateGasResponse;
 import org.semux.api.v2.model.GetAccountCodeResponse;
 import org.semux.api.v2.model.GetAccountInternalTransactionsResponse;
 import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
@@ -85,6 +86,7 @@ import org.semux.api.v2.model.GetAccountResponse;
 import org.semux.api.v2.model.GetAccountStorageResponse;
 import org.semux.api.v2.model.GetAccountTransactionsResponse;
 import org.semux.api.v2.model.GetAccountVotesResponse;
+import org.semux.api.v2.model.GetAccountsResponse;
 import org.semux.api.v2.model.GetBlockResponse;
 import org.semux.api.v2.model.GetDelegateResponse;
 import org.semux.api.v2.model.GetDelegatesResponse;
@@ -102,11 +104,13 @@ import org.semux.api.v2.model.GetVoteResponse;
 import org.semux.api.v2.model.GetVotesResponse;
 import org.semux.api.v2.model.InfoType;
 import org.semux.api.v2.model.InternalTransactionType;
-import org.semux.api.v2.model.GetAccountsResponse;
+import org.semux.api.v2.model.LocalCallResponse;
+import org.semux.api.v2.model.LocalCreateResponse;
 import org.semux.api.v2.model.PeerType;
 import org.semux.api.v2.model.SignMessageResponse;
 import org.semux.api.v2.model.SignRawTransactionResponse;
 import org.semux.api.v2.model.SyncingStatusType;
+import org.semux.api.v2.model.TransactionResultType;
 import org.semux.api.v2.model.VerifyMessageResponse;
 import org.semux.consensus.SemuxSync;
 import org.semux.core.Amount;
@@ -1001,5 +1005,43 @@ public class SemuxApiTest extends SemuxApiTestBase {
         assertEquals("1", result.getStartingHeight());
         assertEquals("10", result.getCurrentHeight());
         assertEquals("100", result.getTargetHeight());
+    }
+
+    @Test
+    public void testLocalCall() {
+        LocalCallResponse response = api.localCall(Hex.encode(Bytes.random(20)), "100", "0xff",
+                "1000000", "1");
+        assertTrue(response.isSuccess());
+
+        TransactionResultType result = response.getResult();
+        assertEquals("SUCCESS", result.getCode());
+    }
+
+    @Test
+    public void testLocalCall2() {
+        LocalCallResponse response = api.localCall(Hex.encode(Bytes.random(20)), null, null, null, null);
+        assertTrue(response.isSuccess());
+
+        TransactionResultType result = response.getResult();
+        assertEquals("SUCCESS", result.getCode());
+    }
+
+    @Test
+    public void testLocalCreate() {
+        LocalCreateResponse response = api.localCreate("100", "0x6000", "1000000", "1");
+        assertTrue(response.isSuccess());
+
+        TransactionResultType result = response.getResult();
+        assertEquals("SUCCESS", result.getCode());
+        assertNotNull(result.getContractAddress());
+    }
+
+    @Test
+    public void testEstimateGas() {
+        EstimateGasResponse response = api.estimateGas(Hex.encode(Bytes.random(20)), "100", "0xff",
+                "1000000", "1");
+        assertTrue(response.isSuccess());
+
+        assertEquals(Long.toString(21_000 + 68), response.getResult());
     }
 }

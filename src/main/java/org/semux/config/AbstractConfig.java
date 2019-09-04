@@ -110,8 +110,10 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     protected boolean apiEnabled = false;
     protected String apiListenIp = "127.0.0.1";
     protected int apiListenPort = Constants.DEFAULT_API_PORT;
+    protected boolean apiAuthEnabled = true;
     protected String apiUsername = null;
     protected String apiPassword = null;
+    protected boolean apiAllowGetMethodsOnly = false;
 
     // =========================
     // BFT consensus
@@ -471,6 +473,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
+    public boolean apiAuthEnabled() {
+        return apiAuthEnabled;
+    }
+
+    @Override
     public String apiUsername() {
         return apiUsername == null ? "admin" : apiUsername;
     }
@@ -478,6 +485,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     @Override
     public String apiPassword() {
         return apiPassword == null ? "admin" : apiPassword;
+    }
+
+    @Override
+    public boolean apiAllowGetMethodsOnly() {
+        return apiAllowGetMethodsOnly;
     }
 
     @Override
@@ -651,11 +663,17 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                 case "api.listenPort":
                     apiListenPort = Integer.parseInt(props.getProperty(name).trim());
                     break;
+                case "api.authEnabled":
+                    apiAuthEnabled = Boolean.parseBoolean(props.getProperty(name).trim());
+                    break;
                 case "api.username":
                     apiUsername = props.getProperty(name).trim();
                     break;
                 case "api.password":
                     apiPassword = props.getProperty(name).trim();
+                    break;
+                case "api.allowGetMethodsOnly":
+                    apiAllowGetMethodsOnly = Boolean.parseBoolean(props.getProperty(name).trim());
                     break;
                 case "ui.locale": {
                     // ui.locale must be in format of en_US ([language]_[country])

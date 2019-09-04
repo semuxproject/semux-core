@@ -287,6 +287,13 @@ public interface Config {
     int apiListenPort();
 
     /**
+     * Whether API auth is enabled.
+     *
+     * @return
+     */
+    boolean apiAuthEnabled();
+
+    /**
      * Returns the user name for API basic authentication.
      *
      * @return
@@ -299,6 +306,13 @@ public interface Config {
      * @return
      */
     String apiPassword();
+
+    /**
+     * Whether to allow GET methods only.
+     *
+     * @return
+     */
+    boolean apiAllowGetMethodsOnly();
 
     // =========================
     // BFT consensus

@@ -1138,7 +1138,7 @@
                 }
             }
         },
-        "CallResponse": {
+        "LocalCallResponse": {
             "type": "object",
             "required": [
                 "success"
@@ -1150,9 +1150,25 @@
                 {
                     "properties": {
                         "result": {
-                            "description": "The return data in hex",
-                            "type": "string",
-                            "pattern": "^(0x)?[0-9a-fA-F]*$"
+                            "$ref": "#/definitions/TransactionResultType"
+                        }
+                    }
+                }
+            ]
+        },
+        "LocalCreateResponse": {
+            "type": "object",
+            "required": [
+                "success"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ApiHandlerResponse"
+                },
+                {
+                    "properties": {
+                        "result": {
+                            "$ref": "#/definitions/TransactionResultType"
                         }
                     }
                 }
@@ -2970,7 +2986,7 @@
             }
         },
         "/sign-message": {
-            "get": {
+            "post": {
                 "tags": [
                     "Wallet"
                 ],
@@ -3019,7 +3035,7 @@
             }
         },
         "/sign-raw-transaction": {
-            "get": {
+            "post": {
                 "tags": [
                     "Wallet"
                 ],
@@ -3081,14 +3097,6 @@
                 ],
                 "parameters": [
                     {
-                        "name": "from",
-                        "in": "query",
-                        "description": "Sender's address. The address must exist in the wallet.data of this Semux node.",
-                        "required": false,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
-                    },
-                    {
                         "name": "to",
                         "in": "query",
                         "description": "Recipient's address (the contract address)",
@@ -3100,15 +3108,6 @@
                         "name": "value",
                         "in": "query",
                         "description": "Amount of value to transfer in nano SEM",
-                        "required": false,
-                        "type": "string",
-                        "format": "int64",
-                        "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "nonce",
-                        "in": "query",
-                        "description": "Transaction nonce, default to sender's nonce if omitted",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -3134,7 +3133,7 @@
                     {
                         "name": "gasPrice",
                         "in": "query",
-                        "description": "The gas price in nanoSEM",
+                        "description": "The gas price in nano SEM",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -3145,7 +3144,76 @@
                     "200": {
                         "description": "successful operation",
                         "schema": {
-                            "$ref": "#/definitions/CallResponse"
+                            "$ref": "#/definitions/LocalCallResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/ApiHandlerResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ]
+            }
+        },
+        "/local-create": {
+            "get": {
+                "tags": [
+                    "Tool"
+                ],
+                "summary": "Make a local create",
+                "description": "Executes a contract deployment immediately without creating a transaction on the block chain.",
+                "operationId": "localCreate",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "Amount of value to transfer in nano SEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "description": "Transaction data encoded in hexadecimal string",
+                        "required": false,
+                        "type": "string",
+                        "pattern": "^(0x)?[0-9a-fA-F]+$"
+                    },
+                    {
+                        "name": "gas",
+                        "in": "query",
+                        "description": "The gas limit for the call",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    },
+                    {
+                        "name": "gasPrice",
+                        "in": "query",
+                        "description": "The gas price in nano SEM",
+                        "required": false,
+                        "type": "string",
+                        "format": "int64",
+                        "pattern": "^\\d+$"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/LocalCreateResponse"
                         }
                     },
                     "400": {
@@ -3175,14 +3243,6 @@
                 ],
                 "parameters": [
                     {
-                        "name": "from",
-                        "in": "query",
-                        "description": "Sender's address. The address must exist in the wallet.data of this Semux node.",
-                        "required": false,
-                        "type": "string",
-                        "pattern": "^(0x)?[0-9a-fA-F]{40}$"
-                    },
-                    {
                         "name": "to",
                         "in": "query",
                         "description": "Recipient's address (the contract address)",
@@ -3194,15 +3254,6 @@
                         "name": "value",
                         "in": "query",
                         "description": "Amount of value to transfer in nano SEM",
-                        "required": false,
-                        "type": "string",
-                        "format": "int64",
-                        "pattern": "^\\d+$"
-                    },
-                    {
-                        "name": "nonce",
-                        "in": "query",
-                        "description": "Transaction nonce, default to sender's nonce if omitted",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -3228,7 +3279,7 @@
                     {
                         "name": "gasPrice",
                         "in": "query",
-                        "description": "The gas price in SEM",
+                        "description": "The gas price in nano SEM",
                         "required": false,
                         "type": "string",
                         "format": "int64",
@@ -3446,7 +3497,7 @@
             }
         },
         "/broadcast-raw-transaction": {
-            "post": {
+            "get": {
                 "tags": [
                     "Tool"
                 ],

@@ -106,7 +106,7 @@ public class PrecompiledContractTest {
         as.setCode(to, codePostDeploy);
         ds.register(delegate, "abc".getBytes());
 
-        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
+        TransactionResult result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
         assertTrue(result.getCode().isSuccess());
         long dataGasCost = 0;
         for (byte b : data) {
@@ -127,7 +127,7 @@ public class PrecompiledContractTest {
         tx = new Transaction(network, type, to, value, ZERO, nonce + 1, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
-        result = exec.execute(tx, as, ds, block, chain, 0);
+        result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(Amount.of(1000, SEM), as.getAccount(to).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getLocked());
@@ -166,7 +166,7 @@ public class PrecompiledContractTest {
         as.setCode(to, codePostDeploy);
         ds.register(delegate, "abc".getBytes());
 
-        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
+        TransactionResult result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
         assertFalse(result.getCode().isSuccess());
     }
 
@@ -200,7 +200,7 @@ public class PrecompiledContractTest {
         as.adjustAvailable(to, Amount.of(1000, SEM));
         ds.register(delegate, "abc".getBytes());
 
-        TransactionResult result = exec.execute(tx, as, ds, block, chain, 0);
+        TransactionResult result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
         assertFalse(result.getCode().isSuccess());
     }
 }

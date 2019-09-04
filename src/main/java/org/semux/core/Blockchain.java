@@ -266,4 +266,6 @@ public interface Blockchain {
      * @return true if the votes are valid, otherwise false
      */
     boolean validateBlockVotes(Block block);
+
+    boolean isVMEnabled();
 }

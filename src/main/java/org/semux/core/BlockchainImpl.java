@@ -701,6 +701,11 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
+    public boolean isVMEnabled() {
+        return isForkActivated(Fork.VIRTUAL_MACHINE);
+    }
+
+    @Override
     public byte[] constructBlockHeaderDataField() {
         Set<Fork> set = new HashSet<>();
 
@@ -780,7 +785,8 @@ public class BlockchainImpl implements Blockchain {
             // [3] evaluate transactions
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
             List<TransactionResult> results = transactionExecutor.execute(transactions, asTrack, dsTrack,
-                    new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()), this, 0);
+                    new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()),
+                    this.isVMEnabled(), 0);
             if (!block.validateResults(header, results)) {
                 logger.error("Invalid transaction results");
                 return false;

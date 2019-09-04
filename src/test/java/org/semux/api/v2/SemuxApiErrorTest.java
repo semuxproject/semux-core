@@ -110,13 +110,13 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
 
                 { GET.class, uriBuilder("getTransaction").queryParam("hash", randomHex()).build() },
 
-                { POST.class, uriBuilder("broadcastRawTransaction").build() },
+                { GET.class, uriBuilder("broadcastRawTransaction").build() },
 
-                { POST.class,
+                { GET.class,
                         uriBuilder("broadcastRawTransaction").queryParam("raw", "I_am_not_a_hexadecimal_string")
                                 .build() },
 
-                { POST.class,
+                { GET.class,
                         uriBuilder("broadcastRawTransaction").queryParam("raw", Hex.encode0x(RandomUtils.nextBytes(10)))
                                 .build() },
 

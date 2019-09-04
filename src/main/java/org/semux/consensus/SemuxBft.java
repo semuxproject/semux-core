@@ -779,7 +779,7 @@ public class SemuxBft implements BftManager {
             }
 
             // re-evaluate the transaction
-            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, chain, 0);
+            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, chain.isVMEnabled(), 0);
             if (result.getCode().isAcceptable()) {
                 long gasUsed = tx.isVMTransaction() ? result.getGasUsed() : config.spec().nonVMTransactionGasCost();
                 includedTxs.add(tx);
@@ -847,7 +847,7 @@ public class SemuxBft implements BftManager {
             // [3] evaluate transactions
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
             List<TransactionResult> results = transactionExecutor.execute(transactions, asTrack, dsTrack,
-                    new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain, 0);
+                    new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain.isVMEnabled(), 0);
             if (!block.validateResults(header, results)) {
                 logger.error("Invalid transaction results");
                 return false;

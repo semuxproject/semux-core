@@ -115,7 +115,7 @@ public class TransactionExecutor {
      * @return
      */
     public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds,
-            SemuxBlock block, Blockchain chain, long gasUsedInBlock) {
+            SemuxBlock block, boolean isVMEnabled, long gasUsedInBlock) {
         List<TransactionResult> results = new ArrayList<>();
 
         for (Transaction tx : txs) {
@@ -248,7 +248,7 @@ public class TransactionExecutor {
                 }
                 case CALL:
                 case CREATE:
-                    if (!chain.isForkActivated(Fork.VIRTUAL_MACHINE)) {
+                    if (!isVMEnabled) {
                         result.setCode(Code.INVALID_TYPE);
                         break;
                     }
@@ -345,8 +345,8 @@ public class TransactionExecutor {
      *            account state
      * @param ds
      *            delegate state
-     * @param chain
-     *            the blockchain instance
+     * @param isVMEnabled
+     *            whether the VM is enabled
      * @param block
      *            the block context
      * @param gasUsedInBlock
@@ -355,7 +355,7 @@ public class TransactionExecutor {
      * @return
      */
     public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, SemuxBlock block,
-            Blockchain chain, long gasUsedInBlock) {
-        return execute(Collections.singletonList(tx), as, ds, block, chain, gasUsedInBlock).get(0);
+            boolean isVMEnabled, long gasUsedInBlock) {
+        return execute(Collections.singletonList(tx), as, ds, block, isVMEnabled, gasUsedInBlock).get(0);
     }
 }
