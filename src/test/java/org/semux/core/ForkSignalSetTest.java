@@ -10,10 +10,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semux.TestUtils;
 import org.semux.crypto.Hex;
 
 public class ForkSignalSetTest {
@@ -30,7 +30,7 @@ public class ForkSignalSetTest {
     public static void beforeClass() {
         for (short i = 1; i <= 8; i++) {
             Fork a = mock(Fork.class);
-            TestUtils.setInternalState(a, "id", i, Fork.class);
+            when(a.id()).thenReturn(i);
             eightPendingForks[i - 1] = a;
         }
 

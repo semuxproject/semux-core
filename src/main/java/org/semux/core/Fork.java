@@ -34,19 +34,19 @@ public enum Fork implements Comparable<Fork> {
     /**
      * An unique number of this fork.
      */
-    private final short id;
+    private short id;
 
     /**
      * The number of blocks which are required to activate this fork.
      */
-    private final long blocksRequired;
+    private int blocksRequired;
 
     /**
      * The number of blocks to check fork signal in block header.
      */
-    private final long blocksToCheck;
+    private int blocksToCheck;
 
-    Fork(short id, long blocksRequired, long blocksToCheck) {
+    Fork(short id, int blocksRequired, int blocksToCheck) {
         this.id = id;
         this.blocksRequired = blocksRequired;
         this.blocksToCheck = blocksToCheck;
@@ -65,11 +65,11 @@ public enum Fork implements Comparable<Fork> {
         return id;
     }
 
-    public long blocksRequired() {
+    public int blocksRequired() {
         return blocksRequired;
     }
 
-    public long blocksToCheck() {
+    public int blocksToCheck() {
         return blocksToCheck;
     }
 

@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.semux.config.Config;
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
+import org.semux.core.Fork;
 import org.semux.core.PendingManager;
 import org.semux.core.Wallet;
 import org.semux.core.state.AccountState;
@@ -52,6 +53,8 @@ public abstract class SemuxApiTestBase {
         pendingMgr = apiMock.getKernel().getPendingManager();
         nodeMgr = apiMock.getKernel().getNodeManager();
         channelMgr = apiMock.getKernel().getChannelManager();
+
+        kernelRule.enableForks(Fork.VIRTUAL_MACHINE, Fork.VOTING_PRECOMPILED_UPGRADE);
     }
 
     @After

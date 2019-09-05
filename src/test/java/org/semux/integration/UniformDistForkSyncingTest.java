@@ -7,6 +7,7 @@
 package org.semux.integration;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.experimental.categories.Category;
 import org.semux.IntegrationTest;
@@ -34,14 +35,9 @@ public class UniformDistForkSyncingTest extends SyncingTest {
         super.setUp();
 
         // forcibly activate the fork
-        Fork fork = mock(Fork.class);
-        TestUtils.setInternalState(fork, "id", (short) 1, Fork.class);
-        TestUtils.setInternalState(fork, "blocksRequired", 1, Fork.class);
-        TestUtils.setInternalState(fork, "blocksToCheck", 2, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "id", fork.id(), Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksRequired", fork.blocksRequired(), Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksToCheck", fork.blocksToCheck(),
-                Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "id", (short) 1, Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksRequired", 1, Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksToCheck", 2, Fork.class);
 
         // disable the fork on kernel3 (validator)
         Config config3 = kernelRule3.getKernel().getConfig();
