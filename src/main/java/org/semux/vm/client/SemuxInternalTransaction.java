@@ -6,7 +6,6 @@
  */
 package org.semux.vm.client;
 
-import org.ethereum.vm.OpCode;
 import org.ethereum.vm.program.InternalTransaction;
 import org.semux.core.Amount;
 import org.semux.crypto.Hex;
@@ -22,7 +21,7 @@ public class SemuxInternalTransaction {
     private boolean rejected;
     private int depth;
     private int index;
-    private OpCode type;
+    private String type;
 
     private byte[] from;
     private byte[] to;
@@ -41,7 +40,7 @@ public class SemuxInternalTransaction {
     }
 
     public SemuxInternalTransaction(byte[] rootTxHash, boolean rejected, int depth, int index,
-            OpCode type, byte[] from, byte[] to, long nonce,
+            String type, byte[] from, byte[] to, long nonce,
             Amount value, byte[] data, long gas, Amount gasPrice) {
         this.rootTxHash = rootTxHash;
         this.rejected = rejected;
@@ -73,7 +72,7 @@ public class SemuxInternalTransaction {
         return index;
     }
 
-    public OpCode getType() {
+    public String getType() {
         return type;
     }
 
@@ -111,7 +110,7 @@ public class SemuxInternalTransaction {
         enc.writeBoolean(this.isRejected());
         enc.writeInt(this.getDepth());
         enc.writeInt(this.getIndex());
-        enc.writeByte(this.getType().val());
+        enc.writeString(this.getType());
         enc.writeBytes(this.getFrom());
         enc.writeBytes(this.getTo());
         enc.writeLong(this.getNonce());
@@ -129,7 +128,7 @@ public class SemuxInternalTransaction {
         boolean isRejected = dec.readBoolean();
         int depth = dec.readInt();
         int index = dec.readInt();
-        OpCode type = OpCode.code(dec.readByte());
+        String type = dec.readString();
         byte[] from = dec.readBytes();
         byte[] to = dec.readBytes();
         long nonce = dec.readLong();

@@ -527,7 +527,7 @@
         <dependency>
             <groupId>com.github.semuxproject</groupId>
             <artifactId>evm</artifactId>
-            <version>26efc6e0378b226e65c033ae03fd28ca7ac75383</version>
+            <version>eb9a8a50212403fd5d74e653555f317faea1d0e1</version>
         </dependency>
 
         <!-- Swagger & JAX-RS API -->

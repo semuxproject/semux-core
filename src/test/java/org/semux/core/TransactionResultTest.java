@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
-import org.ethereum.vm.OpCode;
 import org.junit.Test;
 import org.semux.util.Bytes;
 import org.semux.vm.client.SemuxInternalTransaction;
@@ -110,7 +109,7 @@ public class TransactionResultTest {
         List<SemuxInternalTransaction> internalTransactions = new ArrayList<>();
         internalTransactions
                 .add(new SemuxInternalTransaction(Bytes.random(32),
-                        false, 1, 2, OpCode.CALL,
+                        false, 1, 2, "CALL",
                         Bytes.random(20), Bytes.random(20),
                         3, Amount.of(1), Bytes.random(5), 4, Amount.of(10)));
 

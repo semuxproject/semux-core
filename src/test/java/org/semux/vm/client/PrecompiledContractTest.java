@@ -38,8 +38,11 @@ import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
 import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PrecompiledContractTest {
+    private Logger logger = LoggerFactory.getLogger(VmTransactionTest.class);
 
     @Rule
     public TemporaryDatabaseRule temporaryDBFactory = new TemporaryDatabaseRule();
@@ -107,6 +110,8 @@ public class PrecompiledContractTest {
         ds.register(delegate, "abc".getBytes());
 
         TransactionResult result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
+        logger.info("Result: {}", result);
+
         assertTrue(result.getCode().isSuccess());
         long dataGasCost = 0;
         for (byte b : data) {
@@ -128,6 +133,8 @@ public class PrecompiledContractTest {
         tx.sign(key);
 
         result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
+        logger.info("Result: {}", result);
+
         assertTrue(result.getCode().isSuccess());
         assertEquals(Amount.of(1000, SEM), as.getAccount(to).getAvailable());
         assertEquals(ZERO, as.getAccount(to).getLocked());

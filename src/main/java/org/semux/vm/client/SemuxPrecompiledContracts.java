@@ -6,6 +6,7 @@
  */
 package org.semux.vm.client;
 
+import static org.semux.vm.client.Conversion.amountToWei;
 import static org.semux.vm.client.Conversion.weiToAmount;
 
 import java.math.BigInteger;
@@ -17,11 +18,14 @@ import org.ethereum.vm.chainspec.ConstantinoplePrecompiledContracts;
 import org.ethereum.vm.chainspec.PrecompiledContract;
 import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.client.Repository;
+import org.ethereum.vm.program.InternalTransaction;
+import org.ethereum.vm.program.ProgramResult;
 import org.ethereum.vm.util.Pair;
 import org.semux.core.Amount;
 import org.semux.core.state.AccountState;
 import org.semux.core.state.Delegate;
 import org.semux.core.state.DelegateState;
+import org.semux.util.Bytes;
 
 public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContracts {
 
@@ -61,7 +65,9 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
 
         @Override
         public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
-            if (context.getData().length != 32 + 32) {
+            byte[] data = context.getInternalTransaction().getData();
+
+            if (data == null || data.length != 32 + 32) {
                 return failure;
             }
 
@@ -70,14 +76,18 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 SemuxRepository semuxTrack = (SemuxRepository) track;
                 AccountState as = semuxTrack.getAccountState();
                 DelegateState ds = semuxTrack.getDelegateState();
-                byte[] from = context.getCaller();
-                byte[] to = Arrays.copyOfRange(context.getData(), 12, 32);
-                Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 32, 64)));
+                byte[] from = context.getInternalTransaction().getFrom();
+                byte[] to = Arrays.copyOfRange(data, 12, 32);
+                Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(data, 32, 64)));
 
                 if (as.getAccount(from).getAvailable().greaterThanOrEqual(value)
                         && ds.vote(from, to, value)) {
                     as.adjustAvailable(from, value.negate());
                     as.adjustLocked(from, value);
+
+                    addInternalTx(context.getResult(), context.getInternalTransaction(),
+                            "VOTE", from, to, context.getTrack().getNonce(from),
+                            amountToWei(value), Bytes.EMPTY_BYTES, 0);
                     return success;
                 }
             }
@@ -94,7 +104,9 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
 
         @Override
         public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
-            if (context.getData().length != 32 + 32) {
+            byte[] data = context.getInternalTransaction().getData();
+
+            if (data == null || data.length != 32 + 32) {
                 return failure;
             }
 
@@ -103,14 +115,18 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 SemuxRepository semuxTrack = (SemuxRepository) track;
                 AccountState as = semuxTrack.getAccountState();
                 DelegateState ds = semuxTrack.getDelegateState();
-                byte[] from = context.getCaller();
-                byte[] to = Arrays.copyOfRange(context.getData(), 12, 32);
-                Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(context.getData(), 32, 64)));
+                byte[] from = context.getInternalTransaction().getFrom();
+                byte[] to = Arrays.copyOfRange(data, 12, 32);
+                Amount value = weiToAmount(new BigInteger(1, Arrays.copyOfRange(data, 32, 64)));
 
                 if (as.getAccount(from).getLocked().greaterThanOrEqual(value)
                         && ds.unvote(from, to, value)) {
                     as.adjustAvailable(from, value);
                     as.adjustLocked(from, value.negate());
+
+                    addInternalTx(context.getResult(), context.getInternalTransaction(),
+                            "UNVOTE", from, to, context.getTrack().getNonce(from),
+                            amountToWei(value), Bytes.EMPTY_BYTES, 0);
                     return success;
                 }
             }
@@ -128,7 +144,9 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
 
         @Override
         public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
-            if (context.getData().length != 32) {
+            byte[] data = context.getInternalTransaction().getData();
+
+            if (data == null || data.length != 32) {
                 return failure;
             }
             Repository track = context.getTrack();
@@ -136,7 +154,7 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 SemuxRepository semuxTrack = (SemuxRepository) track;
                 DelegateState ds = semuxTrack.getDelegateState();
 
-                Delegate delegate = ds.getDelegateByAddress(context.getData());
+                Delegate delegate = ds.getDelegateByAddress(data);
                 if (delegate == null) {
                     return failure;
                 }
@@ -156,15 +174,17 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
 
         @Override
         public Pair<Boolean, byte[]> execute(PrecompiledContractContext context) {
-            if (context.getData().length != 32 + 32) {
+            byte[] data = context.getInternalTransaction().getData();
+
+            if (data == null || data.length != 32 + 32) {
                 return failure;
             }
             Repository track = context.getTrack();
             if (track instanceof SemuxRepository) {
                 SemuxRepository semuxTrack = (SemuxRepository) track;
                 DelegateState ds = semuxTrack.getDelegateState();
-                byte[] voter = Arrays.copyOfRange(context.getData(), 0, 32);
-                byte[] delegate = Arrays.copyOfRange(context.getData(), 32, 64);
+                byte[] voter = Arrays.copyOfRange(data, 0, 32);
+                byte[] delegate = Arrays.copyOfRange(data, 32, 64);
 
                 Amount votes = ds.getVote(voter, delegate);
 
@@ -173,5 +193,18 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
 
             return failure;
         }
+    }
+
+    private static InternalTransaction addInternalTx(ProgramResult result, InternalTransaction internalTx,
+            String type, byte[] from, byte[] to, long nonce, BigInteger value, byte[] data, long gas) {
+
+        int depth = internalTx.getDepth() + 1;
+        int index = result.getInternalTransactions().size();
+
+        InternalTransaction tx = new InternalTransaction(depth, index, type,
+                from, to, nonce, value, data, gas, internalTx.getGasPrice());
+        result.addInternalTransaction(tx);
+
+        return tx;
     }
 }
