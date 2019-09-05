@@ -158,7 +158,7 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 if (delegate == null) {
                     return failure;
                 }
-                return Pair.of(true, DataWord.of(delegate.getVotes().toLong()).getData());
+                return Pair.of(true, DataWord.of(amountToWei(delegate.getVotes())).getData());
             }
 
             return failure;
@@ -186,9 +186,8 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
                 byte[] voter = Arrays.copyOfRange(data, 0, 32);
                 byte[] delegate = Arrays.copyOfRange(data, 32, 64);
 
-                Amount votes = ds.getVote(voter, delegate);
-
-                return Pair.of(true, DataWord.of(votes.toLong()).getData());
+                Amount vote = ds.getVote(voter, delegate);
+                return Pair.of(true, DataWord.of(amountToWei(vote)).getData());
             }
 
             return failure;
