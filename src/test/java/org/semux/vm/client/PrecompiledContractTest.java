@@ -51,19 +51,17 @@ public class PrecompiledContractTest {
     private Blockchain chain;
     private AccountState as;
     private DelegateState ds;
-    private TransactionExecutor exec;
     private Network network;
 
     @Before
     public void prepare() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = spy(new BlockchainImpl(config, temporaryDBFactory));
+        doReturn(true).when(chain).isForkActivated(any());
+
         as = chain.getAccountState();
         ds = chain.getDelegateState();
-        exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
-
-        doReturn(true).when(chain).isForkActivated(any());
     }
 
     // pragma solidity ^0.4.14;
@@ -82,6 +80,7 @@ public class PrecompiledContractTest {
 
     @Test
     public void testSuccess() {
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
         Key key = new Key();
         byte[] delegate = Bytes.random(20);
 
@@ -109,7 +108,7 @@ public class PrecompiledContractTest {
         as.setCode(to, codePostDeploy);
         ds.register(delegate, "abc".getBytes());
 
-        TransactionResult result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
+        TransactionResult result = exec.execute(tx, as, ds, block, 0);
         logger.info("Result: {}", result);
 
         assertTrue(result.getCode().isSuccess());
@@ -132,7 +131,7 @@ public class PrecompiledContractTest {
         tx = new Transaction(network, type, to, value, ZERO, nonce + 1, timestamp, data, gas, gasPrice);
         tx.sign(key);
 
-        result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
+        result = exec.execute(tx, as, ds, block, 0);
         logger.info("Result: {}", result);
 
         assertTrue(result.getCode().isSuccess());
@@ -146,6 +145,7 @@ public class PrecompiledContractTest {
     // it would fail because the contract doesn't have balance.
     @Test
     public void testFailure1() {
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
         Key key = new Key();
         byte[] delegate = Bytes.random(20);
 
@@ -173,7 +173,7 @@ public class PrecompiledContractTest {
         as.setCode(to, codePostDeploy);
         ds.register(delegate, "abc".getBytes());
 
-        TransactionResult result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
+        TransactionResult result = exec.execute(tx, as, ds, block, 0);
         assertFalse(result.getCode().isSuccess());
     }
 
@@ -181,6 +181,7 @@ public class PrecompiledContractTest {
     // it would fail because the sender doesn't have enough balance.
     @Test
     public void testFailure2() {
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CALL;
@@ -207,7 +208,7 @@ public class PrecompiledContractTest {
         as.adjustAvailable(to, Amount.of(1000, SEM));
         ds.register(delegate, "abc".getBytes());
 
-        TransactionResult result = exec.execute(tx, as, ds, block, chain.isVMEnabled(), 0);
+        TransactionResult result = exec.execute(tx, as, ds, block, 0);
         assertFalse(result.getCode().isSuccess());
     }
 }

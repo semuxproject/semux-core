@@ -42,7 +42,7 @@ public class TimeUtil {
 
     private static long timeOffsetFromNtp = 0;
 
-    static {
+    public static void startNtpProcess() {
         // inline run at start
         updateNetworkTimeOffset();
         // update time every hour

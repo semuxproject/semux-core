@@ -8,6 +8,7 @@ package org.semux.core;
 
 import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
 import static org.semux.core.Fork.VIRTUAL_MACHINE;
+import static org.semux.core.Fork.VOTING_PRECOMPILED_UPGRADE;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -15,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,6 +55,7 @@ import org.semux.util.ByteArray;
 import org.semux.util.Bytes;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.semux.util.TimeUtil;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxBlockStore;
 import org.semux.vm.client.SemuxInternalTransaction;
@@ -706,6 +710,11 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
+    public boolean isVotingPrecompiledUpgraded() {
+        return isForkActivated(VOTING_PRECOMPILED_UPGRADE);
+    }
+
+    @Override
     public byte[] constructBlockHeaderDataField() {
         Set<Fork> set = new HashSet<>();
 
@@ -717,14 +726,18 @@ public class BlockchainImpl implements Blockchain {
             addFork(set, VIRTUAL_MACHINE);
         }
 
+        if (config.forkVotingPrecompiledUpgradeEnabled()) {
+            addFork(set, VOTING_PRECOMPILED_UPGRADE);
+        }
+
         return set.isEmpty() ? new BlockHeaderData().toBytes() : new BlockHeaderData(ForkSignalSet.of(set)).toBytes();
     }
 
     private void addFork(Set<Fork> set, Fork fork) {
-        Pair<Long, Long> period = config.spec().getForkSignalingPeriod(fork);
+        long[] period = config.spec().getForkSignalingPeriod(fork);
         long number = getLatestBlockNumber() + 1;
 
-        if (/* !this.isForkActivated(fork) && */number >= period.getLeft() && number <= period.getRight()) {
+        if (/* !this.isForkActivated(fork) && */number >= period[0] && number <= period[1]) {
             set.add(fork);
         }
     }
@@ -783,10 +796,11 @@ public class BlockchainImpl implements Blockchain {
             }
 
             // [3] evaluate transactions
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore, isVMEnabled(),
+                    isVotingPrecompiledUpgraded());
             List<TransactionResult> results = transactionExecutor.execute(transactions, asTrack, dsTrack,
                     new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()),
-                    this.isVMEnabled(), 0);
+                    0);
             if (!block.validateResults(header, results)) {
                 logger.error("Invalid transaction results");
                 return false;
@@ -892,6 +906,10 @@ public class BlockchainImpl implements Blockchain {
                 && forks.activateFork(VIRTUAL_MACHINE)) {
             setActivatedForks(forks.getActivatedForks());
         }
+        if (config.forkVotingPrecompiledUpgradeEnabled()
+                && forks.activateFork(VOTING_PRECOMPILED_UPGRADE)) {
+            setActivatedForks(forks.getActivatedForks());
+        }
     }
 
     /**
@@ -937,6 +955,7 @@ public class BlockchainImpl implements Blockchain {
     public static void upgrade(Config config, DatabaseFactory dbFactory, long to) {
         try {
             logger.info("Upgrading the database... DO NOT CLOSE THE WALLET!");
+            Instant begin = Instant.now();
 
             Path dataDir = dbFactory.getDataDir();
             String dataDirName = dataDir.getFileName().toString();
@@ -977,7 +996,9 @@ public class BlockchainImpl implements Blockchain {
             tempDbFactory.moveTo(dataDir);
             delete(backupPath); // delete old database to save space.
 
-            logger.info("Database upgraded: found blocks = {}, imported = {}", latestBlockNumber, imported);
+            Instant end = Instant.now();
+            logger.info("Database upgraded: found blocks = {}, imported = {}, took = {}", latestBlockNumber, imported,
+                    TimeUtil.formatDuration(Duration.between(begin, end)));
         } catch (IOException e) {
             logger.error("Failed to upgrade database", e);
         }

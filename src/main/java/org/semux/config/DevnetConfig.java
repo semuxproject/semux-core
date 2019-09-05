@@ -21,6 +21,7 @@ public class DevnetConfig extends AbstractConfig {
 
         this.forkUniformDistributionEnabled = true;
         this.forkVirtualMachineEnabled = true;
+        this.forkVotingPrecompiledUpgradeEnabled = true;
     }
 
     @Override

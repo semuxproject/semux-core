@@ -47,19 +47,17 @@ public class InternalTransactionTest {
     private Blockchain chain;
     private AccountState as;
     private DelegateState ds;
-    private TransactionExecutor exec;
     private Network network;
 
     @Before
     public void prepare() {
         config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = spy(new BlockchainImpl(config, temporaryDBFactory));
+        doReturn(true).when(chain).isForkActivated(any());
+
         as = chain.getAccountState();
         ds = chain.getDelegateState();
-        exec = new TransactionExecutor(config, new SemuxBlockStore(chain));
         network = config.network();
-
-        doReturn(true).when(chain).isForkActivated(any());
     }
 
     // pragma solidity ^0.5.0;
@@ -71,6 +69,7 @@ public class InternalTransactionTest {
     // }
     @Test
     public void testInternalTransfer() {
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CALL;
@@ -98,7 +97,7 @@ public class InternalTransactionTest {
                 gasPrice);
         tx.sign(key);
 
-        TransactionResult result = exec.execute(tx, as, ds, bh, chain.isVMEnabled(), 0);
+        TransactionResult result = exec.execute(tx, as, ds, bh, 0);
         assertTrue(result.getCode().isSuccess());
         assertEquals(Amount.of(1000, SEM).subtract(Amount.of(5, SEM)),
                 as.getAccount(to).getAvailable());

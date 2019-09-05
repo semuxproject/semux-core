@@ -139,6 +139,7 @@ public class Kernel {
                 config.networkVersion(),
                 coinbase);
         printSystemInfo();
+        TimeUtil.startNtpProcess();
 
         // ====================================
         // initialize blockchain database

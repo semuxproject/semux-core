@@ -268,4 +268,6 @@ public interface Blockchain {
     boolean validateBlockVotes(Block block);
 
     boolean isVMEnabled();
+
+    boolean isVotingPrecompiledUpgraded();
 }

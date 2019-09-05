@@ -437,6 +437,13 @@ public interface Config {
      */
     boolean forkVirtualMachineEnabled();
 
+    /**
+     * Returns whether VOTING_PRECOMPILED_UPGRADE fork is enabled.
+     *
+     * @return
+     */
+    boolean forkVotingPrecompiledUpgradeEnabled();
+
     // =========================
     // Checkpoints
     // =========================

@@ -24,22 +24,27 @@ public enum Fork implements Comparable<Fork> {
     /**
      * This soft fork introduces the virtual machine.
      */
-    VIRTUAL_MACHINE((short) 2, 1500, 2000);
+    VIRTUAL_MACHINE((short) 2, 1500, 2000),
+
+    /**
+     * This soft fork introduces an upgrade to the voting pre-compiled contracts.
+     */
+    VOTING_PRECOMPILED_UPGRADE((short) 3, 1500, 2000);
 
     /**
      * An unique number of this fork.
      */
-    public final short id;
+    private final short id;
 
     /**
      * The number of blocks which are required to activate this fork.
      */
-    public final long blocksRequired;
+    private final long blocksRequired;
 
     /**
      * The number of blocks to check fork signal in block header.
      */
-    public final long blocksToCheck;
+    private final long blocksToCheck;
 
     Fork(short id, long blocksRequired, long blocksToCheck) {
         this.id = id;
@@ -54,6 +59,18 @@ public enum Fork implements Comparable<Fork> {
             }
         }
         return null;
+    }
+
+    public short id() {
+        return id;
+    }
+
+    public long blocksRequired() {
+        return blocksRequired;
+    }
+
+    public long blocksToCheck() {
+        return blocksToCheck;
     }
 
     public static class Activation {
