@@ -6,6 +6,7 @@
  */
 package org.semux.config;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,17 +32,11 @@ public class MainnetConfig extends AbstractConfig {
         // UNIFORM_DISTRIBUTION fork
         initCheckpoints.put(233514L,
                 Hex.decode0x("0x5afad5833a7f29299fc209e0914bdcd6824975897a8a4dcfb05448e30bef3d2a"));
+        // VIRTUAL_MACHINE fork
+        initCheckpoints.put(1640591L,
+                Hex.decode0x("0x7f0e8216477412e2f04f22ac9ba2b29aca2dde57de7d44e803f60ca4a5a008fe"));
 
         checkpoints = MapUtils.unmodifiableMap(initCheckpoints);
-    }
-
-    private static final Map<Fork, Long> forkActivationCheckpoints;
-    static {
-        HashMap<Fork, Long> initForkActivationCheckpoints = new HashMap<>();
-
-        initForkActivationCheckpoints.put(Fork.UNIFORM_DISTRIBUTION, 233514L);
-
-        forkActivationCheckpoints = MapUtils.unmodifiableMap(initForkActivationCheckpoints);
     }
 
     public MainnetConfig(String dataDir) {
@@ -49,6 +44,7 @@ public class MainnetConfig extends AbstractConfig {
 
         this.forkUniformDistributionEnabled = true;
         this.forkVirtualMachineEnabled = true;
+        this.forkVotingPrecompiledUpgradeEnabled = true;
     }
 
     @Override
@@ -58,6 +54,6 @@ public class MainnetConfig extends AbstractConfig {
 
     @Override
     public Map<Fork, Long> manuallyActivatedForks() {
-        return forkActivationCheckpoints;
+        return Collections.emptyMap();
     }
 }

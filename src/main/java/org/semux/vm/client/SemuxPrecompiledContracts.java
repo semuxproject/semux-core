@@ -153,12 +153,11 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
             if (track instanceof SemuxRepository) {
                 SemuxRepository semuxTrack = (SemuxRepository) track;
                 DelegateState ds = semuxTrack.getDelegateState();
+                byte[] delegateAddress = Arrays.copyOfRange(data, 12, 32);
 
-                Delegate delegate = ds.getDelegateByAddress(data);
-                if (delegate == null) {
-                    return failure;
-                }
-                return Pair.of(true, DataWord.of(amountToWei(delegate.getVotes())).getData());
+                Delegate delegate = ds.getDelegateByAddress(delegateAddress);
+                Amount votes = delegate == null ? Amount.ZERO : delegate.getVotes();
+                return Pair.of(true, DataWord.of(amountToWei(votes)).getData());
             }
 
             return failure;
@@ -183,10 +182,10 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
             if (track instanceof SemuxRepository) {
                 SemuxRepository semuxTrack = (SemuxRepository) track;
                 DelegateState ds = semuxTrack.getDelegateState();
-                byte[] voter = Arrays.copyOfRange(data, 0, 32);
-                byte[] delegate = Arrays.copyOfRange(data, 32, 64);
+                byte[] voterAddress = Arrays.copyOfRange(data, 12, 32);
+                byte[] delegateAddress = Arrays.copyOfRange(data, 44, 64);
 
-                Amount vote = ds.getVote(voter, delegate);
+                Amount vote = ds.getVote(voterAddress, delegateAddress);
                 return Pair.of(true, DataWord.of(amountToWei(vote)).getData());
             }
 

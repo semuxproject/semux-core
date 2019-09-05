@@ -38,9 +38,9 @@ public class UniformDistForkSyncingTest extends SyncingTest {
         TestUtils.setInternalState(fork, "id", (short) 1, Fork.class);
         TestUtils.setInternalState(fork, "blocksRequired", 1, Fork.class);
         TestUtils.setInternalState(fork, "blocksToCheck", 2, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "id", fork.id, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksRequired", fork.blocksRequired, Fork.class);
-        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksToCheck", fork.blocksToCheck,
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "id", fork.id(), Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksRequired", fork.blocksRequired(), Fork.class);
+        TestUtils.setInternalState(Fork.UNIFORM_DISTRIBUTION, "blocksToCheck", fork.blocksToCheck(),
                 Fork.class);
 
         // disable the fork on kernel3 (validator)

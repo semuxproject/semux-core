@@ -35,11 +35,11 @@ public class ForkSignalSet {
             throw new UnreachableException("There must be no more than " + MAX_PENDING_FORKS + " pending forks.");
         }
 
-        return new ForkSignalSet(forks.stream().map(f -> f.id).collect(Collectors.toSet()));
+        return new ForkSignalSet(forks.stream().map(f -> f.id()).collect(Collectors.toSet()));
     }
 
     public boolean contains(Fork fork) {
-        return pendingForks.contains(fork.id);
+        return pendingForks.contains(fork.id());
     }
 
     public byte[] toBytes() {

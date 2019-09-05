@@ -8,7 +8,6 @@ package org.semux.config;
 
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.chainspec.Spec;
 import org.semux.core.Amount;
 import org.semux.core.Fork;
@@ -104,5 +103,5 @@ public interface ChainSpec {
      *            the fork
      * @return the start and end block numbers, inclusive
      */
-    Pair<Long, Long> getForkSignalingPeriod(Fork fork);
+    long[] getForkSignalingPeriod(Fork fork);
 }

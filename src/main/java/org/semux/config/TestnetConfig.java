@@ -19,12 +19,11 @@ public class TestnetConfig extends AbstractConfig {
 
         this.forkUniformDistributionEnabled = true;
         this.forkVirtualMachineEnabled = true;
+        this.forkVotingPrecompiledUpgradeEnabled = true;
     }
 
     @Override
     public Map<Long, byte[]> checkpoints() {
-        // we don't set checkpoints for the public testnet as the testnet can be reset
-        // at anytime
         return Collections.emptyMap();
     }
 

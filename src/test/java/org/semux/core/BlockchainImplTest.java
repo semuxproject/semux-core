@@ -330,13 +330,13 @@ public class BlockchainImplTest {
     @Test
     public void testForkActivated() {
         final Fork fork = Fork.UNIFORM_DISTRIBUTION;
-        for (long i = 1; i <= fork.blocksToCheck; i++) {
+        for (long i = 1; i <= fork.blocksToCheck(); i++) {
             chain.addBlock(
                     createBlock(i, coinbase, new BlockHeaderData(ForkSignalSet.of(fork)).toBytes(),
                             Collections.singletonList(tx), Collections.singletonList(res)));
 
             // post-import check
-            if (i < fork.blocksRequired) {
+            if (i < fork.blocksRequired()) {
                 assertFalse(chain.isForkActivated(fork));
             } else {
                 assertTrue(chain.isForkActivated(fork));

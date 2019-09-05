@@ -5,6 +5,7 @@
 This release fixes several critical bugs of the v2 releases. All nodes should upgrade
 to this version ASAP.
 
+NOTE: A softfork `VOTING_PRECOMPILED_UPGRADE` is introduced.
 
 **Bug fixes:**
 

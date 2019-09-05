@@ -16,12 +16,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.client.BlockStore;
 import org.ethereum.vm.client.Repository;
 import org.ethereum.vm.client.TransactionReceipt;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactoryImpl;
+import org.semux.config.ChainSpec;
 import org.semux.config.Config;
 import org.semux.core.TransactionResult.Code;
 import org.semux.core.state.Account;
@@ -32,6 +34,7 @@ import org.semux.util.Bytes;
 import org.semux.util.SystemUtil;
 import org.semux.vm.client.SemuxBlock;
 import org.semux.vm.client.SemuxInternalTransaction;
+import org.semux.vm.client.SemuxPrecompiledContracts;
 import org.semux.vm.client.SemuxRepository;
 import org.semux.vm.client.SemuxTransaction;
 import org.slf4j.Logger;
@@ -62,8 +65,6 @@ public class TransactionExecutor {
         }
     }
 
-    private BlockStore blockStore;
-
     /**
      * Validate delegate name.
      *
@@ -83,17 +84,22 @@ public class TransactionExecutor {
         return true;
     }
 
-    private Config config;
+    private ChainSpec spec;
+    private BlockStore blockStore;
+    private boolean isVMEnabled;
+    private boolean isVotingPrecompiledUpgraded;
 
     /**
      * Creates a new transaction executor.
      *
      * @param config
      */
-    public TransactionExecutor(Config config, BlockStore blockStore) {
-        this.config = config;
+    public TransactionExecutor(Config config, BlockStore blockStore, boolean isVMEnabled,
+            boolean isVotingPrecompiledUpgraded) {
+        this.spec = config.spec();
         this.blockStore = blockStore;
-
+        this.isVMEnabled = isVMEnabled;
+        this.isVotingPrecompiledUpgraded = isVotingPrecompiledUpgraded;
     }
 
     /**
@@ -115,7 +121,7 @@ public class TransactionExecutor {
      * @return
      */
     public List<TransactionResult> execute(List<Transaction> txs, AccountState as, DelegateState ds,
-            SemuxBlock block, boolean isVMEnabled, long gasUsedInBlock) {
+            SemuxBlock block, long gasUsedInBlock) {
         List<TransactionResult> results = new ArrayList<>();
 
         for (Transaction tx : txs) {
@@ -145,7 +151,7 @@ public class TransactionExecutor {
                 if (tx.isVMTransaction()) {
                     // applying a very strict check to avoid mistakes
                     boolean valid = fee.equals(Amount.ZERO)
-                            && tx.getGas() >= 21_000 && tx.getGas() <= config.spec().maxBlockGasLimit()
+                            && tx.getGas() >= 21_000 && tx.getGas() <= spec.maxBlockGasLimit()
                             && tx.getGasPrice().greaterThanOrEqual(Amount.ONE)
                             && tx.getGasPrice().lessThanOrEqual(Amount.of(Integer.MAX_VALUE));
                     if (!valid) {
@@ -153,21 +159,21 @@ public class TransactionExecutor {
                         continue;
                     }
                 } else {
-                    if (fee.lessThan(config.spec().minTransactionFee())) {
+                    if (fee.lessThan(spec.minTransactionFee())) {
                         result.setCode(Code.INVALID_FEE);
                         continue;
                     }
                 }
 
                 // check data length
-                if (data.length > config.spec().maxTransactionDataSize(type)) {
+                if (data.length > spec.maxTransactionDataSize(type)) {
                     result.setCode(Code.INVALID_DATA);
                     continue;
                 }
 
                 // check remaining gas
                 if (!tx.isVMTransaction()) {
-                    if (config.spec().nonVMTransactionGasCost() + gasUsedInBlock > block.getGasLimit()) {
+                    if (spec.nonVMTransactionGasCost() + gasUsedInBlock > block.getGasLimit()) {
                         result.setCode(Code.INVALID);
                         continue;
                     }
@@ -192,7 +198,7 @@ public class TransactionExecutor {
                         result.setCode(Code.INVALID_DELEGATE_NAME);
                         break;
                     }
-                    if (value.lessThan(config.spec().minDelegateBurnAmount())) {
+                    if (value.lessThan(spec.minDelegateBurnAmount())) {
                         result.setCode(Code.INVALID_DELEGATE_BURN_AMOUNT);
                         break;
                     }
@@ -255,7 +261,7 @@ public class TransactionExecutor {
 
                     // the VM transaction executor will check balance and gas cost.
                     // do proper refunds afterwards.
-                    executeVmTransaction(result, tx, as, ds, block, gasUsedInBlock);
+                    executeVmTransaction(tx, as, ds, block, gasUsedInBlock, result);
 
                     // Note: we're assuming the VM will not make changes to the account
                     // and delegate state if the transaction is INVALID; the storage changes
@@ -282,7 +288,7 @@ public class TransactionExecutor {
                 if (tx.isVMTransaction()) {
                     gasUsedInBlock += result.getGasUsed();
                 } else {
-                    gasUsedInBlock += config.spec().nonVMTransactionGasCost();
+                    gasUsedInBlock += spec.nonVMTransactionGasCost();
                 }
             }
 
@@ -292,34 +298,59 @@ public class TransactionExecutor {
         return results;
     }
 
-    private void executeVmTransaction(TransactionResult result, Transaction tx, AccountState as, DelegateState ds,
-            SemuxBlock block, long gasUsedInBlock) {
+    private void executeVmTransaction(Transaction tx, AccountState as, DelegateState ds,
+            SemuxBlock block, long gasUsedInBlock, TransactionResult result) {
+
         SemuxTransaction transaction = new SemuxTransaction(tx);
         Repository repository = new SemuxRepository(as, ds);
         ProgramInvokeFactory invokeFactory = new ProgramInvokeFactoryImpl();
 
         org.ethereum.vm.client.TransactionExecutor executor = new org.ethereum.vm.client.TransactionExecutor(
                 transaction, block, repository, blockStore,
-                config.spec().vmSpec(), invokeFactory, gasUsedInBlock);
+                spec.vmSpec(), invokeFactory, gasUsedInBlock);
 
         TransactionReceipt receipt = executor.run();
 
         if (receipt == null) {
             result.setCode(Code.INVALID);
         } else {
-            // NOTE: currently, we do not refund for REVERT but
-            // we may consider doing so in the future
-            long gasUsed = receipt.isSuccess() ? receipt.getGasUsed() : tx.getGas();
-            Amount delta = tx.getGasPrice().multiply(gasUsed - receipt.getGasUsed());
-            as.adjustAvailable(tx.getFrom(), delta.negate());
+            Code code = receipt.isSuccess() ? Code.SUCCESS : Code.FAILURE;
+            long gasUsed = receipt.getGasUsed();
+            byte[] returnData = receipt.getReturnData();
+
+            // NOTE: the following code is to simulate the behaviour of old clients
+            if (!isVotingPrecompiledUpgraded) {
+                // the old GetVote and GetVotes precompiled contracts always fail
+                if (DataWord.of(tx.getTo()).equals(DataWord.of(102))
+                        || DataWord.of(tx.getTo()).equals(DataWord.of(103))) {
+                    code = Code.FAILURE;
+                    returnData = Bytes.EMPTY_BYTES;
+                    gasUsed = tx.getGas();
+                }
+
+                // however, we always mark a DIRECT call to precompiled contract as SUCCESS
+                SemuxPrecompiledContracts precompiledContracts = new SemuxPrecompiledContracts();
+                if (precompiledContracts.getContractForAddress(DataWord.of(tx.getTo())) != null) {
+                    code = Code.SUCCESS;
+                }
+
+                // and we do not refund for REVERT
+                if (!receipt.isSuccess()) {
+                    gasUsed = tx.getGas();
+                }
+
+                // so, extra charge to the sender
+                Amount delta = tx.getGasPrice().multiply(gasUsed - receipt.getGasUsed());
+                as.adjustAvailable(tx.getFrom(), delta.negate());
+            }
 
             // build result based on the transaction receipt by VM
-            result.setCode(receipt.isSuccess() ? Code.SUCCESS : Code.FAILURE);
-            result.setReturnData(receipt.getReturnData());
+            result.setCode(code);
+            result.setGas(tx.getGas(), tx.getGasPrice(), gasUsed);
+            result.setReturnData(returnData);
             for (LogInfo log : receipt.getLogs()) {
                 result.addLog(log);
             }
-            result.setGas(tx.getGas(), tx.getGasPrice(), gasUsed);
             result.setBlockNumber(block.getNumber());
             result.setInternalTransactions(receipt.getInternalTransactions()
                     .stream()
@@ -345,8 +376,6 @@ public class TransactionExecutor {
      *            account state
      * @param ds
      *            delegate state
-     * @param isVMEnabled
-     *            whether the VM is enabled
      * @param block
      *            the block context
      * @param gasUsedInBlock
@@ -354,8 +383,8 @@ public class TransactionExecutor {
      *            in the block
      * @return
      */
-    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds, SemuxBlock block,
-            boolean isVMEnabled, long gasUsedInBlock) {
-        return execute(Collections.singletonList(tx), as, ds, block, isVMEnabled, gasUsedInBlock).get(0);
+    public TransactionResult execute(Transaction tx, AccountState as, DelegateState ds,
+            SemuxBlock block, long gasUsedInBlock) {
+        return execute(Collections.singletonList(tx), as, ds, block, gasUsedInBlock).get(0);
     }
 }

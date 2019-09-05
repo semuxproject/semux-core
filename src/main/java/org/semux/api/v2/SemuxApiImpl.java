@@ -913,8 +913,9 @@ public final class SemuxApiImpl implements SemuxApi {
         // execute the transaction
         SemuxBlock block = kernel.createEmptyBlock();
         BlockStore blockStore = new SemuxBlockStore(chain);
-        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
-        TransactionResult result = exec.execute(tx, asTrack, dsTrack, block, true, 0);
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore, chain.isVMEnabled(),
+                chain.isVotingPrecompiledUpgraded());
+        TransactionResult result = exec.execute(tx, asTrack, dsTrack, block, 0);
 
         byte[] contractAddress = type.equals(TransactionType.CREATE)
                 ? HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce())

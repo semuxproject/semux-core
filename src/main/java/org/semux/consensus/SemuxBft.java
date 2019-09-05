@@ -765,26 +765,32 @@ public class SemuxBft implements BftManager {
         final List<Transaction> includedTxs = new ArrayList<>();
         final List<TransactionResult> includedResults = new ArrayList<>();
 
-        TransactionExecutor exec = new TransactionExecutor(config, blockStore);
+        TransactionExecutor exec = new TransactionExecutor(config, blockStore, chain.isVMEnabled(),
+                chain.isVotingPrecompiledUpgraded());
         SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
         // only propose gas used up to configured block gas limit
         long remainingBlockGas = config.poolBlockGasLimit();
+        long gasUsedInBlock = 0;
         for (PendingManager.PendingTransaction pendingTx : pendingTxs) {
             Transaction tx = pendingTx.transaction;
 
+            // check if the remaining gas covers the declared gas limit
             long gas = tx.isVMTransaction() ? tx.getGas() : config.spec().nonVMTransactionGasCost();
             if (gas > remainingBlockGas) {
                 break;
             }
 
             // re-evaluate the transaction
-            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, chain.isVMEnabled(), 0);
+            TransactionResult result = exec.execute(tx, asTrack, dsTrack, semuxBlock, gasUsedInBlock);
             if (result.getCode().isAcceptable()) {
-                long gasUsed = tx.isVMTransaction() ? result.getGasUsed() : config.spec().nonVMTransactionGasCost();
                 includedTxs.add(tx);
                 includedResults.add(result);
+
+                // update counter
+                long gasUsed = tx.isVMTransaction() ? result.getGasUsed() : config.spec().nonVMTransactionGasCost();
                 remainingBlockGas -= gasUsed;
+                gasUsedInBlock += gasUsed;
             }
         }
 
@@ -845,9 +851,10 @@ public class SemuxBft implements BftManager {
             }
 
             // [3] evaluate transactions
-            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore);
+            TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore, chain.isVMEnabled(),
+                    chain.isVotingPrecompiledUpgraded());
             List<TransactionResult> results = transactionExecutor.execute(transactions, asTrack, dsTrack,
-                    new SemuxBlock(header, config.spec().maxBlockGasLimit()), chain.isVMEnabled(), 0);
+                    new SemuxBlock(header, config.spec().maxBlockGasLimit()), 0);
             if (!block.validateResults(header, results)) {
                 logger.error("Invalid transaction results");
                 return false;

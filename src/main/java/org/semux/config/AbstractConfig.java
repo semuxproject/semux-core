@@ -6,7 +6,13 @@
  */
 package org.semux.config;
 
+import static org.semux.Network.DEVNET;
+import static org.semux.Network.MAINNET;
+import static org.semux.Network.TESTNET;
 import static org.semux.core.Amount.ZERO;
+import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
+import static org.semux.core.Fork.VIRTUAL_MACHINE;
+import static org.semux.core.Fork.VOTING_PRECOMPILED_UPGRADE;
 import static org.semux.core.Unit.MILLI_SEM;
 import static org.semux.core.Unit.SEM;
 
@@ -23,7 +29,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.ethereum.vm.chainspec.Spec;
 import org.semux.Network;
 import org.semux.config.exception.ConfigException;
@@ -145,6 +150,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // =========================
     protected boolean forkUniformDistributionEnabled = false;
     protected boolean forkVirtualMachineEnabled = false;
+    protected boolean forkVotingPrecompiledUpgradeEnabled = false;
 
     @Override
     public ChainSpec spec() {
@@ -162,7 +168,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
 
     @Override
     public long maxBlockGasLimit() {
-        if (this.network() == Network.MAINNET) {
+        if (this.network() == MAINNET) {
             return maxBlockGasLimit;
         } else {
             return maxBlockGasLimit * 5;
@@ -277,24 +283,27 @@ public abstract class AbstractConfig implements Config, ChainSpec {
         return new SemuxSpec();
     }
 
+    private static long[][][] periods = new long[3][64][];
+
+    static {
+        // 200,000 block time is about 69 days
+        periods[MAINNET.id()][UNIFORM_DISTRIBUTION.id()] = new long[] { 200_001L, 400_000L };
+        periods[MAINNET.id()][VIRTUAL_MACHINE.id()] = new long[] { 1_500_001L, 1_700_000L };
+        periods[MAINNET.id()][VOTING_PRECOMPILED_UPGRADE.id()] = new long[] { 1_600_001L, 1_800_000L };
+
+        periods[TESTNET.id()][UNIFORM_DISTRIBUTION.id()] = new long[] { 1L, 200_000L };
+        periods[TESTNET.id()][VIRTUAL_MACHINE.id()] = new long[] { 1L, 200_000L };
+        periods[TESTNET.id()][VOTING_PRECOMPILED_UPGRADE.id()] = new long[] { 150_001L, 350_000L };
+
+        // as soon as possible
+        periods[DEVNET.id()][UNIFORM_DISTRIBUTION.id()] = new long[] { 1L, 200_000L };
+        periods[DEVNET.id()][VIRTUAL_MACHINE.id()] = new long[] { 1L, 200_000L };
+        periods[DEVNET.id()][VOTING_PRECOMPILED_UPGRADE.id()] = new long[] { 1, 200_000L };
+    }
+
     @Override
-    public Pair<Long, Long> getForkSignalingPeriod(Fork fork) {
-        switch (this.network()) {
-        case MAINNET:
-            if (fork == Fork.UNIFORM_DISTRIBUTION) {
-                return Pair.of(1L, 500000L);
-            } else if (fork == Fork.VIRTUAL_MACHINE) {
-                return Pair.of(1500001L, 2000000L);
-            }
-        case TESTNET:
-        case DEVNET:
-            if (fork == Fork.UNIFORM_DISTRIBUTION) {
-                return Pair.of(1L, 500000L);
-            } else if (fork == Fork.VIRTUAL_MACHINE) {
-                return Pair.of(1L, 500000L);
-            }
-        }
-        return null;
+    public long[] getForkSignalingPeriod(Fork fork) {
+        return periods[network().id()][fork.id()];
     }
 
     @Override
@@ -529,7 +538,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
 
     @Override
     public int poolBlockGasLimit() {
-        if (this.network() == Network.MAINNET) {
+        if (this.network() == MAINNET) {
             return poolBlockGasLimit;
         } else {
             return poolBlockGasLimit * 5;
@@ -569,6 +578,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     @Override
     public boolean forkVirtualMachineEnabled() {
         return forkVirtualMachineEnabled;
+    }
+
+    @Override
+    public boolean forkVotingPrecompiledUpgradeEnabled() {
+        return forkVotingPrecompiledUpgradeEnabled;
     }
 
     protected void init() {
