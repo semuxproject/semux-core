@@ -20,11 +20,12 @@ to this version ASAP.
     - Bumped the version to `v2.4.0`
     - Replaced `/syncing` with `/syncing-status` (#267)
     - Replaced `/call` with `/local-call` (#267)
-    - Replaced `POST /transaction/raw` with `GET /broadcast-raw-transaction` (#267)
+    - Deprecated `POST /transaction/raw` (#267)
     - Deprecated `POST /account` and `DELETE /account` (#267)
+    - Added `/broadcast-raw-transaction` (#267)
     - Added `/create-account` and `/delete-account` (#267)
-    - Added `/account/code` and `/account/storage` (#266)
     - Added `/local-create` (#267)
+    - Added `/account/code` and `/account/storage` (#266)
 
 ## [v2.0.0](https://github.com/semuxproject/semux-core/tree/v2.0.0) (2019-08-25)
 

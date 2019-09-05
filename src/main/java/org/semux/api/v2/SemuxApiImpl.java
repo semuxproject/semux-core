@@ -618,6 +618,11 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
+    public Response broadcastRawTransactionDeprecated(String raw) {
+        return broadcastRawTransaction(raw);
+    }
+
+    @Override
     public Response signMessage(String address, String message) {
         try {
             byte[] addressBytes = parseAddress(address, true);
