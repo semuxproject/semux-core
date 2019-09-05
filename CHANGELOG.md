@@ -1,5 +1,31 @@
 # Change Log
 
+## [v2.1.0](https://github.com/semuxproject/semux-core/tree/v2.1.0) (2019-09-xx)
+
+This release fixes several critical bugs of the v2 releases. All nodes should upgrade
+to this version ASAP.
+
+
+**Bug fixes:**
+
+- Fixed the traceability issue of vote/unvote calls (#249)
+- Fixed the transaction result bug (#260)
+- Fixed the local call bug (#257)
+
+**New features:**
+
+- CLI
+    - Added a database re-index tool (#262)
+- API
+    - Bumped the version to `v2.4.0`
+    - Replaced `/syncing` with `/syncing-status` (#267)
+    - Replaced `/call` with `/local-call` (#267)
+    - Replaced `POST /transaction/raw` with `GET /broadcast-raw-transaction` (#267)
+    - Deprecated `POST /account` and `DELETE /account` (#267)
+    - Added `/create-account` and `/delete-account` (#267)
+    - Added `/account/code` and `/account/storage` (#266)
+    - Added `/local-create` (#267)
+
 ## [v2.0.0](https://github.com/semuxproject/semux-core/tree/v2.0.0) (2019-08-25)
 
 This release features the **virtual machine hardfork** and **HD wallet**.
