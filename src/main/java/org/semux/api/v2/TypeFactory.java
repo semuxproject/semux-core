@@ -192,7 +192,7 @@ public class TypeFactory {
                 .rejected(it.isRejected())
                 .depth(Integer.toString(it.getDepth()))
                 .index(Integer.toString(it.getIndex()))
-                .type(it.getType().name())
+                .type(it.getType())
                 .from(Hex.encode0x(it.getFrom()))
                 .to(Hex.encode0x(it.getTo()))
                 .nonce(Long.toString(it.getNonce()))

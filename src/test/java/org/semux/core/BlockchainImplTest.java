@@ -17,7 +17,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.List;
 
-import org.ethereum.vm.OpCode;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -180,7 +179,7 @@ public class BlockchainImplTest {
         boolean rejected = true;
         int depth = 1;
         int index = 2;
-        OpCode type = OpCode.CALL;
+        String type = "CALL";
         byte[] from = Bytes.random(20);
         byte[] to = Bytes.random(20);
         long nonce = 3;

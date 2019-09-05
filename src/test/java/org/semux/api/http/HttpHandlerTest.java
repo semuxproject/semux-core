@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
-import org.semux.Network;
 import org.semux.api.ApiVersion;
 import org.semux.api.SemuxApiService;
 import org.semux.config.Config;

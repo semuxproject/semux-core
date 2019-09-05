@@ -66,7 +66,6 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
-import org.ethereum.vm.OpCode;
 import org.ethereum.vm.util.HashUtil;
 import org.junit.Test;
 import org.semux.Network;
@@ -525,7 +524,7 @@ public class SemuxApiTest extends SemuxApiTestBase {
         Transaction tx = createTransaction(config, CREATE, from, to, Amount.of(1, SEM), 1);
         TransactionResult res = new TransactionResult();
         SemuxInternalTransaction internalTx = new SemuxInternalTransaction(
-                Bytes.random(32), false, 1, 2, OpCode.CALL,
+                Bytes.random(32), false, 1, 2, "CALL",
                 Bytes.random(20), Bytes.random(20), 3, Amount.of(4), "data".getBytes(),
                 5, Amount.of(6));
         res.addInternalTransaction(internalTx);
