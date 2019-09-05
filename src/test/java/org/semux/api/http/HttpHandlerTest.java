@@ -27,14 +27,27 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.KernelMock;
+import org.semux.Network;
 import org.semux.api.ApiVersion;
 import org.semux.api.SemuxApiService;
+import org.semux.config.Config;
+import org.semux.core.Amount;
+import org.semux.core.Transaction;
+import org.semux.core.TransactionType;
+import org.semux.crypto.Hex;
+import org.semux.crypto.Key;
 import org.semux.rules.KernelRule;
 import org.semux.util.BasicAuth;
+import org.semux.util.Bytes;
+import org.semux.util.TimeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
 public class HttpHandlerTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpHandlerTest.class);
 
     @Rule
     public KernelRule kernelRule = new KernelRule(51610, 51710);
@@ -123,6 +136,34 @@ public class HttpHandlerTest {
         assertEquals("/test", uri);
         assertEquals("b", params.get("a"));
         assertEquals("f", params.get("e"));
+        assertEquals("d", headers.get("c"));
+    }
+
+    @Test
+    public void testGETBigData() throws IOException {
+        Config config = kernelRule.getKernel().getConfig();
+        Transaction tx = new Transaction(config.network(),
+                TransactionType.CALL, Bytes.random(20),
+                Amount.ZERO, Amount.ZERO, 0,
+                TimeUtil.currentTimeMillis(),
+                new byte[config.spec().maxTransactionDataSize(TransactionType.CALL)],
+                5_000_000L, Amount.of(100));
+        tx.sign(new Key());
+        assertTrue(tx.validate(config.network()));
+
+        URL url = new URL(
+                "http://" + ip + ":" + port + "/broadcast-raw-transactions?raw=" + Hex.encode0x(tx.toBytes()));
+        logger.info("URL length: " + url.toString().length());
+
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty("c", "d");
+        con.setRequestProperty("Authorization", auth);
+        Scanner s = new Scanner(con.getInputStream());
+        s.nextLine();
+        s.close();
+
+        assertEquals("/broadcast-raw-transactions", uri);
+        assertEquals(Hex.encode0x(tx.toBytes()), params.get("raw"));
         assertEquals("d", headers.get("c"));
     }
 
