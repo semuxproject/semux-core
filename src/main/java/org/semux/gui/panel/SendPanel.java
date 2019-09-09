@@ -381,6 +381,17 @@ public class SendPanel extends JPanel implements ActionListener {
                 showErrorDialog(
                         GuiMessages.get("InvalidData", config.spec().maxTransactionDataSize(TransactionType.TRANSFER)));
             } else {
+                byte[] code = kernel.getBlockchain().getAccountState().getCode(to);
+                if (code != null && code.length > 0) {
+                    int ret = JOptionPane.showConfirmDialog(this,
+                            GuiMessages.get("SendToContract"),
+                            GuiMessages.get("SendToContractWarning"),
+                            JOptionPane.OK_CANCEL_OPTION);
+                    if (ret != JOptionPane.OK_OPTION) {
+                        return;
+                    }
+                }
+
                 int ret = JOptionPane.showConfirmDialog(this,
                         GuiMessages.get("TransferInfo", SwingUtil.formatAmountFull(value), Hex.encode0x(to)),
                         GuiMessages.get("ConfirmTransfer"), JOptionPane.YES_NO_OPTION);
