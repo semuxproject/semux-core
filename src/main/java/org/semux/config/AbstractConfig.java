@@ -116,11 +116,13 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     protected boolean apiEnabled = false;
     protected String apiListenIp = "127.0.0.1";
     protected int apiListenPort = Constants.DEFAULT_API_PORT;
-    protected boolean apiAuthEnabled = true;
-    protected String apiUsername = null;
-    protected String apiPassword = null;
-    protected String[] apiServices = {
-            "blockchain", "account", "delegate", "tool", "node", "wallet"
+    protected String apiUsername = "YOUR_API_USERNAME";
+    protected String apiPassword = "YOUR_API_PASSWORD";
+    protected String[] apiPublicServices = {
+            "blockchain", "account", "delegate", "tool"
+    };
+    protected String[] apiPrivateServices = {
+            "node", "wallet"
     };
 
     // =========================
@@ -485,23 +487,23 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
-    public boolean apiAuthEnabled() {
-        return apiAuthEnabled;
-    }
-
-    @Override
     public String apiUsername() {
-        return apiUsername == null ? "admin" : apiUsername;
+        return apiUsername;
     }
 
     @Override
     public String apiPassword() {
-        return apiPassword == null ? "admin" : apiPassword;
+        return apiPassword;
     }
 
     @Override
-    public String[] apiServices() {
-        return apiServices;
+    public String[] apiPublicServices() {
+        return apiPublicServices;
+    }
+
+    @Override
+    public String[] apiPrivateServices() {
+        return apiPrivateServices;
     }
 
     @Override
@@ -680,17 +682,19 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                 case "api.listenPort":
                     apiListenPort = Integer.parseInt(props.getProperty(name).trim());
                     break;
-                case "api.authEnabled":
-                    apiAuthEnabled = Boolean.parseBoolean(props.getProperty(name).trim());
-                    break;
                 case "api.username":
                     apiUsername = props.getProperty(name).trim();
                     break;
                 case "api.password":
                     apiPassword = props.getProperty(name).trim();
                     break;
-                case "api.services":
-                    apiServices = Stream.of(props.getProperty(name).trim().split(","))
+                case "api.public":
+                    apiPublicServices = Stream.of(props.getProperty(name).trim().split(","))
+                            .map(String::trim)
+                            .toArray(String[]::new);
+                    break;
+                case "api.private":
+                    apiPrivateServices = Stream.of(props.getProperty(name).trim().split(","))
                             .map(String::trim)
                             .toArray(String[]::new);
                     break;
