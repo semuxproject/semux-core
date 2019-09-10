@@ -15,11 +15,6 @@ import org.semux.crypto.Key;
 public class Constants {
 
     /**
-     * JSON mime type string.
-     */
-    public static final String JSON_MIME = "application/json";
-
-    /**
      * Default data directory.
      */
     public static final String DEFAULT_DATA_DIR = ".";
@@ -39,7 +34,7 @@ public class Constants {
     /**
      * Version of this client.
      */
-    public static final String CLIENT_VERSION = "2.1.0";
+    public static final String CLIENT_VERSION = "2.1.1";
 
     /**
      * Algorithm name for the 256-bit hash.
