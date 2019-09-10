@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.ethereum.vm.chainspec.Spec;
 import org.semux.Network;
@@ -118,7 +119,9 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     protected boolean apiAuthEnabled = true;
     protected String apiUsername = null;
     protected String apiPassword = null;
-    protected boolean apiAllowGetMethodsOnly = false;
+    protected String[] apiServices = {
+            "blockchain", "account", "delegate", "tool", "node", "wallet"
+    };
 
     // =========================
     // BFT consensus
@@ -497,8 +500,8 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
-    public boolean apiAllowGetMethodsOnly() {
-        return apiAllowGetMethodsOnly;
+    public String[] apiServices() {
+        return apiServices;
     }
 
     @Override
@@ -686,8 +689,10 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                 case "api.password":
                     apiPassword = props.getProperty(name).trim();
                     break;
-                case "api.allowGetMethodsOnly":
-                    apiAllowGetMethodsOnly = Boolean.parseBoolean(props.getProperty(name).trim());
+                case "api.services":
+                    apiServices = Stream.of(props.getProperty(name).trim().split(","))
+                            .map(String::trim)
+                            .toArray(String[]::new);
                     break;
                 case "ui.locale": {
                     // ui.locale must be in format of en_US ([language]_[country])

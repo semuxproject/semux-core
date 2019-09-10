@@ -32,7 +32,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.api.http.HttpHandler;
 import org.semux.api.v2.SemuxApiImpl;
+import org.semux.api.v2.server.AccountApi;
+import org.semux.api.v2.server.BlockchainApi;
+import org.semux.api.v2.server.DelegateApi;
+import org.semux.api.v2.server.NodeApi;
 import org.semux.api.v2.server.SemuxApi;
+import org.semux.api.v2.server.ToolApi;
+import org.semux.api.v2.server.WalletApi;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +59,30 @@ public class ApiHandlerImpl implements ApiHandler {
     private final Map<ApiVersion, Map<ImmutablePair<HttpMethod, String>, Route>> routes = new HashMap<>();
 
     public ApiHandlerImpl(Kernel kernel) {
+        Map<ImmutablePair<HttpMethod, String>, Route> routesV2 = new HashMap<>();
         SemuxApi apiImplementationV2 = new SemuxApiImpl(kernel);
-        Class<?> apiInterfaceV2 = SemuxApi.class;
-        Map<ImmutablePair<HttpMethod, String>, Route> routesV2 = loadRoutes(apiImplementationV2, apiInterfaceV2);
+        for (String service : kernel.getConfig().apiServices()) {
+            switch (service) {
+            case "blockchain":
+                routesV2.putAll(loadRoutes(apiImplementationV2, BlockchainApi.class));
+                break;
+            case "account":
+                routesV2.putAll(loadRoutes(apiImplementationV2, AccountApi.class));
+                break;
+            case "delegate":
+                routesV2.putAll(loadRoutes(apiImplementationV2, DelegateApi.class));
+                break;
+            case "tool":
+                routesV2.putAll(loadRoutes(apiImplementationV2, ToolApi.class));
+                break;
+            case "node":
+                routesV2.putAll(loadRoutes(apiImplementationV2, NodeApi.class));
+                break;
+            case "wallet":
+                routesV2.putAll(loadRoutes(apiImplementationV2, WalletApi.class));
+                break;
+            }
+        }
 
         this.routes.put(ApiVersion.v2_0_0, routesV2);
         this.routes.put(ApiVersion.v2_1_0, routesV2);

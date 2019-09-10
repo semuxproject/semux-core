@@ -135,12 +135,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
 
-        // check request method
-        if (config.apiAllowGetMethodsOnly() && !msg.method().equals(HttpMethod.GET)) {
-            writeJsonResponse(ctx, FORBIDDEN, FORBIDDEN_RESPONSE);
-            return;
-        }
-
         // check decoding result
         if (!msg.decoderResult().isSuccess()) {
             writeJsonResponse(ctx, BAD_REQUEST, BAD_REQUEST_RESPONSE);

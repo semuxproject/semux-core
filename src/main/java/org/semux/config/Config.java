@@ -308,11 +308,11 @@ public interface Config {
     String apiPassword();
 
     /**
-     * Whether to allow GET methods only.
+     * Returns enabled API services.
      *
      * @return
      */
-    boolean apiAllowGetMethodsOnly();
+    String[] apiServices();
 
     // =========================
     // BFT consensus
