@@ -32,7 +32,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.semux.Kernel;
 import org.semux.api.http.HttpHandler;
 import org.semux.api.v2.SemuxApiImpl;
+import org.semux.api.v2.server.AccountApi;
+import org.semux.api.v2.server.BlockchainApi;
+import org.semux.api.v2.server.DelegateApi;
+import org.semux.api.v2.server.NodeApi;
 import org.semux.api.v2.server.SemuxApi;
+import org.semux.api.v2.server.ToolApi;
+import org.semux.api.v2.server.WalletApi;
 import org.semux.util.exception.UnreachableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +59,10 @@ public class ApiHandlerImpl implements ApiHandler {
     private final Map<ApiVersion, Map<ImmutablePair<HttpMethod, String>, Route>> routes = new HashMap<>();
 
     public ApiHandlerImpl(Kernel kernel) {
-        SemuxApi apiImplementationV2 = new SemuxApiImpl(kernel);
-        Class<?> apiInterfaceV2 = SemuxApi.class;
-        Map<ImmutablePair<HttpMethod, String>, Route> routesV2 = loadRoutes(apiImplementationV2, apiInterfaceV2);
+        Map<ImmutablePair<HttpMethod, String>, Route> routesV2 = new HashMap<>();
+        SemuxApi implV2 = new SemuxApiImpl(kernel);
+        load(routesV2, implV2, kernel.getConfig().apiPublicServices(), true);
+        load(routesV2, implV2, kernel.getConfig().apiPrivateServices(), false);
 
         this.routes.put(ApiVersion.v2_0_0, routesV2);
         this.routes.put(ApiVersion.v2_1_0, routesV2);
@@ -64,14 +71,35 @@ public class ApiHandlerImpl implements ApiHandler {
         this.routes.put(ApiVersion.v2_4_0, routesV2);
     }
 
+    private void load(Map<ImmutablePair<HttpMethod, String>, Route> routes, SemuxApi impl,
+            String[] services, boolean isPublic) {
+        for (String service : services) {
+            switch (service) {
+            case "blockchain":
+                routes.putAll(loadRoutes(impl, BlockchainApi.class, isPublic));
+                break;
+            case "account":
+                routes.putAll(loadRoutes(impl, AccountApi.class, isPublic));
+                break;
+            case "delegate":
+                routes.putAll(loadRoutes(impl, DelegateApi.class, isPublic));
+                break;
+            case "tool":
+                routes.putAll(loadRoutes(impl, ToolApi.class, isPublic));
+                break;
+            case "node":
+                routes.putAll(loadRoutes(impl, NodeApi.class, isPublic));
+                break;
+            case "wallet":
+                routes.putAll(loadRoutes(impl, WalletApi.class, isPublic));
+                break;
+            }
+        }
+    }
+
     @Override
     public Response service(HttpMethod method, String path, Map<String, String> params, HttpHeaders headers) {
-        // find the route by [version, method, path]
-        Route route = null;
-        Matcher m = VERSIONED_PATH.matcher(path);
-        if (m.matches() && routes.containsKey(ApiVersion.of(m.group(1)))) {
-            route = routes.get(ApiVersion.of(m.group(1))).get(ImmutablePair.of(method, m.group(2)));
-        }
+        Route route = matchRoute(method, path);
         if (route == null) {
             return Response.status(NOT_FOUND).entity(HttpHandler.NOT_FOUND_RESPONSE).build();
         }
@@ -83,6 +111,25 @@ public class ApiHandlerImpl implements ApiHandler {
             logger.warn("Internal error", e);
             return Response.status(INTERNAL_SERVER_ERROR).entity(HttpHandler.INTERNAL_SERVER_ERROR_RESPONSE).build();
         }
+    }
+
+    @Override
+    public boolean isAuthRequired(HttpMethod method, String path) {
+        Route route = matchRoute(method, path);
+        return route != null && !route.isPublic;
+    }
+
+    /**
+     * Matches route by [version, method, path]
+     */
+    private Route matchRoute(HttpMethod method, String path) {
+        Route route = null;
+        Matcher m = VERSIONED_PATH.matcher(path);
+        if (m.matches() && routes.containsKey(ApiVersion.of(m.group(1)))) {
+            route = routes.get(ApiVersion.of(m.group(1))).get(ImmutablePair.of(method, m.group(2)));
+        }
+
+        return route;
     }
 
     private HttpMethod readHttpMethod(Method method) {
@@ -112,12 +159,12 @@ public class ApiHandlerImpl implements ApiHandler {
         }
     }
 
-    private Map<ImmutablePair<HttpMethod, String>, Route> loadRoutes(Object semuxApi, Class<?> swaggerInterface) {
+    private Map<ImmutablePair<HttpMethod, String>, Route> loadRoutes(Object impl, Class<?> api, boolean isPublic) {
         Map<ImmutablePair<HttpMethod, String>, Route> result = new HashMap<>();
 
         try {
-            for (Method methodInterface : swaggerInterface.getMethods()) {
-                Method methodImpl = semuxApi.getClass().getMethod(methodInterface.getName(),
+            for (Method methodInterface : api.getMethods()) {
+                Method methodImpl = impl.getClass().getMethod(methodInterface.getName(),
                         methodInterface.getParameterTypes());
 
                 HttpMethod httpMethod = readHttpMethod(methodInterface);
@@ -125,7 +172,7 @@ public class ApiHandlerImpl implements ApiHandler {
 
                 if (httpMethod != null && path != null) {
                     result.put(ImmutablePair.of(httpMethod, path),
-                            new Route(semuxApi, httpMethod, path, methodInterface, methodImpl));
+                            new Route(impl, httpMethod, path, methodInterface, methodImpl, isPublic));
                     logger.trace("Loaded route: {} {}", httpMethod, path);
                 }
             }
@@ -153,7 +200,10 @@ public class ApiHandlerImpl implements ApiHandler {
 
         final List<Pair<QueryParam, Class<?>>> queryParams;
 
-        Route(Object semuxApi, HttpMethod httpMethod, String path, Method methodInterface, Method methodImpl) {
+        final boolean isPublic;
+
+        Route(Object semuxApi, HttpMethod httpMethod, String path, Method methodInterface, Method methodImpl,
+                boolean isPublic) {
             this.semuxApi = semuxApi;
             this.httpMethod = httpMethod;
             this.path = path;
@@ -163,6 +213,7 @@ public class ApiHandlerImpl implements ApiHandler {
                     .stream(methodInterface.getParameters())
                     .map(p -> new ImmutablePair<QueryParam, Class<?>>(p.getAnnotation(QueryParam.class), p.getType()))
                     .collect(Collectors.toList());
+            this.isPublic = isPublic;
         }
 
         Object invoke(Map<String, String> params) throws Exception {

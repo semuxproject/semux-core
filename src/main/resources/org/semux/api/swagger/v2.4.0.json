@@ -1274,7 +1274,7 @@
                 ]
             }
         },
-        "/syncing-status": {
+        "/syncing": {
             "get": {
                 "tags": [
                     "Node"

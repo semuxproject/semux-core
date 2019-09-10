@@ -11,7 +11,6 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaderValues.CLOSE;
 import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -125,22 +124,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         HttpHeaders headers = msg.headers();
         ByteBuf body = Unpooled.buffer(HttpConstants.MAX_BODY_SIZE);
 
-        // check basic authentication
-        if (config.apiAuthEnabled() && !checkBasicAuth(headers)) {
-            FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-            resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");
-            resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
-
-            ctx.writeAndFlush(resp);
-            return;
-        }
-
-        // check request method
-        if (config.apiAllowGetMethodsOnly() && !msg.method().equals(HttpMethod.GET)) {
-            writeJsonResponse(ctx, FORBIDDEN, FORBIDDEN_RESPONSE);
-            return;
-        }
-
         // check decoding result
         if (!msg.decoderResult().isSuccess()) {
             writeJsonResponse(ctx, BAD_REQUEST, BAD_REQUEST_RESPONSE);
@@ -196,6 +179,17 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
 
         } else {
+            // check basic access authentication
+            if (apiHandler.isAuthRequired(msg.method(), path) && !checkBasicAuth(headers)) {
+                FullHttpResponse resp = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
+                resp.headers().set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"Semux RESTful API\"");
+                resp.headers().set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
+
+                ctx.writeAndFlush(resp);
+                return;
+            }
+
+            // do the service
             boolean prettyPrint = Boolean.parseBoolean(map.get("pretty"));
             Response response = apiHandler.service(msg.method(), path, map, headers);
             lastContentFuture = writeApiResponse(ctx, prettyPrint, response);

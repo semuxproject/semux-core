@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.ethereum.vm.chainspec.Spec;
 import org.semux.Network;
@@ -115,10 +116,14 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     protected boolean apiEnabled = false;
     protected String apiListenIp = "127.0.0.1";
     protected int apiListenPort = Constants.DEFAULT_API_PORT;
-    protected boolean apiAuthEnabled = true;
-    protected String apiUsername = null;
-    protected String apiPassword = null;
-    protected boolean apiAllowGetMethodsOnly = false;
+    protected String apiUsername = "YOUR_API_USERNAME";
+    protected String apiPassword = "YOUR_API_PASSWORD";
+    protected String[] apiPublicServices = {
+            "blockchain", "account", "delegate", "tool"
+    };
+    protected String[] apiPrivateServices = {
+            "node", "wallet"
+    };
 
     // =========================
     // BFT consensus
@@ -482,23 +487,23 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
-    public boolean apiAuthEnabled() {
-        return apiAuthEnabled;
-    }
-
-    @Override
     public String apiUsername() {
-        return apiUsername == null ? "admin" : apiUsername;
+        return apiUsername;
     }
 
     @Override
     public String apiPassword() {
-        return apiPassword == null ? "admin" : apiPassword;
+        return apiPassword;
     }
 
     @Override
-    public boolean apiAllowGetMethodsOnly() {
-        return apiAllowGetMethodsOnly;
+    public String[] apiPublicServices() {
+        return apiPublicServices;
+    }
+
+    @Override
+    public String[] apiPrivateServices() {
+        return apiPrivateServices;
     }
 
     @Override
@@ -677,17 +682,21 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                 case "api.listenPort":
                     apiListenPort = Integer.parseInt(props.getProperty(name).trim());
                     break;
-                case "api.authEnabled":
-                    apiAuthEnabled = Boolean.parseBoolean(props.getProperty(name).trim());
-                    break;
                 case "api.username":
                     apiUsername = props.getProperty(name).trim();
                     break;
                 case "api.password":
                     apiPassword = props.getProperty(name).trim();
                     break;
-                case "api.allowGetMethodsOnly":
-                    apiAllowGetMethodsOnly = Boolean.parseBoolean(props.getProperty(name).trim());
+                case "api.public":
+                    apiPublicServices = Stream.of(props.getProperty(name).trim().split(","))
+                            .map(String::trim)
+                            .toArray(String[]::new);
+                    break;
+                case "api.private":
+                    apiPrivateServices = Stream.of(props.getProperty(name).trim().split(","))
+                            .map(String::trim)
+                            .toArray(String[]::new);
                     break;
                 case "ui.locale": {
                     // ui.locale must be in format of en_US ([language]_[country])
@@ -728,9 +737,15 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     private void validate() {
-        if (apiEnabled &&
-                ("YOUR_API_USERNAME".equals(apiUsername) || "YOUR_API_PASSWORD".equals(apiPassword))) {
-            throw new ConfigException("Please change your API username/password from the default values.");
+        if (apiEnabled) {
+            if ("YOUR_API_USERNAME".equals(apiUsername) || "YOUR_API_PASSWORD".equals(apiPassword)) {
+                throw new ConfigException("Please change your API username/password from the default values.");
+            }
+
+            if (Arrays.stream(apiPublicServices)
+                    .anyMatch(x -> Arrays.stream(apiPrivateServices).anyMatch(y -> y.equals(x)))) {
+                throw new ConfigException("There are services which belong to both api.public and api.private");
+            }
         }
     }
 }

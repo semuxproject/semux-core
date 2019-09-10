@@ -32,4 +32,6 @@ public interface ApiHandler {
      * @return the response object
      */
     Response service(HttpMethod method, String path, Map<String, String> params, HttpHeaders headers);
+
+    boolean isAuthRequired(HttpMethod method, String path);
 }
