@@ -737,9 +737,15 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     private void validate() {
-        if (apiEnabled &&
-                ("YOUR_API_USERNAME".equals(apiUsername) || "YOUR_API_PASSWORD".equals(apiPassword))) {
-            throw new ConfigException("Please change your API username/password from the default values.");
+        if (apiEnabled) {
+            if ("YOUR_API_USERNAME".equals(apiUsername) || "YOUR_API_PASSWORD".equals(apiPassword)) {
+                throw new ConfigException("Please change your API username/password from the default values.");
+            }
+
+            if (Arrays.stream(apiPublicServices)
+                    .anyMatch(x -> Arrays.stream(apiPrivateServices).anyMatch(y -> y.equals(x)))) {
+                throw new ConfigException("There are services which belong to both api.public and api.private");
+            }
         }
     }
 }

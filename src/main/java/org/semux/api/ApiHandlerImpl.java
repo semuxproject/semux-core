@@ -116,7 +116,7 @@ public class ApiHandlerImpl implements ApiHandler {
     @Override
     public boolean isAuthRequired(HttpMethod method, String path) {
         Route route = matchRoute(method, path);
-        return route == null ? false : !route.isPublic;
+        return route != null && !route.isPublic;
     }
 
     /**
