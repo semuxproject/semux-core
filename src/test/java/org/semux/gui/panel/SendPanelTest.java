@@ -29,10 +29,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.semux.KernelMock;
 import org.semux.core.Amount;
+import org.semux.core.Blockchain;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
 import org.semux.core.TransactionType;
+import org.semux.core.state.AccountState;
 import org.semux.crypto.Hex;
 import org.semux.crypto.Key;
 import org.semux.gui.WalletModelRule;
@@ -50,6 +52,12 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
 
     @Mock
     PendingManager pendingManager;
+
+    @Mock
+    Blockchain blockchain;
+
+    @Mock
+    AccountState accountState;
 
     @Captor
     ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
@@ -111,9 +119,14 @@ public class SendPanelTest extends AssertJSwingJUnitTestCase {
         application = GuiActionRunner.execute(() -> new SendPanelTestApplication(walletRule.walletModel, kernelMock));
 
         // mock pending manager
+        when(kernelMock.getPendingManager()).thenReturn(pendingManager);
         when(pendingManager.getNonce(any())).thenReturn(RandomUtils.nextLong());
         when(pendingManager.addTransactionSync(any())).thenReturn(mockResult);
-        when(kernelMock.getPendingManager()).thenReturn(pendingManager);
+
+        // mock blockchain
+        when(kernelMock.getBlockchain()).thenReturn(blockchain);
+        when(blockchain.getAccountState()).thenReturn(accountState);
+        when(accountState.getCode(any())).thenReturn(null);
 
         // create window
         window = new FrameFixture(robot(), application);
