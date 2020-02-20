@@ -31,6 +31,9 @@ public class DevnetConfig extends AbstractConfig {
         bftPreCommitTimeout = 1000L;
         bftCommitTimeout = 1000L;
         bftFinalizeTimeout = 1000L;
+
+        // huge gas limit
+        maxBlockGasLimit = 500_000_000L;
     }
 
     @Override
