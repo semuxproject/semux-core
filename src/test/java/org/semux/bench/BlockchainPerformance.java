@@ -13,7 +13,7 @@ import org.semux.Network;
 import org.semux.TestUtils;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class BlockchainPerformance {
     private static final Logger logger = LoggerFactory.getLogger(BlockchainPerformance.class);
 
-    private static Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+    private static Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
     private static Key key = new Key();
 
     public static Block testBlockCreation() {

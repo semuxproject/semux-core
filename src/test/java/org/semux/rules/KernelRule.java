@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import org.junit.rules.TemporaryFolder;
 import org.semux.KernelMock;
 import org.semux.config.Config;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.BlockchainImpl;
@@ -111,7 +111,7 @@ public class KernelRule extends TemporaryFolder {
     }
 
     protected Config mockConfig(int p2pPort, int apiPort) {
-        Config config = spy(new DevnetConfig(getRoot().getAbsolutePath()));
+        Config config = spy(new UnitTestnetConfig(getRoot().getAbsolutePath()));
 
         when(config.p2pDeclaredIp()).thenReturn(Optional.of("127.0.0.1"));
         when(config.p2pListenIp()).thenReturn("127.0.0.1");

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Amount;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
@@ -40,7 +40,7 @@ public class SemuxPerformance {
     private static String to = "";
 
     public static void testTransfer(int n) throws IOException, InterruptedException {
-        DevnetConfig config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+        UnitTestnetConfig config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
 
         long t1 = TimeUtil.currentTimeMillis();
         for (int i = 1; i <= n; i++) {
