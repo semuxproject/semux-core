@@ -7,6 +7,7 @@
 package org.semux.config;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.semux.Network;
@@ -22,6 +23,14 @@ public class DevnetConfig extends AbstractConfig {
         this.forkUniformDistributionEnabled = true;
         this.forkVirtualMachineEnabled = true;
         this.forkVotingPrecompiledUpgradeEnabled = true;
+
+        // set fast blocks
+        bftNewHeightTimeout = 1000L;
+        bftProposeTimeout = 2000L;
+        bftValidateTimeout = 1000L;
+        bftPreCommitTimeout = 1000L;
+        bftCommitTimeout = 1000L;
+        bftFinalizeTimeout = 1000L;
     }
 
     @Override
@@ -31,6 +40,12 @@ public class DevnetConfig extends AbstractConfig {
 
     @Override
     public Map<Fork, Long> manuallyActivatedForks() {
-        return Collections.emptyMap();
+
+        Map<Fork, Long> forks = new HashMap<>();
+        forks.put(Fork.UNIFORM_DISTRIBUTION, 1l);
+        forks.put(Fork.VIRTUAL_MACHINE, 1l);
+        forks.put(Fork.VOTING_PRECOMPILED_UPGRADE, 1l);
+
+        return forks;
     }
 }
