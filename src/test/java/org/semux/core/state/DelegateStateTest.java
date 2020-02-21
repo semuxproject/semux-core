@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
@@ -42,7 +42,7 @@ public class DelegateStateTest {
 
     @Before
     public void init() {
-        chain = new BlockchainImpl(new DevnetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
+        chain = new BlockchainImpl(new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
         ds = chain.getDelegateState();
         delegates = chain.getGenesis().getDelegates();
     }

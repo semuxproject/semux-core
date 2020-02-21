@@ -12,14 +12,14 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.crypto.Key;
 
 public class WorldMessageTest {
 
     @Test
     public void testCodec() {
-        Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+        Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
 
         Key key = new Key();
         String peerId = key.toAddressString();

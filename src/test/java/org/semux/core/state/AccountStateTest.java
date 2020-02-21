@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
@@ -36,7 +36,7 @@ public class AccountStateTest {
 
     @Before
     public void setUp() {
-        chain = new BlockchainImpl(new DevnetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
+        chain = new BlockchainImpl(new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
         state = chain.getAccountState();
     }
 

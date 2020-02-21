@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -51,7 +51,7 @@ public class InternalTransactionTest {
 
     @Before
     public void prepare() {
-        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = spy(new BlockchainImpl(config, temporaryDBFactory));
         doReturn(true).when(chain).isForkActivated(any());
 

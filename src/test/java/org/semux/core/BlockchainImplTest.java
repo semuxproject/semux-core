@@ -25,7 +25,7 @@ import org.semux.TestUtils;
 import org.semux.config.AbstractConfig;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.BlockchainImpl.StatsType;
 import org.semux.crypto.Key;
 import org.semux.rules.TemporaryDatabaseRule;
@@ -60,7 +60,7 @@ public class BlockchainImplTest {
 
     @Before
     public void setUp() {
-        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
         res = new TransactionResult();
     }
