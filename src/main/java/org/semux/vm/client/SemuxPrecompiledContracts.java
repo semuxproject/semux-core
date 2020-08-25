@@ -33,14 +33,18 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
     private static final Unvote unvote = new Unvote();
     private static final GetVotes getVotes = new GetVotes();
     private static final GetVote getVote = new GetVote();
+    private static final Ed25519Vfy ed25519vfy = new Ed25519Vfy();
 
     private static final DataWord voteAddr = DataWord.of(100);
     private static final DataWord unvoteAddr = DataWord.of(101);
     private static final DataWord getVotesAddr = DataWord.of(102);
     private static final DataWord getVoteAddr = DataWord.of(103);
 
-    private static final Pair<Boolean, byte[]> success = new Pair<>(true, ArrayUtils.EMPTY_BYTE_ARRAY);
-    private static final Pair<Boolean, byte[]> failure = new Pair<>(false, ArrayUtils.EMPTY_BYTE_ARRAY);
+    // match the ethereum code, eip-665
+    private static final DataWord ed25519vfyAddr = DataWord.of(0x9);
+
+    public static final Pair<Boolean, byte[]> success = new Pair<>(true, ArrayUtils.EMPTY_BYTE_ARRAY);
+    public static final Pair<Boolean, byte[]> failure = new Pair<>(false, ArrayUtils.EMPTY_BYTE_ARRAY);
 
     @Override
     public PrecompiledContract getContractForAddress(DataWord address) {
@@ -53,6 +57,8 @@ public class SemuxPrecompiledContracts extends ConstantinoplePrecompiledContract
             return getVotes;
         } else if (address.equals(getVoteAddr)) {
             return getVote;
+        } else if (address.equals(ed25519vfyAddr)) {
+            return ed25519vfy;
         }
         return super.getContractForAddress(address);
     }

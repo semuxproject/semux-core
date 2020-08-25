@@ -41,6 +41,10 @@ import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Random;
+
 public class PrecompiledContractTest {
     private Logger logger = LoggerFactory.getLogger(VmTransactionTest.class);
 
@@ -209,6 +213,68 @@ public class PrecompiledContractTest {
         ds.register(delegate, "abc".getBytes());
 
         TransactionResult result = exec.execute(tx, as, ds, block, 0);
+        assertFalse(result.getCode().isSuccess());
+    }
+
+    @Test
+    public void testEd25519Vfy() {
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        Key key = new Key();
+
+        byte[] message = new byte[32];
+        new Random().nextBytes(message);
+
+        Key signingKey = new Key();
+        Key.Signature sig = signingKey.sign(message);
+        byte[] signature = sig.getS();
+        byte[] publicKey = sig.getA();
+
+        // our signatures are (S,A), eth spec is (A,S)
+        TransactionType type = TransactionType.CALL;
+        byte[] from = key.toAddress();
+        byte[] to = Hex.decode0x("0x0000000000000000000000000000000000000009");
+        byte[] delegate = Bytes.random(20);
+        Amount value = Amount.of(0);
+
+        long nonce = as.getAccount(from).getNonce();
+        long timestamp = TimeUtil.currentTimeMillis();
+        byte[] data = Bytes.merge(message, publicKey, signature);
+
+        long gas = 100000;
+        Amount gasPrice = Amount.of(1);
+
+        Transaction tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+
+        SemuxBlock block = new SemuxBlock(
+                new BlockHeader(123, Bytes.random(20), Bytes.random(20), TimeUtil.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.spec().maxBlockGasLimit());
+        as.adjustAvailable(from, Amount.of(1000, SEM));
+        as.adjustAvailable(to, Amount.of(1000, SEM));
+        ds.register(delegate, "abc".getBytes());
+
+        TransactionResult result = exec.execute(tx, as, ds, block, 0);
+        assertTrue(result.getCode().isSuccess());
+
+        // check if message is tampered
+        nonce = as.getAccount(from).getNonce();
+        timestamp = TimeUtil.currentTimeMillis();
+        message[0] = (byte) ((int) message[0] + 1 % 8);
+        data = Bytes.merge(message, publicKey, signature);
+
+        tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+
+        block = new SemuxBlock(
+                new BlockHeader(123, Bytes.random(20), Bytes.random(20), TimeUtil.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.spec().maxBlockGasLimit());
+        as.adjustAvailable(from, Amount.of(1000, SEM));
+        as.adjustAvailable(to, Amount.of(1000, SEM));
+        ds.register(delegate, "abc".getBytes());
+
+        result = exec.execute(tx, as, ds, block, 0);
         assertFalse(result.getCode().isSuccess());
     }
 }

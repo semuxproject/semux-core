@@ -1,5 +1,13 @@
 # Change Log
 
+## [v2.2.x](https://github.com/semuxproject/semux-core/tree/develop) (2020-xx-xx) (WIP)
+
+This release adds support for EIP-665 precompiled contract.
+
+NOTE:  A softfork `EIP665_PRECOMPILED_UPGRADE` is introduced.
+
+
+
 ## [v2.1.x](https://github.com/semuxproject/semux-core/tree/v2.1.1) (2019-09-10)
 
 This release tries to fix several issues about the voting precompiled contracts. All nodes
