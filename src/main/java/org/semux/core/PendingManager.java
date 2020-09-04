@@ -352,7 +352,8 @@ public class PendingManager implements Runnable, BlockchainListener {
             AccountState as = pendingAS.track();
             DelegateState ds = pendingDS.track();
             TransactionResult result = new TransactionExecutor(kernel.getConfig(), blockStore,
-                    kernel.getBlockchain().isVMEnabled(), kernel.getBlockchain().isVotingPrecompiledUpgraded())
+                    kernel.getBlockchain().isVMEnabled(), kernel.getBlockchain().isVotingPrecompiledUpgraded(),
+                    kernel.getBlockchain().isEd25519ContractEnabled())
                             .execute(tx, as, ds, dummyBlock, 0);
 
             if (result.getCode().isAcceptable()) {

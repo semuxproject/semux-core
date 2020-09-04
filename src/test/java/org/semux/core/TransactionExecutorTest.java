@@ -52,7 +52,7 @@ public class TransactionExecutorTest {
         as = chain.getAccountState();
         ds = chain.getDelegateState();
         exec = new TransactionExecutor(config, new SemuxBlockStore(chain), chain.isVMEnabled(),
-                chain.isVotingPrecompiledUpgraded());
+                chain.isVotingPrecompiledUpgraded(), chain.isEd25519ContractEnabled());
         network = config.network();
         block = new SemuxBlock(mock(BlockHeader.class), config.spec().maxBlockGasLimit());
     }

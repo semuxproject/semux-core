@@ -6,6 +6,8 @@
  */
 package org.semux.vm.client;
 
+import java.util.Arrays;
+
 import org.ethereum.vm.chainspec.PrecompiledContract;
 import org.ethereum.vm.chainspec.PrecompiledContractContext;
 import org.ethereum.vm.util.Pair;
@@ -14,14 +16,15 @@ import org.semux.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-
 /**
  * Implementation of
  * https://github.com/ethereum/EIPs/blob/master/EIPS/eip-665.md
  */
 public class Ed25519Vfy implements PrecompiledContract {
     private static final Logger logger = LoggerFactory.getLogger(Ed25519Vfy.class);
+
+    // any non-zero value indicates a signature verification failure
+    public static final Pair<Boolean, byte[]> signatureVerificationFailure = new Pair<>(true, new byte[] { 1 });
 
     @Override
     public long getGasForData(byte[] bytes) {
@@ -59,8 +62,9 @@ public class Ed25519Vfy implements PrecompiledContract {
             }
         } catch (Exception e) {
             logger.info("Exception while verifying signature", e);
+            return SemuxPrecompiledContracts.failure;
         }
 
-        return isValidSignature ? SemuxPrecompiledContracts.success : SemuxPrecompiledContracts.failure;
+        return isValidSignature ? SemuxPrecompiledContracts.success : signatureVerificationFailure;
     }
 }

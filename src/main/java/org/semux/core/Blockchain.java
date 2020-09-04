@@ -270,4 +270,6 @@ public interface Blockchain {
     boolean isVMEnabled();
 
     boolean isVotingPrecompiledUpgraded();
+
+    boolean isEd25519ContractEnabled();
 }

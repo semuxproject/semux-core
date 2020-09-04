@@ -86,7 +86,7 @@ public class CorePerformanceTest {
 
         Blockchain chain = new BlockchainImpl(config, temporaryDBFactory);
         TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), chain.isVMEnabled(),
-                chain.isVotingPrecompiledUpgraded());
+                chain.isVotingPrecompiledUpgraded(), chain.isEd25519ContractEnabled());
 
         t1 = System.nanoTime();
         exec.execute(txs, chain.getAccountState().track(), chain.getDelegateState().track(),

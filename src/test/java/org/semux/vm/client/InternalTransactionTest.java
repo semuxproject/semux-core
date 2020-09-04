@@ -69,7 +69,8 @@ public class InternalTransactionTest {
     // }
     @Test
     public void testInternalTransfer() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CALL;

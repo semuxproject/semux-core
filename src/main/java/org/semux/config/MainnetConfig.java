@@ -45,6 +45,7 @@ public class MainnetConfig extends AbstractConfig {
         this.forkUniformDistributionEnabled = true;
         this.forkVirtualMachineEnabled = true;
         this.forkVotingPrecompiledUpgradeEnabled = true;
+        this.forkEd25519ContractEnabled = false; // enable this when we are ready to go
     }
 
     @Override

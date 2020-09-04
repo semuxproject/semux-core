@@ -6,9 +6,7 @@
  */
 package org.semux.vm.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -16,6 +14,11 @@ import static org.semux.core.Amount.ONE;
 import static org.semux.core.Amount.ZERO;
 import static org.semux.core.Unit.SEM;
 
+import java.util.Random;
+
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,10 +43,6 @@ import org.semux.util.Bytes;
 import org.semux.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.InvalidAlgorithmParameterException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Random;
 
 public class PrecompiledContractTest {
     private Logger logger = LoggerFactory.getLogger(VmTransactionTest.class);
@@ -84,7 +83,8 @@ public class PrecompiledContractTest {
 
     @Test
     public void testSuccess() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
         byte[] delegate = Bytes.random(20);
 
@@ -149,7 +149,8 @@ public class PrecompiledContractTest {
     // it would fail because the contract doesn't have balance.
     @Test
     public void testFailure1() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
         byte[] delegate = Bytes.random(20);
 
@@ -185,7 +186,8 @@ public class PrecompiledContractTest {
     // it would fail because the sender doesn't have enough balance.
     @Test
     public void testFailure2() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CALL;
@@ -218,7 +220,8 @@ public class PrecompiledContractTest {
 
     @Test
     public void testEd25519Vfy() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         byte[] message = new byte[32];
@@ -256,6 +259,7 @@ public class PrecompiledContractTest {
 
         TransactionResult result = exec.execute(tx, as, ds, block, 0);
         assertTrue(result.getCode().isSuccess());
+        assertArrayEquals(new byte[0], result.getReturnData());
 
         // check if message is tampered
         nonce = as.getAccount(from).getNonce();
@@ -275,6 +279,124 @@ public class PrecompiledContractTest {
         ds.register(delegate, "abc".getBytes());
 
         result = exec.execute(tx, as, ds, block, 0);
+
+        // call is still a success, but data is not empty
+        assertTrue(result.getCode().isSuccess());
+        Assert.assertThat(new byte[0], IsNot.not(IsEqual.equalTo(result.getReturnData())));
+
+        // check that invalid set of data is failure
+        nonce = as.getAccount(from).getNonce();
+        timestamp = TimeUtil.currentTimeMillis();
+        message[0] = (byte) ((int) message[0] + 1 % 8);
+        data = Bytes.merge(message, publicKey); // no signature
+
+        tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+
+        block = new SemuxBlock(
+                new BlockHeader(123, Bytes.random(20), Bytes.random(20), TimeUtil.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.spec().maxBlockGasLimit());
+        as.adjustAvailable(from, Amount.of(1000, SEM));
+        as.adjustAvailable(to, Amount.of(1000, SEM));
+        ds.register(delegate, "abc".getBytes());
+
+        result = exec.execute(tx, as, ds, block, 0);
+
+        // call is still a success, but data is not empty
         assertFalse(result.getCode().isSuccess());
+        assertArrayEquals(new byte[0], result.getReturnData());
+    }
+
+    @Test
+    public void testEd25519Vfy_Prefork() {
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                false);
+        Key key = new Key();
+
+        byte[] message = new byte[32];
+        new Random().nextBytes(message);
+
+        Key signingKey = new Key();
+        Key.Signature sig = signingKey.sign(message);
+        byte[] signature = sig.getS();
+        byte[] publicKey = sig.getA();
+
+        // our signatures are (S,A), eth spec is (A,S)
+        TransactionType type = TransactionType.CALL;
+        byte[] from = key.toAddress();
+        byte[] to = Hex.decode0x("0x0000000000000000000000000000000000000009");
+        byte[] delegate = Bytes.random(20);
+        Amount value = Amount.of(0);
+
+        long nonce = as.getAccount(from).getNonce();
+        long timestamp = TimeUtil.currentTimeMillis();
+        byte[] data = Bytes.merge(message, publicKey, signature);
+
+        long gas = 100000;
+        Amount gasPrice = Amount.of(1);
+
+        Transaction tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+
+        SemuxBlock block = new SemuxBlock(
+                new BlockHeader(123, Bytes.random(20), Bytes.random(20), TimeUtil.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.spec().maxBlockGasLimit());
+        as.adjustAvailable(from, Amount.of(1000, SEM));
+        as.adjustAvailable(to, Amount.of(1000, SEM));
+        ds.register(delegate, "abc".getBytes());
+
+        TransactionResult result = exec.execute(tx, as, ds, block, 0);
+        // calls to nonimplemented precompiled contracts just return success/empty
+        assertTrue(result.getCode().isSuccess());
+        assertArrayEquals(new byte[0], result.getReturnData());
+
+        // check if message is tampered
+        nonce = as.getAccount(from).getNonce();
+        timestamp = TimeUtil.currentTimeMillis();
+        message[0] = (byte) ((int) message[0] + 1 % 8);
+        data = Bytes.merge(message, publicKey, signature);
+
+        tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+
+        block = new SemuxBlock(
+                new BlockHeader(123, Bytes.random(20), Bytes.random(20), TimeUtil.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.spec().maxBlockGasLimit());
+        as.adjustAvailable(from, Amount.of(1000, SEM));
+        as.adjustAvailable(to, Amount.of(1000, SEM));
+        ds.register(delegate, "abc".getBytes());
+
+        result = exec.execute(tx, as, ds, block, 0);
+        // calls to nonimplemented precompiled contracts just return success/empty
+        assertTrue(result.getCode().isSuccess());
+        assertArrayEquals(new byte[0], result.getReturnData());
+
+        // check that invalid set of data is not a failure (since it should default to
+        // default calling of non-address
+        nonce = as.getAccount(from).getNonce();
+        timestamp = TimeUtil.currentTimeMillis();
+        message[0] = (byte) ((int) message[0] + 1 % 8);
+        data = Bytes.merge(message, publicKey); // no signature
+
+        tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx.sign(key);
+
+        block = new SemuxBlock(
+                new BlockHeader(123, Bytes.random(20), Bytes.random(20), TimeUtil.currentTimeMillis(),
+                        Bytes.random(20), Bytes.random(20), Bytes.random(20), Bytes.random(20)),
+                config.spec().maxBlockGasLimit());
+        as.adjustAvailable(from, Amount.of(1000, SEM));
+        as.adjustAvailable(to, Amount.of(1000, SEM));
+        ds.register(delegate, "abc".getBytes());
+
+        result = exec.execute(tx, as, ds, block, 0);
+
+        // call is still a success, but data is not empty
+        assertTrue(result.getCode().isSuccess());
+        assertArrayEquals(new byte[0], result.getReturnData());
+
     }
 }

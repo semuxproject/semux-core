@@ -6,9 +6,7 @@
  */
 package org.semux.core;
 
-import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
-import static org.semux.core.Fork.VIRTUAL_MACHINE;
-import static org.semux.core.Fork.VOTING_PRECOMPILED_UPGRADE;
+import static org.semux.core.Fork.*;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -715,6 +713,11 @@ public class BlockchainImpl implements Blockchain {
     }
 
     @Override
+    public boolean isEd25519ContractEnabled() {
+        return isForkActivated(ED25519_CONTRACT);
+    }
+
+    @Override
     public byte[] constructBlockHeaderDataField() {
         Set<Fork> set = new HashSet<>();
 
@@ -728,6 +731,9 @@ public class BlockchainImpl implements Blockchain {
 
         if (config.forkVotingPrecompiledUpgradeEnabled()) {
             addFork(set, VOTING_PRECOMPILED_UPGRADE);
+        }
+        if (config.forkEd25519ContractEnabled()) {
+            addFork(set, ED25519_CONTRACT);
         }
 
         return set.isEmpty() ? new BlockHeaderData().toBytes() : new BlockHeaderData(ForkSignalSet.of(set)).toBytes();
@@ -797,7 +803,7 @@ public class BlockchainImpl implements Blockchain {
 
             // [3] evaluate transactions
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore, isVMEnabled(),
-                    isVotingPrecompiledUpgraded());
+                    isVotingPrecompiledUpgraded(), isEd25519ContractEnabled());
             List<TransactionResult> results = transactionExecutor.execute(transactions, asTrack, dsTrack,
                     new SemuxBlock(block.getHeader(), config.spec().maxBlockGasLimit()),
                     0);
@@ -908,6 +914,10 @@ public class BlockchainImpl implements Blockchain {
         }
         if (config.forkVotingPrecompiledUpgradeEnabled()
                 && forks.activateFork(VOTING_PRECOMPILED_UPGRADE)) {
+            setActivatedForks(forks.getActivatedForks());
+        }
+        if (config.forkEd25519ContractEnabled()
+                && forks.activateFork(ED25519_CONTRACT)) {
             setActivatedForks(forks.getActivatedForks());
         }
     }

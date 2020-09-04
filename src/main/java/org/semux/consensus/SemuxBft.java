@@ -766,7 +766,7 @@ public class SemuxBft implements BftManager {
         final List<TransactionResult> includedResults = new ArrayList<>();
 
         TransactionExecutor exec = new TransactionExecutor(config, blockStore, chain.isVMEnabled(),
-                chain.isVotingPrecompiledUpgraded());
+                chain.isVotingPrecompiledUpgraded(), chain.isEd25519ContractEnabled());
         SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
         // only propose gas used up to configured block gas limit
@@ -852,7 +852,7 @@ public class SemuxBft implements BftManager {
 
             // [3] evaluate transactions
             TransactionExecutor transactionExecutor = new TransactionExecutor(config, blockStore, chain.isVMEnabled(),
-                    chain.isVotingPrecompiledUpgraded());
+                    chain.isVotingPrecompiledUpgraded(), chain.isEd25519ContractEnabled());
             List<TransactionResult> results = transactionExecutor.execute(transactions, asTrack, dsTrack,
                     new SemuxBlock(header, config.spec().maxBlockGasLimit()), 0);
             if (!block.validateResults(header, results)) {

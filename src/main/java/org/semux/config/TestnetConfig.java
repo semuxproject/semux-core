@@ -20,6 +20,7 @@ public class TestnetConfig extends AbstractConfig {
         this.forkUniformDistributionEnabled = true;
         this.forkVirtualMachineEnabled = true;
         this.forkVotingPrecompiledUpgradeEnabled = true;
+        this.forkEd25519ContractEnabled = true;
     }
 
     @Override

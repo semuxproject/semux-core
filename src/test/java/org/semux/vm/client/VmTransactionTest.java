@@ -77,7 +77,8 @@ public class VmTransactionTest {
      */
     @Test
     public void testCall() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CALL;
@@ -128,7 +129,8 @@ public class VmTransactionTest {
      */
     @Test
     public void testCreate() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CREATE;
@@ -190,7 +192,8 @@ public class VmTransactionTest {
     // }
     @Test
     public void testCreateAndCall() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CREATE;
@@ -241,7 +244,8 @@ public class VmTransactionTest {
     // }
     @Test
     public void testInternalTransferNotEnoughGas() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CREATE;
@@ -271,7 +275,8 @@ public class VmTransactionTest {
 
     @Test
     public void testInternalTransfer() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CREATE;
@@ -324,7 +329,8 @@ public class VmTransactionTest {
 
     @Test
     public void testTransferToContract() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CALL;
@@ -359,7 +365,8 @@ public class VmTransactionTest {
 
     @Test
     public void testTransferToContractOutOfGas() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key key = new Key();
 
         TransactionType type = TransactionType.CALL;
@@ -394,7 +401,8 @@ public class VmTransactionTest {
     // tx: 0x31d6c6c1c5e82b286b8179f4368543fb4595beb57ee1fd2a01dbbb22f6cca9f1
     @Test
     public void testCallFailureRevertBeforeFork() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, false);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, false,
+                true);
         Key sender = new Key();
 
         TransactionType type = TransactionType.CREATE;
@@ -438,7 +446,8 @@ public class VmTransactionTest {
 
     @Test
     public void testCallFailureRevertAfterFork() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key sender = new Key();
 
         TransactionType type = TransactionType.CREATE;
@@ -483,7 +492,8 @@ public class VmTransactionTest {
     // tx: 0x64fa2479faaeca0dcefbb57c2fc96f785336663f27726e8e7225e7dce3096452
     @Test
     public void testCreateFailure() {
-        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true);
+        TransactionExecutor exec = new TransactionExecutor(config, new SemuxBlockStore(chain), true, true,
+                true);
         Key sender = new Key();
 
         TransactionType type = TransactionType.CREATE;

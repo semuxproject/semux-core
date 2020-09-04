@@ -444,6 +444,13 @@ public interface Config {
      */
     boolean forkVotingPrecompiledUpgradeEnabled();
 
+    /**
+     * Returns whether ED25519_CONTRACT fork is enabled.
+     * 
+     * @return
+     */
+    boolean forkEd25519ContractEnabled();
+
     // =========================
     // Checkpoints
     // =========================
@@ -462,4 +469,5 @@ public interface Config {
      *         [block height]
      */
     Map<Fork, Long> manuallyActivatedForks();
+
 }

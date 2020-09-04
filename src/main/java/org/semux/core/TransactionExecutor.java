@@ -88,6 +88,7 @@ public class TransactionExecutor {
     private BlockStore blockStore;
     private boolean isVMEnabled;
     private boolean isVotingPrecompiledUpgraded;
+    private boolean isEd25519ContractEnabled;
 
     /**
      * Creates a new transaction executor.
@@ -95,11 +96,12 @@ public class TransactionExecutor {
      * @param config
      */
     public TransactionExecutor(Config config, BlockStore blockStore, boolean isVMEnabled,
-            boolean isVotingPrecompiledUpgraded) {
+            boolean isVotingPrecompiledUpgraded, boolean isEd25519ContractEnabled) {
         this.spec = config.spec();
         this.blockStore = blockStore;
         this.isVMEnabled = isVMEnabled;
         this.isVotingPrecompiledUpgraded = isVotingPrecompiledUpgraded;
+        this.isEd25519ContractEnabled = isEd25519ContractEnabled;
     }
 
     /**
@@ -319,6 +321,15 @@ public class TransactionExecutor {
             byte[] returnData = receipt.getReturnData();
 
             // NOTE: the following code is to simulate the behaviour of old clients
+            if (!isEd25519ContractEnabled) {
+                // Calling to a non existant precompiled contract just returns success/empty
+                //
+                if (DataWord.of(tx.getTo()).equals(DataWord.of(0x9))) {
+                    code = Code.SUCCESS;
+                    returnData = Bytes.EMPTY_BYTES;
+                    gasUsed = tx.getGas();
+                }
+            }
             if (!isVotingPrecompiledUpgraded) {
                 // the old GetVote and GetVotes precompiled contracts always fail
                 if (DataWord.of(tx.getTo()).equals(DataWord.of(102))

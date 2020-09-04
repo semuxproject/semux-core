@@ -10,9 +10,7 @@ import static org.semux.Network.DEVNET;
 import static org.semux.Network.MAINNET;
 import static org.semux.Network.TESTNET;
 import static org.semux.core.Amount.ZERO;
-import static org.semux.core.Fork.UNIFORM_DISTRIBUTION;
-import static org.semux.core.Fork.VIRTUAL_MACHINE;
-import static org.semux.core.Fork.VOTING_PRECOMPILED_UPGRADE;
+import static org.semux.core.Fork.*;
 import static org.semux.core.Unit.MILLI_SEM;
 import static org.semux.core.Unit.SEM;
 
@@ -156,6 +154,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     protected boolean forkUniformDistributionEnabled = false;
     protected boolean forkVirtualMachineEnabled = false;
     protected boolean forkVotingPrecompiledUpgradeEnabled = false;
+    protected boolean forkEd25519ContractEnabled = false;
 
     @Override
     public ChainSpec spec() {
@@ -295,15 +294,18 @@ public abstract class AbstractConfig implements Config, ChainSpec {
         periods[MAINNET.id()][UNIFORM_DISTRIBUTION.id()] = new long[] { 200_001L, 400_000L };
         periods[MAINNET.id()][VIRTUAL_MACHINE.id()] = new long[] { 1_500_001L, 1_700_000L };
         periods[MAINNET.id()][VOTING_PRECOMPILED_UPGRADE.id()] = new long[] { 1_600_001L, 1_800_000L };
+        periods[MAINNET.id()][ED25519_CONTRACT.id()] = new long[] { 2_800_804L, 3_000_000L };
 
         periods[TESTNET.id()][UNIFORM_DISTRIBUTION.id()] = new long[] { 1L, 200_000L };
         periods[TESTNET.id()][VIRTUAL_MACHINE.id()] = new long[] { 1L, 200_000L };
         periods[TESTNET.id()][VOTING_PRECOMPILED_UPGRADE.id()] = new long[] { 150_001L, 350_000L };
+        periods[MAINNET.id()][ED25519_CONTRACT.id()] = new long[] { 1_000_000L, 1_500_000L };
 
         // as soon as possible
         periods[DEVNET.id()][UNIFORM_DISTRIBUTION.id()] = new long[] { 1L, 200_000L };
         periods[DEVNET.id()][VIRTUAL_MACHINE.id()] = new long[] { 1L, 200_000L };
         periods[DEVNET.id()][VOTING_PRECOMPILED_UPGRADE.id()] = new long[] { 1, 200_000L };
+        periods[DEVNET.id()][ED25519_CONTRACT.id()] = new long[] { 1, 200_000L };
     }
 
     @Override
@@ -588,6 +590,11 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     @Override
     public boolean forkVotingPrecompiledUpgradeEnabled() {
         return forkVotingPrecompiledUpgradeEnabled;
+    }
+
+    @Override
+    public boolean forkEd25519ContractEnabled() {
+        return forkEd25519ContractEnabled;
     }
 
     protected void init() {
