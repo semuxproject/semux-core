@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2018 The Semux Developers
+ * Copyright (c) 2017-2020 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -59,7 +59,7 @@ public class VmTransactionTest {
 
     @Before
     public void prepare() {
-        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = Mockito.spy(new BlockchainImpl(config, temporaryDBFactory));
 
         as = chain.getAccountState();

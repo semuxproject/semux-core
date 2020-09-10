@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2018 The Semux Developers
+ * Copyright (c) 2017-2020 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
@@ -58,7 +58,7 @@ public class PrecompiledContractTest {
 
     @Before
     public void prepare() {
-        config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
         chain = spy(new BlockchainImpl(config, temporaryDBFactory));
         doReturn(true).when(chain).isForkActivated(any());
 

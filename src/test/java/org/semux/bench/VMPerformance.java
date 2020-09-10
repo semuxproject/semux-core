@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2018 The Semux Developers
+ * Copyright (c) 2017-2020 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -16,7 +16,7 @@ import java.util.Map;
 import org.semux.Network;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class VMPerformance {
     private static final Logger logger = LoggerFactory.getLogger(VMPerformance.class);
 
-    private static Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR) {
+    private static Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR) {
         @Override
         public Map<Fork, Long> manuallyActivatedForks() {
             return Collections.singletonMap(Fork.VIRTUAL_MACHINE, 0L);

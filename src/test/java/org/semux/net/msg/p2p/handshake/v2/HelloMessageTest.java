@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2018 The Semux Developers
+ * Copyright (c) 2017-2020 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.semux.config.Config;
 import org.semux.config.Constants;
-import org.semux.config.DevnetConfig;
+import org.semux.config.UnitTestnetConfig;
 import org.semux.crypto.Key;
 import org.semux.net.CapabilityTreeSet;
 import org.semux.net.Peer;
@@ -22,7 +22,7 @@ public class HelloMessageTest {
 
     @Test
     public void testCodec() {
-        Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+        Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
 
         Key key = new Key();
         String peerId = key.toAddressString();
