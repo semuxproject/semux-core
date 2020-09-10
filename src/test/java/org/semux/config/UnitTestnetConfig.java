@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2020 The Semux Developers
+ * Copyright (c) 2017-2018 The Semux Developers
  *
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
@@ -12,10 +12,21 @@ import java.util.Map;
 import org.semux.Network;
 import org.semux.core.Fork;
 
-public class TestnetConfig extends AbstractConfig {
+/**
+ * The unit tests were written with a specific configuration in mind, however
+ * the devnet config is changeable for users needs and to aid in local
+ * development
+ *
+ * So we introduce a new network configuration with no forks enabled and normal
+ * block times.
+ *
+ */
+public class UnitTestnetConfig extends AbstractConfig {
 
-    public TestnetConfig(String dataDir) {
-        super(dataDir, Network.TESTNET, Constants.TESTNET_VERSION);
+    public UnitTestnetConfig(String dataDir) {
+        super(dataDir, Network.DEVNET, Constants.DEVNET_VERSION);
+
+        this.netMaxInboundConnectionsPerIp = Integer.MAX_VALUE;
 
         this.forkUniformDistributionEnabled = true;
         this.forkVirtualMachineEnabled = true;
@@ -30,17 +41,5 @@ public class TestnetConfig extends AbstractConfig {
     @Override
     public Map<Fork, Long> manuallyActivatedForks() {
         return Collections.emptyMap();
-    }
-
-    /**
-     * Testnet maxes out at 10 validators to stop dead validators from breaking
-     * concensus
-     * 
-     * @param number
-     * @return
-     */
-    @Override
-    public int getNumberOfValidators(long number) {
-        return Math.min(10, super.getNumberOfValidators(number));
     }
 }

@@ -41,7 +41,7 @@ Run:
 
 ## Contribute
 
-Anyone is welcome to contribute to this open source project in the form of peer review, testing and patches. Please see the [contributing](./.github/contributing.md) guide for more details.
+Anyone is welcome to contribute to this open source project in the form of peer review, testing and patches. Please see the [contributing](./.github/CONTRIBUTING.md) guide for more details.
 
 If you find a bug, please submit it to [issues](https://github.com/semuxproject/semux-core/issues).
 
