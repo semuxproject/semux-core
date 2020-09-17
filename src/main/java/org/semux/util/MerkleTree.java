@@ -93,7 +93,7 @@ public class MerkleTree {
                 Node left = nodes.get(i);
                 if (i + 1 < nodes.size()) {
                     Node right = nodes.get(i + 1);
-                    list.add(new Node(Hash.h256(left.value, right.value), left, right));
+                    list.add(new Node(Hash.h256_s(left.value, right.value, null), left, right));
                 } else {
                     list.add(new Node(left.value, left, null));
                 }

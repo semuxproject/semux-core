@@ -392,11 +392,13 @@ public class BlockchainImpl implements Blockchain {
             Transaction tx = new Transaction(config.network(),
                     TransactionType.COINBASE,
                     block.getCoinbase(),
+                    Constants.COINBASE_KEY.toAddress(),
                     reward,
                     Amount.ZERO,
                     block.getNumber(),
                     block.getTimestamp(),
-                    Bytes.EMPTY_BYTES);
+                    Bytes.EMPTY_BYTES,
+                    isForkActivated(Fork.ED25519_CONTRACT));
             tx.sign(Constants.COINBASE_KEY);
             indexDB.put(Bytes.merge(TYPE_TRANSACTION_INDEX_BY_HASH, tx.getHash()), tx.toBytes());
             indexDB.put(Bytes.merge(TYPE_BLOCK_COINBASE_BY_NUMBER, Bytes.of(block.getNumber())), tx.getHash());
@@ -792,7 +794,7 @@ public class BlockchainImpl implements Blockchain {
             }
 
             // [2] check transactions
-            if (!block.validateTransactions(header, transactions, config.network())) {
+            if (!block.validateTransactions(header, transactions, config.network(), isForkActivated(Fork.ED25519_CONTRACT))) {
                 logger.error("Invalid transactions");
                 return false;
             }

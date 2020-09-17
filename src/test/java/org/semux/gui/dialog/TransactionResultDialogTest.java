@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.semux.Kernel;
 import org.semux.core.Amount;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionResult;
@@ -42,7 +43,8 @@ public class TransactionResultDialogTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testTransactionResult() {
-        kernelRule1.getKernel().start();
+    	Kernel kernel = kernelRule1.getKernel();
+        kernel.start();
 
         Key from = new Key();
         Key to = new Key();
@@ -53,8 +55,8 @@ public class TransactionResultDialogTest extends AssertJSwingJUnitTestCase {
         byte[] data = "some data".getBytes();
         long gas = 10_000;
         Amount gasPrice = Amount.of(10);
-        Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().network(), CREATE, to.toAddress(), value,
-                fee, nonce, now, data, gas, gasPrice).sign(from);
+        Transaction tx = new Transaction(kernel.getConfig().network(), CREATE, to.toAddress(), from.toAddress(),
+        		value, fee, nonce, now, data, gas, gasPrice, kernel.getConfig().forkEd25519ContractEnabled()).sign(from);
 
         TransactionResult result = new TransactionResult();
         result.setCode(TransactionResult.Code.FAILURE);

@@ -122,9 +122,10 @@ public class Native {
      * Computes the 256-bit hash. See {@link Hash#h256(byte[])}
      *
      * @param data
+     * @param salt (blake2b)
      * @return
      */
-    public static native byte[] h256(byte[] data);
+    public static native byte[] h256(byte[] data, byte[] salt);
 
     /**
      * Computes the 160-bit hash. See {@link Hash#h160(byte[])}

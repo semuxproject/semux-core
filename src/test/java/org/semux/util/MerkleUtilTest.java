@@ -33,8 +33,12 @@ public class MerkleUtilTest {
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.random(128);
-        Transaction tx1 = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(new Key());
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce, timestamp, data).sign(new Key());
+        
+        Key key1 = new Key();
+        Key key2 = new Key();
+        
+        Transaction tx1 = new Transaction(network, type, to, key1.toAddress(), value, fee, nonce, timestamp, data, true).sign(key1);
+        Transaction tx2 = new Transaction(network, type, to, key2.toAddress(), value, fee, nonce, timestamp, data, true).sign(key2);
         byte[] b1 = tx1.getHash();
         byte[] b2 = tx2.getHash();
         byte[] root = new MerkleTree(Arrays.asList(b1, b2)).getRootHash();
@@ -51,8 +55,8 @@ public class MerkleUtilTest {
         res1.setReturnData(Bytes.random(20));
         res2.setReturnData(Bytes.random(20));
 
-        byte[] b1 = Hash.h256(res1.toBytesForMerkle());
-        byte[] b2 = Hash.h256(res2.toBytesForMerkle());
+        byte[] b1 = Hash.h256_s(res1.toBytesForMerkle(), null);
+        byte[] b2 = Hash.h256_s(res2.toBytesForMerkle(), null);
         byte[] root = new MerkleTree(Arrays.asList(b1, b2)).getRootHash();
 
         byte[] merkle = MerkleUtil.computeResultsRoot(Arrays.asList(res1, res2));

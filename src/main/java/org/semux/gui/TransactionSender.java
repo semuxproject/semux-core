@@ -9,6 +9,7 @@ package org.semux.gui;
 import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.core.Amount;
+import org.semux.core.Fork;
 import org.semux.core.PendingManager;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
@@ -30,7 +31,7 @@ public class TransactionSender {
         byte[] from = account.getKey().toAddress();
         long nonce = pendingMgr.getNonce(from);
         long timestamp = TimeUtil.currentTimeMillis();
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, from, value, fee, nonce, timestamp, data, gas, gasPrice, kernel.getBlockchain().isForkActivated(Fork.ED25519_CONTRACT));
         tx.sign(account.getKey());
 
         return pendingMgr.addTransactionSync(tx);

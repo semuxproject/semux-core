@@ -265,10 +265,12 @@ public class SemuxBftTest {
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
+                from.toAddress(),
                 Amount.of(10, SEM),
                 kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 nonce,
                 time,
-                Bytes.EMPTY_BYTES).sign(from);
+                Bytes.EMPTY_BYTES,
+                kernelRule.getKernel().getConfig().forkEd25519ContractEnabled()).sign(from);
     }
 }

@@ -49,6 +49,7 @@ public class DevnetConfig extends AbstractConfig {
         forks.put(Fork.UNIFORM_DISTRIBUTION, 1l);
         forks.put(Fork.VIRTUAL_MACHINE, 1l);
         forks.put(Fork.VOTING_PRECOMPILED_UPGRADE, 1l);
+        forks.put(Fork.ED25519_CONTRACT, 1l);
 
         return forks;
     }

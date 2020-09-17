@@ -54,12 +54,12 @@ public class NativeTest {
 
     @Test(expected = CryptoException.class)
     public void testH256Null() {
-        Native.h256(null);
+        Native.h256(null, null);
     }
 
     @Test
     public void testH256() {
-        assertArrayEquals(H256, Native.h256(MESSAGE));
+        assertArrayEquals(H256, Native.h256(MESSAGE, null));
     }
 
     @Test(expected = CryptoException.class)
@@ -335,7 +335,7 @@ public class NativeTest {
 
     @Test
     public void testCompatibility() {
-        assertArrayEquals(Native.h256(MESSAGE), Hash.h256(MESSAGE));
+        assertArrayEquals(Native.h256(MESSAGE, null), Hash.h256_s(MESSAGE, null));
         assertArrayEquals(Native.h160(MESSAGE), Hash.h160(MESSAGE));
 
         Key key = new Key();
@@ -354,13 +354,13 @@ public class NativeTest {
 
         // warm up
         for (int i = 0; i < repeat / 10; i++) {
-            Hash.h256(data);
+            Hash.h256_s(data, null);
         }
 
         // native
         Instant start = Instant.now();
         for (int i = 0; i < repeat; i++) {
-            Native.h256(data);
+            Native.h256(data, null);
         }
         Instant end = Instant.now();
         logger.debug("H256 Native: " + Duration.between(start, end).toMillis() + "ms");
@@ -368,12 +368,12 @@ public class NativeTest {
         // java (JIT)
         start = Instant.now();
         for (int i = 0; i < repeat; i++) {
-            Hash.h256(data);
+            Hash.h256_s(data, null);
         }
         end = Instant.now();
         logger.debug("H256 Java: " + Duration.between(start, end).toMillis() + "ms");
 
-        assertArrayEquals(Hash.h256(data), Native.h256(data));
+        assertArrayEquals(Hash.h256_s(data, null), Native.h256(data, null));
     }
 
     @Test
@@ -402,7 +402,7 @@ public class NativeTest {
         end = Instant.now();
         logger.debug("H160 Java: " + Duration.between(start, end).toMillis() + "ms");
 
-        assertArrayEquals(Hash.h256(data), Native.h256(data));
+        assertArrayEquals(Hash.h256_s(data, null), Native.h256(data, null));
     }
 
     @Test

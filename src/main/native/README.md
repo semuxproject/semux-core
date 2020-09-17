@@ -25,6 +25,16 @@ Steps to build on Debian/Ubuntu based distributions with a x86_64 machine:
 ```
 sudo apt install cmake automake autoconf gcc gcc-aarch64-linux-gnu gcc-mingw-w64 binutils binutils-aarch64-linux-gnu binutils-mingw-w64
 
+clone ed25519-donna:
+cd ../../native/crypto
+git clone https://github.com/floodyberry/ed25519-donna
+
+clone libsodium:
+cd ../../native/crypto
+git clone https://github.com/jedisct1/libsodium
+cd ./libsodium
+git checkout 4f5e89fa84ce1d178a6765b8b46f2b6f91216677
+
 mkdir build && cd build
 cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-x86_64.cmake ../
 make -j$(nproc)

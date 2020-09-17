@@ -78,7 +78,7 @@ public class VMPerformance {
                 byte[] data = Bytes.merge(Hex.decode0x("9c438a3d"), Bytes.of(j)); // sha1()
                 long gas = 100_000L;
                 Amount gasPrice = Amount.of(10);
-                Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasPrice)
+                Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled())
                         .sign(key);
                 txs.add(tx);
                 res.add(new TransactionResult());

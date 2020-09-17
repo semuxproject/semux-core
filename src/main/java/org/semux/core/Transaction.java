@@ -20,8 +20,11 @@ import org.semux.crypto.Key;
 import org.semux.crypto.Key.Signature;
 import org.semux.util.SimpleDecoder;
 import org.semux.util.SimpleEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Transaction {
+	private static final Logger logger = LoggerFactory.getLogger(Transaction.class);
 
     private final byte networkId;
 
@@ -54,6 +57,7 @@ public class Transaction {
      * @param network
      * @param type
      * @param to
+     * @param from
      * @param value
      * @param fee
      * @param nonce
@@ -61,9 +65,10 @@ public class Transaction {
      * @param data
      * @param gas
      * @param gasPrice
+     * @param isFixTxHash
      */
-    public Transaction(Network network, TransactionType type, byte[] to, Amount value, Amount fee, long nonce,
-            long timestamp, byte[] data, long gas, Amount gasPrice) {
+    public Transaction(Network network, TransactionType type, byte[] to, byte[] from, Amount value, Amount fee, long nonce,
+            long timestamp, byte[] data, long gas, Amount gasPrice, boolean isFixTxHash) {
         this.networkId = network.id();
         this.type = type;
         this.to = to;
@@ -90,7 +95,9 @@ public class Transaction {
             enc.writeAmount(gasPrice);
         }
         this.encoded = enc.toBytes();
-        this.hash = Hash.h256(encoded);
+        this.hash = Hash.h256_s(encoded, isFixTxHash ? from : null);
+        
+        logger.info("!!! isFixTxHash = " + isFixTxHash);
     }
 
     /**
@@ -99,11 +106,14 @@ public class Transaction {
      * @param hash
      * @param encoded
      * @param signature
+     * @param isFixTxHash
      */
-    private Transaction(byte[] hash, byte[] encoded, byte[] signature) {
+    private Transaction(byte[] hash, byte[] encoded, byte[] signature, boolean isFixTxHash) {
         this.hash = hash;
+        
+        this.signature = Signature.fromBytes(signature);
 
-        Transaction decodedTx = fromEncoded(encoded);
+        Transaction decodedTx = fromEncoded(encoded, this.signature.getAddress(), isFixTxHash);
         this.networkId = decodedTx.networkId;
         this.type = decodedTx.type;
         this.to = decodedTx.to;
@@ -117,12 +127,13 @@ public class Transaction {
         this.gasPrice = decodedTx.gasPrice;
 
         this.encoded = encoded;
-        this.signature = Signature.fromBytes(signature);
+        
+        logger.info("isFixTxHash = " + isFixTxHash);
     }
 
-    public Transaction(Network network, TransactionType type, byte[] toAddress, Amount value, Amount fee, long nonce,
-            long timestamp, byte[] data) {
-        this(network, type, toAddress, value, fee, nonce, timestamp, data, 0, Amount.ZERO);
+    public Transaction(Network network, TransactionType type, byte[] toAddress, byte[] fromAddress, Amount value, Amount fee, long nonce,
+            long timestamp, byte[] data, boolean isFixTxHash) {
+        this(network, type, toAddress, fromAddress, value, fee, nonce, timestamp, data, 0, Amount.ZERO, isFixTxHash);
     }
 
     public boolean isVMTransaction() {
@@ -154,9 +165,13 @@ public class Transaction {
      *            Whether to verify the transaction signature or not. This is useful
      *            when there are multiple transaction signatures that can be
      *            verified in batch for performance reason.
+     * @param isFixTxHash
      * @return true if success, otherwise false
      */
-    public boolean validate(Network network, boolean verifySignature) {
+    private boolean validate(Network network, boolean verifySignature, boolean isFixTxHash) {
+    	
+    	logger.info("isFixTxHash = " + isFixTxHash);
+    	
         return hash != null && hash.length == Hash.HASH_LEN
                 && networkId == network.id()
                 && type != null
@@ -171,7 +186,7 @@ public class Transaction {
                 && encoded != null
                 && signature != null && !Arrays.equals(signature.getAddress(), EMPTY_ADDRESS)
 
-                && Arrays.equals(Hash.h256(encoded), hash)
+                && Arrays.equals(Hash.h256_s(encoded, isFixTxHash ? signature.getAddress() : null), hash)
                 && (!verifySignature || Key.verify(hash, signature))
 
                 // The coinbase key is publicly available. People can use it for transactions.
@@ -182,8 +197,12 @@ public class Transaction {
                                 && !Arrays.equals(to, Constants.COINBASE_ADDRESS)));
     }
 
-    public boolean validate(Network network) {
-        return validate(network, true);
+    public boolean validate_verify_sign(Network network, boolean isFixTxHash) {
+        return validate(network, true, isFixTxHash);
+    }
+    
+    public boolean validate_no_verify_sign(Network network, boolean isFixTxHash) {
+        return validate(network, false, isFixTxHash);
     }
 
     /**
@@ -293,9 +312,14 @@ public class Transaction {
      *
      * @param encoded
      *            the bytes of encoded transaction
+     * @param from
+     * @param isFixTxHash
      * @return the decoded transaction
      */
-    public static Transaction fromEncoded(byte[] encoded) {
+    public static Transaction fromEncoded(byte[] encoded, byte[] from, boolean isFixTxHash) {
+    	
+        System.out.println("isFixTxHash = " + isFixTxHash);
+    	
         SimpleDecoder decoder = new SimpleDecoder(encoded);
 
         byte networkId = decoder.readByte();
@@ -316,8 +340,8 @@ public class Transaction {
             gasPrice = decoder.readAmount();
         }
 
-        return new Transaction(Network.of(networkId), transactionType, to, value, fee, nonce, timestamp, data,
-                gas, gasPrice);
+        return new Transaction(Network.of(networkId), transactionType, to, from, value, fee, nonce, timestamp, data,
+                gas, gasPrice, isFixTxHash);
     }
 
     /**
@@ -347,6 +371,7 @@ public class Transaction {
      * Parses from a byte array.
      *
      * @param bytes
+     * @param isFixTxHash
      * @return
      */
     public static Transaction fromBytes(byte[] bytes) {
@@ -355,7 +380,7 @@ public class Transaction {
         byte[] encoded = dec.readBytes();
         byte[] signature = dec.readBytes();
 
-        return new Transaction(hash, encoded, signature);
+        return new Transaction(hash, encoded, signature, false);
     }
 
     /**

@@ -38,11 +38,18 @@ public class BlockTest {
     private long timestamp = TimeUtil.currentTimeMillis();
     private byte[] data = Bytes.of("data");
 
-    private Transaction tx = new Transaction(Network.DEVNET, TransactionType.TRANSFER, Bytes.random(20), ZERO,
-            config.spec().minTransactionFee(),
-            1, TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES).sign(new Key());
+    private Transaction NewTx ()
+    {
+    	Key key = new Key();
+    	
+    	return new Transaction(Network.DEVNET, TransactionType.TRANSFER, Bytes.random(20), key.toAddress(), ZERO,
+    			config.spec().minTransactionFee(),
+    			1, TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES,
+    			config.forkEd25519ContractEnabled()).sign(key);
+    }
+    	
     private TransactionResult res = new TransactionResult();
-    private List<Transaction> transactions = Collections.singletonList(tx);
+    private List<Transaction> transactions = Collections.singletonList(NewTx());
     private List<TransactionResult> results = Collections.singletonList(res);
     private int view = 1;
     private List<Signature> votes = new ArrayList<>();
@@ -107,7 +114,7 @@ public class BlockTest {
         Integer index = indexes.getRight().get(0);
         SimpleDecoder dec = new SimpleDecoder(block.getEncodedTransactions(), index);
         Transaction tx2 = Transaction.fromBytes(dec.readBytes());
-        assertArrayEquals(tx.getHash(), tx2.getHash());
+        assertArrayEquals(NewTx().getHash(), tx2.getHash());
     }
 
     @Test
@@ -119,7 +126,7 @@ public class BlockTest {
         Block block = new Block(header, transactions);
 
         assertTrue(block.validateHeader(header, previousHeader));
-        assertTrue(block.validateTransactions(previousHeader, transactions, Network.DEVNET));
+        assertTrue(block.validateTransactions(previousHeader, transactions, Network.DEVNET, config.forkEd25519ContractEnabled()));
         assertTrue(block.validateResults(previousHeader, results));
     }
 
@@ -133,7 +140,7 @@ public class BlockTest {
 
         assertTrue(block.validateHeader(header, previousHeader));
         assertTrue(block.validateTransactions(previousHeader, Collections.singleton(transactions.get(0)), transactions,
-                Network.DEVNET));
+                Network.DEVNET, config.forkEd25519ContractEnabled()));
         assertTrue(block.validateResults(previousHeader, results));
     }
 }

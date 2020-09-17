@@ -59,19 +59,25 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
-    public void testTransactions() {
+    public void testTransactions() 
+    {
+    	KernelMock kernel = kernelRule.getKernel();
+    	kernel.start();
+    	
         Key key = new Key();
         Amount $1 = Amount.of(1);
         WalletAccount acc = spy(new WalletAccount(key, new Account(key.toAddress(), $1, $1, 1), null));
 
-        Transaction tx = new Transaction(kernelRule.getKernel().getConfig().network(),
+        Transaction tx = new Transaction(kernel.getConfig().network(),
                 TransactionType.TRANSFER,
                 Bytes.random(Key.ADDRESS_LEN),
+                key.toAddress(),
                 Amount.of(1, SEM),
                 Amount.of(10, MILLI_SEM),
                 0,
                 TimeUtil.currentTimeMillis(),
-                Bytes.EMPTY_BYTES);
+                Bytes.EMPTY_BYTES,
+                kernel.getConfig().forkEd25519ContractEnabled());
         tx.sign(new Key());
         acc.setTransactions(Collections.singletonList(tx));
 
@@ -79,7 +85,7 @@ public class TransactionsPanelTest extends AssertJSwingJUnitTestCase {
         when(walletModel.getAccounts()).thenReturn(Collections.singletonList(acc));
 
         // mock kernel
-        KernelMock kernelMock = spy(kernelRule.getKernel());
+        KernelMock kernelMock = spy(kernel);
         Blockchain chain = mock(Blockchain.class);
         DelegateState ds = mock(DelegateState.class);
         PendingManager pendingManager = mock(PendingManager.class);

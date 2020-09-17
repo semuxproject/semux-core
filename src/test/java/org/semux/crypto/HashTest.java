@@ -24,7 +24,7 @@ public class HashTest {
     @Test
     public void testEmptyHash() {
         byte[] x = new byte[0];
-        byte[] hash = Hash.h256(x);
+        byte[] hash = Hash.h256_s(x, null);
 
         logger.info("Hash of empty byte array = {}", Hex.encode(hash));
     }
@@ -32,7 +32,7 @@ public class HashTest {
     @Test
     public void testH256() {
         byte[] raw = Bytes.of(msg);
-        byte[] hash = Hash.h256(raw);
+        byte[] hash = Hash.h256_s(raw, null);
 
         assertEquals(msgBlake2b, Hex.encode(hash));
     }
@@ -41,7 +41,7 @@ public class HashTest {
     public void testH256Merge() {
         byte[] raw1 = Bytes.of(msg.substring(0, 1));
         byte[] raw2 = Bytes.of(msg.substring(1));
-        byte[] hash = Hash.h256(raw1, raw2);
+        byte[] hash = Hash.h256_s(raw1, raw2, null);
 
         assertEquals(msgBlake2b, Hex.encode(hash));
     }

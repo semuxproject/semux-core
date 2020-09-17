@@ -29,9 +29,11 @@ public class TransactionMessageTest {
         long nonce = 1;
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.of("data");
+        
+        Key key = new Key();
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
-        tx.sign(new Key());
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, timestamp, data, true);
+        tx.sign(key);
 
         TransactionMessage msg = new TransactionMessage(tx);
         TransactionMessage msg2 = new TransactionMessage(msg.getBody());

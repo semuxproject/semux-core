@@ -252,7 +252,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
             return validators.get(getUniformDistPrimaryValidatorNumber(validators.size(), height, view));
         } else {
             byte[] key = Bytes.merge(Bytes.of(height), Bytes.of(view));
-            return validators.get((Hash.h256(key)[0] & 0xff) % validators.size());
+            return validators.get((Hash.h256_s(key, null)[0] & 0xff) % validators.size());
         }
     }
 

@@ -151,10 +151,11 @@ public class Block {
      * @param header
      * @param transactions
      * @param network
+     * @param isFixTxHash
      * @return
      */
-    public boolean validateTransactions(BlockHeader header, List<Transaction> transactions, Network network) {
-        return validateTransactions(header, transactions, transactions, network);
+    public boolean validateTransactions(BlockHeader header, List<Transaction> transactions, Network network, boolean isFixTxHash) {
+        return validateTransactions(header, transactions, transactions, network, isFixTxHash);
     }
 
     /**
@@ -169,18 +170,19 @@ public class Block {
      *            all transactions within the block
      * @param network
      *            network
+     * @param isFixTxHash
      * @return
      */
     public boolean validateTransactions(BlockHeader header, Collection<Transaction> unvalidatedTransactions,
-            List<Transaction> allTransactions, Network network) {
+            List<Transaction> allTransactions, Network network, boolean isFixTxHash) {
 
         // validate transactions
         if (!Key.isVerifyBatchSupported() || unvalidatedTransactions.size() < 3) {
-            if (!unvalidatedTransactions.parallelStream().allMatch(tx -> tx.validate(network))) {
+            if (!unvalidatedTransactions.parallelStream().allMatch(tx -> tx.validate_verify_sign(network, isFixTxHash))) {
                 return false;
             }
         } else {
-            if (!unvalidatedTransactions.parallelStream().allMatch(tx -> tx.validate(network, false))) {
+            if (!unvalidatedTransactions.parallelStream().allMatch(tx -> tx.validate_no_verify_sign(network, isFixTxHash))) {
                 return false;
             }
 
@@ -460,6 +462,7 @@ public class Block {
      *            Serialized transaction results
      * @param v
      *            Serialized votes
+     * @param isFixTxHash
      * @return
      */
     public static Block fromComponents(byte[] h, byte[] t, byte[] r, byte[] v) {

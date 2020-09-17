@@ -72,14 +72,14 @@ public class CorePerformanceTest {
             long timestamp = TimeUtil.currentTimeMillis();
             byte[] data = Bytes.random(16);
 
-            Transaction tx = new Transaction(Network.DEVNET, type, to, value, fee, nonce, timestamp, data);
+            Transaction tx = new Transaction(Network.DEVNET, type, to, key.toAddress(), value, fee, nonce, timestamp, data, config.forkEd25519ContractEnabled());
             tx.sign(key);
             txs.add(tx);
         }
 
         long t1 = System.nanoTime();
         for (Transaction tx : txs) {
-            assertTrue(tx.validate(Network.DEVNET));
+            assertTrue(tx.validate_verify_sign(Network.DEVNET, config.forkEd25519ContractEnabled()));
         }
         long t2 = System.nanoTime();
         logger.info("Perf_transaction_1: {} μs/tx", (t2 - t1) / 1_000 / repeat);

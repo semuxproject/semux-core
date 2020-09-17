@@ -40,7 +40,7 @@ public class MerkleUtil {
     public static byte[] computeResultsRoot(List<TransactionResult> results) {
         List<byte[]> hashes = new ArrayList<>();
         for (TransactionResult tx : results) {
-            hashes.add(Hash.h256(tx.toBytesForMerkle()));
+            hashes.add(Hash.h256_s(tx.toBytesForMerkle(), null));
         }
         return new MerkleTree(hashes).getRootHash();
     }

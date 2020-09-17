@@ -19,6 +19,7 @@ import org.semux.Kernel;
 import org.semux.core.Amount;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
+import org.semux.util.Bytes;
 
 public class TransactionBuilderTest {
 
@@ -41,7 +42,7 @@ public class TransactionBuilderTest {
                 .withValue("6")
                 .withNonce("7")
                 .withFee("8")
-                .buildUnsigned();
+                .buildUnsigned(Bytes.random(20));
         assertEquals(Amount.of(6), tx.getValue());
         assertEquals(7L, tx.getNonce());
     }

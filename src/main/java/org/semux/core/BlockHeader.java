@@ -71,7 +71,7 @@ public class BlockHeader {
         enc.writeBytes(stateRoot);
         enc.writeBytes(data);
         this.encoded = enc.toBytes();
-        this.hash = Hash.h256(encoded);
+        this.hash = Hash.h256_s(encoded, null);
     }
 
     /**
@@ -112,7 +112,7 @@ public class BlockHeader {
                 && stateRoot != null && Arrays.equals(Bytes.EMPTY_HASH, stateRoot) // RESERVED FOR VM
                 && data != null && data.length <= BlockHeaderData.MAX_SIZE
                 && encoded != null
-                && Arrays.equals(Hash.h256(encoded), hash);
+                && Arrays.equals(Hash.h256_s(encoded, null), hash);
     }
 
     public byte[] getHash() {

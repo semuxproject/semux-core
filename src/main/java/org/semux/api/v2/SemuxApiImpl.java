@@ -70,6 +70,7 @@ import org.semux.core.Amount;
 import org.semux.core.Block;
 import org.semux.core.Blockchain;
 import org.semux.core.BlockchainImpl;
+import org.semux.core.Fork;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
@@ -167,7 +168,9 @@ public final class SemuxApiImpl implements SemuxApi {
                     .withData(data)
                     .withGas(gas)
                     .withGasPrice(gasPrice);
-            Transaction transaction = transactionBuilder.buildUnsigned();
+                       
+            /*We can use TO address instead FROM address, only if transaction will be used for ComposeRawTransactionResponse*/
+            Transaction transaction = transactionBuilder.buildUnsigned(transactionBuilder.To());
 
             ComposeRawTransactionResponse resp = new ComposeRawTransactionResponse();
             resp.setResult(Hex.encode0x(transaction.getEncoded()));
@@ -662,7 +665,7 @@ public final class SemuxApiImpl implements SemuxApi {
                 return badRequest("Address doesn't belong to this wallet.");
             }
 
-            Transaction tx = Transaction.fromEncoded(txBytes).sign(signerKey);
+            Transaction tx = Transaction.fromEncoded(txBytes, signerKey.toAddress(), kernel.getBlockchain().isForkActivated(Fork.ED25519_CONTRACT)).sign(signerKey);
 
             SignRawTransactionResponse resp = new SignRawTransactionResponse();
             resp.setResult(Hex.encode0x(tx.toBytes()));

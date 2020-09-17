@@ -9,6 +9,7 @@ package org.semux.api.util;
 import org.semux.Kernel;
 import org.semux.Network;
 import org.semux.core.Amount;
+import org.semux.core.Fork;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.CryptoException;
@@ -218,7 +219,7 @@ public class TransactionBuilder {
         return this;
     }
 
-    public Transaction buildUnsigned() {
+    public Transaction buildUnsigned(byte[] from) {
         Network network = (this.network != null) ? this.network : kernel.getConfig().network();
 
         TransactionType type = this.type;
@@ -293,7 +294,7 @@ public class TransactionBuilder {
             }
         }
 
-        return new Transaction(network, type, to, value, fee, nonce, timestamp, data, gas, gasPrice);
+        return new Transaction(network, type, to, from, value, fee, nonce, timestamp, data, gas, gasPrice, kernel.getBlockchain().isForkActivated(Fork.ED25519_CONTRACT));
     }
 
     public Transaction buildSigned() {
@@ -301,6 +302,11 @@ public class TransactionBuilder {
             throw new IllegalArgumentException("The sender is not specified");
         }
 
-        return buildUnsigned().sign(account);
+        return buildUnsigned(account.toAddress()).sign(account);
+    }
+    
+    public byte[] To ()
+    {
+    	return to;
     }
 }

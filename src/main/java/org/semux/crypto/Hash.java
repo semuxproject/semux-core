@@ -28,16 +28,19 @@ public class Hash {
      * Generate the 256-bit hash.
      *
      * @param input
+     * @param salt
      * @return
      */
-    public static byte[] h256(byte[] input) {
+    public static byte[] h256_s(byte[] input, byte[] salt) {
 
         if (Native.isEnabled()) {
-            return Native.h256(input);
+            return Native.h256(input, salt);
         } else {
             try {
                 MessageDigest digest = MessageDigest.getInstance(Constants.HASH_ALGORITHM);
-                return digest.digest(input);
+                digest.update(input);
+                digest.update(salt);
+                return digest.digest();
             } catch (Exception e) {
                 throw new CryptoException(e);
             }
@@ -49,14 +52,15 @@ public class Hash {
      *
      * @param one
      * @param two
+     * @param salt
      * @return
      */
-    public static byte[] h256(byte[] one, byte[] two) {
+    public static byte[] h256_s(byte[] one, byte[] two, byte[] salt) {
         byte[] all = new byte[one.length + two.length];
         System.arraycopy(one, 0, all, 0, one.length);
         System.arraycopy(two, 0, all, one.length, two.length);
 
-        return Hash.h256(all);
+        return Hash.h256_s(all, null);
     }
 
     /**
@@ -70,7 +74,7 @@ public class Hash {
             return Native.h160(input);
         } else {
             try {
-                byte[] h256 = h256(input);
+                byte[] h256 = h256_s(input, null);
 
                 RIPEMD160Digest digest = new RIPEMD160Digest();
                 digest.update(h256, 0, h256.length);

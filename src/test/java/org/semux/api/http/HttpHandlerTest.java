@@ -32,6 +32,7 @@ import org.semux.api.ApiVersion;
 import org.semux.api.SemuxApiService;
 import org.semux.config.Config;
 import org.semux.core.Amount;
+import org.semux.core.Fork;
 import org.semux.core.Transaction;
 import org.semux.core.TransactionType;
 import org.semux.crypto.Hex;
@@ -151,14 +152,19 @@ public class HttpHandlerTest {
     @Test
     public void testGETBigData() throws IOException {
         Config config = kernelRule.getKernel().getConfig();
+        
+        Key key = new Key();
+        
+        final boolean isFixTxHashActivated = kernelRule.getKernel().getBlockchain().isForkActivated(Fork.ED25519_CONTRACT);
+        
         Transaction tx = new Transaction(config.network(),
-                TransactionType.CALL, Bytes.random(20),
+                TransactionType.CALL, Bytes.random(20)/*to*/, key.toAddress()/*from*/,
                 Amount.ZERO, Amount.ZERO, 0,
                 TimeUtil.currentTimeMillis(),
                 new byte[config.spec().maxTransactionDataSize(TransactionType.CALL)],
-                5_000_000L, Amount.of(100));
-        tx.sign(new Key());
-        assertTrue(tx.validate(config.network()));
+                5_000_000L, Amount.of(100), isFixTxHashActivated);
+        tx.sign(key);
+        assertTrue(tx.validate_verify_sign(config.network(), isFixTxHashActivated));
 
         URL url = new URL(
                 "http://" + ip + ":" + port + "/broadcast-raw-transactions?raw=" + Hex.encode0x(tx.toBytes()));

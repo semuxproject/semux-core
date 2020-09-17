@@ -41,8 +41,9 @@ public class ProposalTest {
         long timestamp = TimeUtil.currentTimeMillis();
         byte[] data = Bytes.of("data");
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
-        tx.sign(new Key());
+        Key key1 = new Key();
+        Transaction tx = new Transaction(network, type, to, key1.toAddress(), value, fee, nonce, timestamp, data, true);
+        tx.sign(key1);
         TransactionResult res = new TransactionResult();
 
         long height = Long.MAX_VALUE;

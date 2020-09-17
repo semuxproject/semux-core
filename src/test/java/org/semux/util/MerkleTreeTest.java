@@ -47,7 +47,7 @@ public class MerkleTreeTest {
 
     @Test
     public void testTwoElements() {
-        byte[] hash12 = Hash.h256(hash1, hash2);
+        byte[] hash12 = Hash.h256_s(hash1, hash2, null);
 
         MerkleTree tree = new MerkleTree(Arrays.asList(hash1, hash2));
         assertEquals(2, tree.size());
@@ -61,9 +61,9 @@ public class MerkleTreeTest {
 
     @Test
     public void testThreeElements() {
-        byte[] hash12 = Hash.h256(hash1, hash2);
+        byte[] hash12 = Hash.h256_s(hash1, hash2, null);
         byte[] hash33 = hash3;
-        byte[] hash1233 = Hash.h256(hash12, hash33);
+        byte[] hash1233 = Hash.h256_s(hash12, hash33, null);
 
         MerkleTree tree = new MerkleTree(Arrays.asList(hash1, hash2, hash3));
         assertEquals(3, tree.size());

@@ -53,11 +53,13 @@ public class BlockchainImportTest {
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
+                from1.toAddress(),
                 Amount.of(10, SEM),
                 kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 0,
                 time,
-                Bytes.EMPTY_BYTES).sign(from1);
+                Bytes.EMPTY_BYTES,
+                kernelRule.getKernel().getConfig().forkEd25519ContractEnabled()).sign(from1);
         kernelRule.getKernel().setBlockchain(new BlockchainImpl(kernelRule.getKernel().getConfig(), temporaryDBRule));
         kernelRule.getKernel().getBlockchain().getAccountState().adjustAvailable(from1.toAddress(), Amount.of(
                 1000, SEM));
@@ -72,11 +74,13 @@ public class BlockchainImportTest {
                 kernelRule.getKernel().getConfig().network(),
                 TransactionType.TRANSFER,
                 to.toAddress(),
+                from2.toAddress(),
                 Amount.of(10, SEM),
                 kernelRule.getKernel().getConfig().spec().minTransactionFee(),
                 0,
                 time,
-                Bytes.EMPTY_BYTES).sign(from2);
+                Bytes.EMPTY_BYTES,
+                kernelRule.getKernel().getConfig().forkEd25519ContractEnabled()).sign(from2);
         Block block2 = kernelRule.createBlock(Collections.singletonList(tx2));
 
         // this test case is valid if and only if tx1 and tx2 have the same tx hash

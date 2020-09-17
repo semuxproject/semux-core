@@ -49,7 +49,7 @@ public class WalletVersionTest {
     }
 
     private void writeVersion1Wallet(List<Key> accounts, File file, String password) throws IOException {
-        byte[] key = Hash.h256(Bytes.of(password));
+        byte[] key = Hash.h256_s(Bytes.of(password), null);
 
         // write a version 1 wallet
         SimpleEncoder enc = new SimpleEncoder();

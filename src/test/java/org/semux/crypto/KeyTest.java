@@ -51,7 +51,7 @@ public class KeyTest {
     public void testMalleability() {
         Key key = new Key();
         byte[] data = Bytes.of("test");
-        byte[] hash = Hash.h256(data);
+        byte[] hash = Hash.h256_s(data, null);
 
         Signature sig = key.sign(hash);
         assertTrue(Key.verify(hash, sig));
@@ -93,7 +93,7 @@ public class KeyTest {
         Key key = new Key();
         byte[] data = Bytes.of("test");
 
-        byte[] hash = Hash.h256(data);
+        byte[] hash = Hash.h256_s(data, null);
         byte[] sig = key.sign(hash).toBytes();
 
         assertEquals(Signature.LENGTH, sig.length);
@@ -116,7 +116,7 @@ public class KeyTest {
     @Test
     public void testInvalidSignature() throws SignatureException {
         byte[] data = Bytes.of("test");
-        byte[] hash = Hash.h256(data);
+        byte[] hash = Hash.h256_s(data, null);
 
         assertFalse(Key.verify(hash, Bytes.random(20)));
         assertFalse(Key.verify(hash, Bytes.random(Signature.LENGTH)));
@@ -128,7 +128,7 @@ public class KeyTest {
         Key key = new Key();
         byte[] data = Bytes.of("test");
 
-        byte[] hash = Hash.h256(data);
+        byte[] hash = Hash.h256_s(data, null);
         byte[] sig = key.sign(hash).toBytes();
 
         logger.info("signature size: {} B, {} GB per year", sig.length,

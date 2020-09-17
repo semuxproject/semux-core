@@ -82,8 +82,9 @@ public class PendingManagerTest {
     public void testGetTransaction() throws InterruptedException {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
+        boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
@@ -94,10 +95,11 @@ public class PendingManagerTest {
     public void testAddTransaction() throws InterruptedException {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
+        boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 128, now, Bytes.EMPTY_BYTES)
+        Transaction tx2 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce + 128, now, Bytes.EMPTY_BYTES, isFixTxHash)
                 .sign(key);
         pendingMgr.addTransaction(tx2);
 
@@ -107,7 +109,8 @@ public class PendingManagerTest {
 
     @Test
     public void testAddTransactionSyncErrorInvalidFormat() {
-        Transaction tx = new Transaction(network, type, to, value, fee, 0, 0, Bytes.EMPTY_BYTES).sign(key);
+    	boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, 0, 0, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
         assertNotNull(result.error);
@@ -116,8 +119,9 @@ public class PendingManagerTest {
 
     @Test
     public void testAddTransactionSyncErrorDuplicatedHash() {
-        Transaction tx = new Transaction(network, type, to, value, fee, 0, TimeUtil.currentTimeMillis(),
-                Bytes.EMPTY_BYTES)
+    	boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();    	
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, 0, TimeUtil.currentTimeMillis(),
+                Bytes.EMPTY_BYTES, isFixTxHash)
                         .sign(key);
 
         kernel.setBlockchain(spy(kernel.getBlockchain()));
@@ -133,8 +137,9 @@ public class PendingManagerTest {
 
     @Test
     public void testAddTransactionSyncInvalidRecipient() {
-        Transaction tx = new Transaction(network, type, Constants.COINBASE_KEY.toAddress(), value, fee, 0,
-                TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES)
+    	boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
+        Transaction tx = new Transaction(network, type, Constants.COINBASE_KEY.toAddress(), key.toAddress(), value, fee, 0,
+                TimeUtil.currentTimeMillis(), Bytes.EMPTY_BYTES, isFixTxHash)
                         .sign(key);
 
         PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx);
@@ -145,18 +150,19 @@ public class PendingManagerTest {
 
     @Test
     public void testNonceJump() throws InterruptedException {
-        long now = TimeUtil.currentTimeMillis();
+    	long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
+        boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
 
-        Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx3 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce + 2, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx3);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx2 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce + 1, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx2);
 
         Thread.sleep(100);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx);
 
         Thread.sleep(100);
@@ -167,18 +173,19 @@ public class PendingManagerTest {
     public void testNonceJumpTimestampError() throws InterruptedException {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
+        boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
 
-        Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2,
+        Transaction tx3 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce + 2,
                 now - TimeUnit.HOURS.toMillis(2) + TimeUnit.SECONDS.toMillis(1),
-                Bytes.EMPTY_BYTES).sign(key);
+                Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx3);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx2 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce + 1, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx2);
 
         TimeUnit.SECONDS.sleep(1);
         assertEquals(0, pendingMgr.getPendingTransactions().size());
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx);
 
         TimeUnit.SECONDS.sleep(1);
@@ -190,9 +197,10 @@ public class PendingManagerTest {
     public void testTimestampError() {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
+        boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
 
-        Transaction tx3 = new Transaction(network, type, to, value, fee, nonce, now - ALLOWED_TIME_DRIFT - 1,
-                Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx3 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, now - ALLOWED_TIME_DRIFT - 1,
+                Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         PendingManager.ProcessingResult result = pendingMgr.addTransactionSync(tx3);
         assertEquals(INVALID_TIMESTAMP, result.error);
     }
@@ -201,10 +209,11 @@ public class PendingManagerTest {
     public void testHighVolumeTransaction() throws InterruptedException {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
+        boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
 
         int[] perm = ArrayUtil.permutation(5000);
         for (int p : perm) {
-            Transaction tx = new Transaction(network, type, to, value, fee, nonce + p, now, Bytes.EMPTY_BYTES)
+            Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce + p, now, Bytes.EMPTY_BYTES, isFixTxHash)
                     .sign(key);
             pendingMgr.addTransaction(tx);
         }
@@ -216,10 +225,11 @@ public class PendingManagerTest {
     public void testNewBlock() throws InterruptedException {
         long now = TimeUtil.currentTimeMillis();
         long nonce = accountState.getAccount(from).getNonce();
+        boolean isFixTxHash = kernel.getConfig().forkEd25519ContractEnabled();
 
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce + 1, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx2 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce + 1, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         // pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);
@@ -242,7 +252,7 @@ public class PendingManagerTest {
         kernel.getBlockchain().getAccountState().increaseNonce(from);
         pendingMgr.onBlockAdded(block);
 
-        Transaction tx3 = new Transaction(network, type, to, value, fee, nonce + 2, now, Bytes.EMPTY_BYTES).sign(key);
+        Transaction tx3 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce + 2, now, Bytes.EMPTY_BYTES, isFixTxHash).sign(key);
         pendingMgr.addTransaction(tx3);
 
         Thread.sleep(100);

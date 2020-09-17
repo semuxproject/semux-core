@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.semux.Kernel;
 import org.semux.core.Amount;
 import org.semux.core.Transaction;
 import org.semux.crypto.Hex;
@@ -40,7 +41,8 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testDisplayTransferTransaction() {
-        kernelRule1.getKernel().start();
+        Kernel kernel = kernelRule1.getKernel();
+        kernel.start();
 
         Key from = new Key();
         Key to = new Key();
@@ -49,8 +51,8 @@ public class TransactionDialogTest extends AssertJSwingJUnitTestCase {
         long nonce = 0L;
         long now = Instant.now().toEpochMilli();
         byte[] data = "some data".getBytes();
-        Transaction tx = new Transaction(kernelRule1.getKernel().getConfig().network(), TRANSFER, to.toAddress(), value,
-                fee, nonce, now, data).sign(from);
+        Transaction tx = new Transaction(kernel.getConfig().network(), TRANSFER, to.toAddress(), 
+        		from.toAddress(), value, fee, nonce, now, data, kernel.getConfig().forkEd25519ContractEnabled()).sign(from);
 
         TransactionDialogTestApplication application = GuiActionRunner
                 .execute(() -> new TransactionDialogTestApplication(walletModel, kernelRule1.getKernel(), tx));

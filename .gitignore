@@ -41,3 +41,12 @@ src/gen
 
 # ignore slf4j test config
 src/test/resources/log4j2-test.xml
+
+CMakeFiles
+CMakeFiles/
+/CMakeFiles/
+CMakeLists.txt.user
+CMakeCache.txt
+Makefile
+install_manifest.txt
+cmake_install.cmake

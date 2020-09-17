@@ -100,7 +100,7 @@ public class PrecompiledContractTest {
         long gas = 100000;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         SemuxBlock block = new SemuxBlock(
@@ -132,7 +132,7 @@ public class PrecompiledContractTest {
                 Hex.decode("000000000000000000000000"), delegate,
                 Hex.decode("000000000000000000000000000000000000000000000000000000003B9ACA00")); // 1 nanoSEM
 
-        tx = new Transaction(network, type, to, value, ZERO, nonce + 1, timestamp, data, gas, gasPrice);
+        tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce + 1, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         result = exec.execute(tx, as, ds, block, 0);
@@ -166,7 +166,7 @@ public class PrecompiledContractTest {
         long gas = 100000;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         SemuxBlock block = new SemuxBlock(
@@ -203,7 +203,7 @@ public class PrecompiledContractTest {
         long gas = 100000;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         SemuxBlock block = new SemuxBlock(
@@ -246,7 +246,7 @@ public class PrecompiledContractTest {
         long gas = 100000;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         SemuxBlock block = new SemuxBlock(
@@ -267,7 +267,7 @@ public class PrecompiledContractTest {
         message[0] = (byte) ((int) message[0] + 1 % 8);
         data = Bytes.merge(message, publicKey, signature);
 
-        tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         block = new SemuxBlock(
@@ -290,7 +290,7 @@ public class PrecompiledContractTest {
         message[0] = (byte) ((int) message[0] + 1 % 8);
         data = Bytes.merge(message, publicKey); // no signature
 
-        tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         block = new SemuxBlock(
@@ -336,7 +336,7 @@ public class PrecompiledContractTest {
         long gas = 100000;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         SemuxBlock block = new SemuxBlock(
@@ -358,7 +358,7 @@ public class PrecompiledContractTest {
         message[0] = (byte) ((int) message[0] + 1 % 8);
         data = Bytes.merge(message, publicKey, signature);
 
-        tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         block = new SemuxBlock(
@@ -381,7 +381,7 @@ public class PrecompiledContractTest {
         message[0] = (byte) ((int) message[0] + 1 % 8);
         data = Bytes.merge(message, publicKey); // no signature
 
-        tx = new Transaction(network, type, to, value, ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx = new Transaction(network, type, to, key.toAddress(), value, ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         block = new SemuxBlock(

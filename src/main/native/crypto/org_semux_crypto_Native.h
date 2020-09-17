@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     org_semux_crypto_Native
  * Method:    h256
- * Signature: ([B)[B
+ * Signature: ([B[B)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h256
-  (JNIEnv *, jclass, jbyteArray);
+  (JNIEnv *, jclass, jbyteArray, jbyteArray);
 
 /*
  * Class:     org_semux_crypto_Native

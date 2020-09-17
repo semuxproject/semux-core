@@ -141,11 +141,11 @@ public class Wallet {
 
                 switch (version) {
                 case 1:
-                    key = Hash.h256(Bytes.of(password));
+                    key = Hash.h256_s(Bytes.of(password), null);
                     newAccounts = readAccounts(key, dec, false, version);
                     break;
                 case 2:
-                    key = Hash.h256(Bytes.of(password));
+                    key = Hash.h256_s(Bytes.of(password), null);
                     newAccounts = readAccounts(key, dec, true, version);
                     newAliases = readAddressAliases(key, dec);
                     break;

@@ -23,7 +23,7 @@ public class CryptoPerformance {
 
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
-                Hash.h256(data);
+                Hash.h256_s(data, null);
             }
             long t2 = System.nanoTime();
 
@@ -49,7 +49,7 @@ public class CryptoPerformance {
         for (int size : DATA_SIZES) {
             Key eckey = new Key();
             byte[] data = new byte[size];
-            byte[] hash = Hash.h256(data);
+            byte[] hash = Hash.h256_s(data, null);
 
             long t1 = System.nanoTime();
             for (int i = 0; i < REPEAT; i++) {
@@ -65,7 +65,7 @@ public class CryptoPerformance {
         for (int size : DATA_SIZES) {
             Key eckey = new Key();
             byte[] data = new byte[size];
-            byte[] hash = Hash.h256(data);
+            byte[] hash = Hash.h256_s(data, null);
             byte[] sig = eckey.sign(hash).toBytes();
 
             long t1 = System.nanoTime();

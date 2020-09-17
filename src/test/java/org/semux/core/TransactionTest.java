@@ -44,11 +44,11 @@ public class TransactionTest {
 
     @Test
     public void testNew() {
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, timestamp, data, config.forkEd25519ContractEnabled());
         assertNotNull(tx.getHash());
         assertNull(tx.getSignature());
         tx.sign(key);
-        assertTrue(tx.validate(network));
+        assertTrue(tx.validate_verify_sign(network, config.forkEd25519ContractEnabled()));
 
         testFields(tx);
     }
@@ -58,7 +58,7 @@ public class TransactionTest {
      */
     @Test
     public void testSerialization() {
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, data);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, timestamp, data, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         testFields(Transaction.fromBytes(tx.toBytes()));
@@ -66,7 +66,7 @@ public class TransactionTest {
 
     @Test
     public void testTransactionSize() {
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, Bytes.random(128))
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, timestamp, Bytes.random(128), config.forkEd25519ContractEnabled())
                 .sign(key);
         byte[] bytes = tx.toBytes();
 
@@ -86,9 +86,9 @@ public class TransactionTest {
 
     @Test
     public void testEquality() {
-        Transaction tx = new Transaction(network, type, to, value, fee, nonce, timestamp, Bytes.random(128))
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, timestamp, Bytes.random(128), config.forkEd25519ContractEnabled())
                 .sign(key);
-        Transaction tx2 = new Transaction(network, type, to, value, fee, nonce, timestamp, tx.getData())
+        Transaction tx2 = new Transaction(network, type, to, key.toAddress(), value, fee, nonce, timestamp, tx.getData(), config.forkEd25519ContractEnabled())
                 .sign(key);
 
         assertEquals(tx, tx2);
@@ -104,11 +104,13 @@ public class TransactionTest {
                 network,
                 type,
                 to,
+                key.toAddress(),
                 value,
                 fee,
                 nonce,
                 timestamp,
-                data);
+                data,
+                config.forkEd25519ContractEnabled());
 
         assertArrayEquals(encodedBytes, tx.getEncoded());
     }
@@ -118,7 +120,7 @@ public class TransactionTest {
      */
     @Test
     public void testDecoding() {
-        Transaction tx = Transaction.fromEncoded(encodedBytes);
+        Transaction tx = Transaction.fromEncoded(encodedBytes, Bytes.random(20), config.forkEd25519ContractEnabled());
 
         assertEquals(network.id(), tx.getNetworkId());
         assertEquals(type, tx.getType());

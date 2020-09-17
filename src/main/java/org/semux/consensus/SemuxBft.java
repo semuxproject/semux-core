@@ -27,6 +27,7 @@ import org.semux.core.BftManager;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
 import org.semux.core.Blockchain;
+import org.semux.core.Fork;
 import org.semux.core.PendingManager;
 import org.semux.core.SyncManager;
 import org.semux.core.Transaction;
@@ -841,7 +842,7 @@ public class SemuxBft implements BftManager {
 
             // [2] check transactions
             List<Transaction> unvalidatedTransactions = getUnvalidatedTransactions(transactions);
-            if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network())) {
+            if (!block.validateTransactions(header, unvalidatedTransactions, transactions, config.network(), kernel.getBlockchain().isForkActivated(Fork.ED25519_CONTRACT))) {
                 logger.warn("Invalid transactions");
                 return false;
             }

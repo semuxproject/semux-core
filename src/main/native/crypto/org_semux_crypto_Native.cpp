@@ -8,7 +8,7 @@
 #define ed25519_SIGNATUREBYTES 64U
 
 JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h256
-(JNIEnv *env, jclass cls, jbyteArray msg)
+(JNIEnv *env, jclass cls, jbyteArray msg, jbyteArray salt)
 {
     // check inputs
     if (msg == NULL) {
@@ -16,17 +16,33 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h256
         return NULL;
     }
 
-    // read byte arrays
+	// read message bytes
     jsize msg_size = env->GetArrayLength(msg);
     jbyte *msg_buf = (jbyte *)malloc(msg_size);
     env->GetByteArrayRegion(msg, 0, msg_size, msg_buf);
 
+	// read salt bytes
+	jsize salt_size = 0;
+	jbyte *salt_buf = NULL;
+
+	if (salt != NULL)
+	{
+		salt_size = env->GetArrayLength(salt);
+		salt_buf = (jbyte *)malloc(salt_size);
+		env->GetByteArrayRegion(salt, 0, salt_size, salt_buf);
+	}
+
     // compute blake2b hash
     unsigned char hash[crypto_generichash_blake2b_BYTES];
-    crypto_generichash_blake2b(hash, sizeof(hash), (const unsigned char *)msg_buf, msg_size, NULL, 0);
+	crypto_generichash_blake2b(hash, sizeof(hash), (const unsigned char *)msg_buf, msg_size, (const unsigned char *)salt_buf, salt_size);
 
     // release buffer
     free(msg_buf);
+
+	if (salt_buf != NULL)
+	{
+		free(salt_buf);
+	}
 
     jbyteArray result = env->NewByteArray(sizeof(hash));
     env->SetByteArrayRegion(result, 0, sizeof(hash), (const jbyte*)hash);
@@ -42,14 +58,14 @@ JNIEXPORT jbyteArray JNICALL Java_org_semux_crypto_Native_h160
         return NULL;
     }
 
-    // read byte arrays
+	// read message bytes
     jsize msg_size = env->GetArrayLength(msg);
     jbyte *msg_buf = (jbyte *)malloc(msg_size);
     env->GetByteArrayRegion(msg, 0, msg_size, msg_buf);
 
     // compute blake2b hash
     unsigned char hash[crypto_generichash_blake2b_BYTES];
-    crypto_generichash_blake2b(hash, sizeof(hash), (const unsigned char *)msg_buf, msg_size, NULL, 0);
+	crypto_generichash_blake2b(hash, sizeof(hash), (const unsigned char *)msg_buf, msg_size, NULL, 0);
 
     // compute ripemd160 digest
     unsigned char digest[20];

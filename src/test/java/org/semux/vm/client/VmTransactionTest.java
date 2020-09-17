@@ -99,9 +99,9 @@ public class VmTransactionTest {
         long gas = 30000;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
-        assertTrue(tx.validate(network));
+        assertTrue(tx.validate_verify_sign(network, config.forkEd25519ContractEnabled()));
 
         // insufficient available
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, 0);
@@ -148,10 +148,10 @@ public class VmTransactionTest {
         long gas = 1000000;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, create, gas,
-                gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, create, gas,
+                gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
-        assertTrue(tx.validate(network));
+        assertTrue(tx.validate_verify_sign(network, config.forkEd25519ContractEnabled()));
 
         // insufficient available
         TransactionResult result = exec.execute(tx, as.track(), ds.track(), block, 0);
@@ -213,9 +213,9 @@ public class VmTransactionTest {
         Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
-        assertTrue(tx.validate(network));
+        assertTrue(tx.validate_verify_sign(network, config.forkEd25519ContractEnabled()));
 
         TransactionResult result = exec.execute(tx, as, ds, block, 0);
         assertTrue(result.getCode().isSuccess());
@@ -226,9 +226,9 @@ public class VmTransactionTest {
         to = newContractAddress;
         nonce += 1;
         data = Hex.decode0x("0x60fe47b10000000000000000000000000000000000000000000000000000000000000009");
-        tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
-        assertTrue(tx.validate(network));
+        assertTrue(tx.validate_verify_sign(network, config.forkEd25519ContractEnabled()));
 
         result = exec.execute(tx, as, ds, block, 0);
         assertTrue(result.getCode().isSuccess());
@@ -265,9 +265,9 @@ public class VmTransactionTest {
         Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
-        assertTrue(tx.validate(network));
+        assertTrue(tx.validate_verify_sign(network, config.forkEd25519ContractEnabled()));
 
         TransactionResult result = exec.execute(tx, as, ds, block, 0);
         assertFalse(result.getCode().isSuccess());
@@ -296,9 +296,9 @@ public class VmTransactionTest {
         Amount available = Amount.of(1000, SEM);
         as.adjustAvailable(key.toAddress(), available);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
-        assertTrue(tx.validate(network));
+        assertTrue(tx.validate_verify_sign(network, config.forkEd25519ContractEnabled()));
 
         TransactionResult result = exec.execute(tx, as, ds, block, 0);
         assertTrue(result.getCode().isSuccess());
@@ -310,9 +310,9 @@ public class VmTransactionTest {
         nonce += 1;
         data = Hex.decode0x("0x3e58c58c000000000000000000000000791f1c3f06b19f1b3a4c7774675df9933a091d10");
         value = Amount.of(1, SEM);
-        tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice);
+        tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
-        assertTrue(tx.validate(network));
+        assertTrue(tx.validate_verify_sign(network, config.forkEd25519ContractEnabled()));
 
         assertEquals(ZERO, as.getAccount(newContractAddress).getAvailable());
         assertEquals(ZERO, as.getAccount(Hex.decode0x("791f1c3f06b19f1b3a4c7774675df9933a091d10")).getAvailable());
@@ -347,8 +347,8 @@ public class VmTransactionTest {
         long gas = 100000;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, contract, gas,
-                gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, contract, gas,
+                gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         TransactionResult result = exec.execute(tx, as, ds, block, 0);
@@ -383,8 +383,8 @@ public class VmTransactionTest {
         long gas = 21073;
         Amount gasPrice = Amount.of(1);
 
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, contract, gas,
-                gasPrice);
+        Transaction tx = new Transaction(network, type, to, key.toAddress(), value, Amount.ZERO, nonce, timestamp, contract, gas,
+                gasPrice, config.forkEd25519ContractEnabled());
         tx.sign(key);
 
         TransactionResult result = exec.execute(tx, as, ds, block, 0);
@@ -414,7 +414,7 @@ public class VmTransactionTest {
                 "0x608060405234801561001057600080fd5b50610165806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680633bc5de3014610046575b600080fd5b34801561005257600080fd5b5061005b6100d6565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561009b578082015181840152602081019050610080565b50505050905090810190601f1680156100c85780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60608060405190810160405280602281526020017f466972737420636f6e7472616374212053656d757820746f20746865204d6f6f81526020017f6e210000000000000000000000000000000000000000000000000000000000008152509050905600a165627a7a72305820934582d75405e634939862f4188ebbb6c2765362add401961e8f44aa91b91f040029");
         long gas = 1000000;
         Amount gasPrice = Amount.of(1);
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice)
+        Transaction tx = new Transaction(network, type, to, sender.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled())
                 .sign(sender);
 
         // credit the sender some balance
@@ -432,7 +432,8 @@ public class VmTransactionTest {
         nonce = as.getAccount(sender.toAddress()).getNonce();
         data = Hex.decode0x("0x3bc5de30");
         value = Amount.of(1, SEM);
-        tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice).sign(sender);
+        tx = new Transaction(network, type, to, sender.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled())
+        		.sign(sender);
 
         // call the contract
         result = exec.execute(tx, as, ds, block, 0);
@@ -459,7 +460,7 @@ public class VmTransactionTest {
                 "0x608060405234801561001057600080fd5b50610165806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680633bc5de3014610046575b600080fd5b34801561005257600080fd5b5061005b6100d6565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561009b578082015181840152602081019050610080565b50505050905090810190601f1680156100c85780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60608060405190810160405280602281526020017f466972737420636f6e7472616374212053656d757820746f20746865204d6f6f81526020017f6e210000000000000000000000000000000000000000000000000000000000008152509050905600a165627a7a72305820934582d75405e634939862f4188ebbb6c2765362add401961e8f44aa91b91f040029");
         long gas = 1000000;
         Amount gasPrice = Amount.of(1);
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice)
+        Transaction tx = new Transaction(network, type, to, sender.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled())
                 .sign(sender);
 
         // credit the sender some balance
@@ -477,7 +478,8 @@ public class VmTransactionTest {
         nonce = as.getAccount(sender.toAddress()).getNonce();
         data = Hex.decode0x("0x3bc5de30");
         value = Amount.of(1, SEM);
-        tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice).sign(sender);
+        tx = new Transaction(network, type, to, sender.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled())
+        		.sign(sender);
 
         // call the contract
         result = exec.execute(tx, as, ds, block, 0);
@@ -505,7 +507,7 @@ public class VmTransactionTest {
                 "0x608060405234801561001057600080fd5b50610165806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680633bc5de3014610046575b600080fd5b34801561005257600080fd5b5061005b6100d6565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561009b578082015181840152602081019050610080565b50505050905090810190601f1680156100c85780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60608060405190810160405280602281526020017f466972737420636f6e7472616374212053656d757820746f20746865204d6f6f81526020017f6e210000000000000000000000000000000000000000000000000000000000008152509050905600a165627a7a72305820934582d75405e634939862f4188ebbb6c2765362add401961e8f44aa91b91f040029");
         long gas = 121000;
         Amount gasPrice = Amount.of(200);
-        Transaction tx = new Transaction(network, type, to, value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice)
+        Transaction tx = new Transaction(network, type, to, sender.toAddress(), value, Amount.ZERO, nonce, timestamp, data, gas, gasPrice, config.forkEd25519ContractEnabled())
                 .sign(sender);
 
         // credit the sender some balance
