@@ -33,7 +33,7 @@ clone libsodium:
 cd ../../native/crypto
 git clone https://github.com/jedisct1/libsodium
 cd ./libsodium
-git checkout 4f5e89fa84ce1d178a6765b8b46f2b6f91216677
+git checkout b732443c442239c2e0184820e9b23cca0de0828c
 
 mkdir build && cd build
 cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-x86_64.cmake ../
