@@ -545,7 +545,8 @@ public class SemuxGui extends Launcher {
      */
     protected Version getCurrentVersions() {
         try {
-            URL url = new URL("http://api.semux.org/version");
+            URL url = new URL(
+                    "https://raw.githubusercontent.com/semuxproject/semux-core/master/assets/semux-core-version.json");
             URLConnection con = url.openConnection();
             con.addRequestProperty("User-Agent", Constants.DEFAULT_USER_AGENT);
             con.setConnectTimeout(Constants.DEFAULT_CONNECT_TIMEOUT);

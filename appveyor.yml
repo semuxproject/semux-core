@@ -8,9 +8,6 @@ clone_folder: C:\projects\semux
 
 environment:
   matrix:
-    - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
-      Launch4j: debug
-      MAVEN_OPTS: -Xmx1g
     - JAVA_HOME: C:\Program Files\Java\jdk11
       Launch4j: debug
       MAVEN_OPTS: -Xmx1g

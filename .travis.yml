@@ -6,35 +6,13 @@ matrix:
     - env: NAME="License, formatter, and FindBugs check"
       os: linux
       sudo: false
-      jdk: openjdk8
+      jdk: openjdk11
       script:
         - mvn license:check
         - mvn formatter:validate
         - mvn findbugs:check
 
-    # Coverage report
-    - env: NAME="Coverage report"
-      os: linux
-      sudo: false
-      jdk: openjdk8
-      services:
-        - xvfb
-      script:
-        - mvn cobertura:cobertura
-      after_success:
-        - mvn coveralls:report
-
-    # Linux tests (Java 8 LTS)
-    - env: NAME="Linux tests (Java 8)"
-      os: linux
-      sudo: false
-      jdk: openjdk8
-      services:
-        - xvfb
-      script:
-        - mvn test
-
-    # Linux tests (Java 11 LTS)
+    # Linux tests
     - env: NAME="Linux tests (Java 11)"
       os: linux
       sudo: false
@@ -44,10 +22,10 @@ matrix:
       script:
         - mvn test
 
-    # macOS tests (Java 8 LTS)
+    # macOS tests
     - env: NAME="macOS tests"
       os: osx
-      osx_image: xcode9.2
+      osx_image: xcode9.4
       services:
         - xvfb
       script:

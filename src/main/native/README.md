@@ -14,6 +14,7 @@ Prerequisites:
 - cmake
 - automake
 - autoconf
+- libtool
 - gcc-x86_64-linux-gnu
 - gcc-aarch64-linux-gnu 
 - gcc-mingw-w64
@@ -23,7 +24,11 @@ Prerequisites:
 
 Steps to build on Debian/Ubuntu based distributions with a x86_64 machine:
 ```
-sudo apt install cmake automake autoconf gcc gcc-aarch64-linux-gnu gcc-mingw-w64 binutils binutils-aarch64-linux-gnu binutils-mingw-w64
+sudo apt install \
+cmake automake autoconf libtool \
+gcc gcc-aarch64-linux-gnu gcc-mingw-w64 \
+g++-aarch64-linux-gnu g++-mingw-w64-x86-64 \
+binutils binutils-aarch64-linux-gnu binutils-mingw-w64
 
 mkdir build && cd build
 cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-x86_64.cmake ../
@@ -34,7 +39,7 @@ cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Linux-aarch64.cmake ../
 make -j$(nproc)
 
 cd .. && rm -rf build && mkdir build && cd build
-cmake -vvv -DCMAKE_TOOLCHAIN_FILE=toolchain-Windows-x86_64.cmake ../
+cmake -vvv -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-Windows-x86_64.cmake ../
 make -j$(nproc)
 ```
 
