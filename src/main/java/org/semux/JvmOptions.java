@@ -26,6 +26,7 @@ public class JvmOptions {
         sb.append(" -Dlog4j2.garbagefreeThreadContextMap=true");
         sb.append(" -Dlog4j2.shutdownHookEnabled=false");
         sb.append(" -Dlog4j2.disableJmx=true");
+        sb.append(" -Dfile.encoding=UTF-8");
         if (SystemUtil.isJavaPlatformModuleSystemAvailable()) {
             sb.append(" --add-opens=java.base/java.lang.reflect=ALL-UNNAMED");
         }
