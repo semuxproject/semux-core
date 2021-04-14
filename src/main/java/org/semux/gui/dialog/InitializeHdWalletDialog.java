@@ -30,17 +30,14 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
     private final transient Wallet wallet;
 
     private final JTextArea phraseField;
-    private final JTextField repeatPhraseField;
-    private MnemonicGenerator generator = new MnemonicGenerator();
-    private String phrase = generator.getWordlist(Wallet.MNEMONIC_ENTROPY_LENGTH, Wallet.MNEMONIC_LANGUAGE);
+    private final MnemonicGenerator generator = new MnemonicGenerator();
+    private final String phrase = generator.getWordlist(Wallet.MNEMONIC_ENTROPY_LENGTH, Wallet.MNEMONIC_LANGUAGE);
 
     public InitializeHdWalletDialog(Wallet wallet, JFrame parent) {
         super(parent, GuiMessages.get("InitializeHdWallet"));
         this.wallet = wallet;
 
         JLabel lblMnemonicPhraseTip = new JLabel(GuiMessages.get("MnemonicPhraseTip"));
-        JLabel lblMnemonicPhrase = new JLabel(GuiMessages.get("MnemonicPhrase") + ":");
-        JLabel lblMnemonicPhraseRepeat = new JLabel(GuiMessages.get("RepeatMnemonicPhrase") + ":");
 
         phraseField = new JTextArea();
         phraseField.setEditable(false);
@@ -48,8 +45,6 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
         phraseField.setWrapStyleWord(true);
         phraseField.setRows(2);
         phraseField.setText(phrase);
-
-        repeatPhraseField = new JTextField();
 
         JButton okButton = SwingUtil.createDefaultButton(GuiMessages.get("OK"), this, Action.OK);
 
@@ -59,14 +54,9 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
             groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addGroup(groupLayout.createSequentialGroup()
                     .addGap(30)
-                    .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                        .addComponent(lblMnemonicPhraseRepeat)
-                        .addComponent(lblMnemonicPhrase))
-                    .addGap(15)
                     .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addComponent(lblMnemonicPhraseTip)
                         .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(repeatPhraseField, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE)
                         .addComponent(okButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(30, Short.MAX_VALUE))
         );
@@ -78,12 +68,7 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
                         .addComponent(lblMnemonicPhraseTip))
                     .addGap(20)
                     .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblMnemonicPhrase)
                         .addComponent(phraseField, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE))
-                    .addGap(20)
-                    .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblMnemonicPhraseRepeat)
-                        .addComponent(repeatPhraseField))
                     .addGap(20)
                     .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(okButton))
@@ -105,20 +90,8 @@ public class InitializeHdWalletDialog extends JDialog implements ActionListener 
 
         switch (action) {
         case OK: {
-            String phrase = phraseField.getText();
-
-            String repeat = repeatPhraseField.getText();
-            repeat = String.join(" ", repeat.trim().split("\\s+"));
-
-            if (!repeat.equals(phrase)) {
-                JOptionPane.showMessageDialog(this, GuiMessages.get("HdWalletInitializationFailure"));
-                break;
-            }
-
             wallet.initializeHdWallet(phrase);
             wallet.flush();
-            JOptionPane.showMessageDialog(this, GuiMessages.get("HdWalletInitializationSuccess"));
-
             this.dispose();
             break;
         }
