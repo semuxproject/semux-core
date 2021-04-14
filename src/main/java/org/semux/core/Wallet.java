@@ -669,6 +669,12 @@ public class Wallet {
             }
         }
 
+        // Copy mnemonic phrase if the other wallet is HD enabled while this wallet
+        // isn't.
+        if (!this.isHdWalletInitialized()) {
+            this.initializeHdWallet(w.mnemonicPhrase);
+        }
+
         return numImportedAddresses;
     }
 
