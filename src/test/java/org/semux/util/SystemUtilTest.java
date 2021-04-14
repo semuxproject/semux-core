@@ -94,10 +94,15 @@ public class SystemUtilTest {
         case "9":
         case "10":
         case "11":
+        case "12":
+        case "13":
+        case "14":
+        case "15":
+        case "16":
             assertTrue(SystemUtil.isJavaPlatformModuleSystemAvailable());
             break;
         default:
-            throw new UnreachableException();
+            // do not check for other versions
         }
     }
 

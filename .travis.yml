@@ -12,7 +12,7 @@ matrix:
         - mvn formatter:validate
         - mvn findbugs:check
 
-    # Linux tests
+    # Linux tests (Java 11)
     - env: NAME="Linux tests (Java 11)"
       os: linux
       sudo: false
@@ -22,7 +22,7 @@ matrix:
       script:
         - mvn test
 
-    # macOS tests
+    # macOS tests (Java 13)
     - env: NAME="macOS tests"
       os: osx
       osx_image: xcode9.4
