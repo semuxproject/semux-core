@@ -6,10 +6,6 @@
  */
 package org.semux.crypto;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -22,8 +18,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.util.Bytes;
+import org.semux.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.*;
 
 public class NativeTest {
 
@@ -43,7 +42,8 @@ public class NativeTest {
 
     @BeforeClass
     public static void setup() {
-        assertTrue(Native.isEnabled());
+        assertEquals(SystemUtil.getOsName() == SystemUtil.OsName.WINDOWS
+                || SystemUtil.getOsName() == SystemUtil.OsName.LINUX, Native.isEnabled());
         Native.disable();
     }
 

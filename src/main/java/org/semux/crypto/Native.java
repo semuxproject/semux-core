@@ -45,9 +45,6 @@ public class Native {
                 enabled = loadLibrary("/native/Linux-x86_64/libsemuxcrypto.so");
             }
             break;
-        case MACOS:
-            enabled = loadLibrary("/native/Darwin-x86_64/libsemuxcrypto.dylib");
-            break;
         case WINDOWS:
             enabled = loadLibrary("/native/Windows-x86_64/libsemuxcrypto.dll");
             break;
