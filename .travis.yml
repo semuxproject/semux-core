@@ -10,9 +10,9 @@ matrix:
       script:
         - mvn license:check
         - mvn formatter:validate
-        - mvn findbugs:check
+        - mvn spotbugs:check
 
-    # Linux tests (Java 11)
+    # Linux tests
     - env: NAME="Linux tests (Java 11)"
       os: linux
       sudo: false
@@ -22,8 +22,8 @@ matrix:
       script:
         - mvn test
 
-    # macOS tests (Java 13)
-    - env: NAME="macOS tests"
+    # macOS tests
+    - env: NAME="macOS tests (Java 13)"
       os: osx
       osx_image: xcode9.4
       services:
