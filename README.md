@@ -1,6 +1,6 @@
 # Semux Core
 
-[![Build Status](https://api.travis-ci.com/semuxproject/semux-core.svg)](https://travis-ci.org/semuxproject/semux-core)
+[![Build Status](https://api.travis-ci.com/semuxproject/semux-core.svg)](https://travis-ci.com/semuxproject/semux-core)
 [![Build status](https://ci.appveyor.com/api/projects/status/dkeif4luqj7fymi7?svg=true)](https://ci.appveyor.com/project/semuxproject/semux-core)
 [![Crowdin](https://badges.crowdin.net/semux-core/localized.svg)](https://crowdin.com/project/semux-core)
 
@@ -22,7 +22,7 @@ More info can be found at our [Documentation page](./docs/README.md).
 
 Prerequisites:
 ```
-OpenJDK 8 or above
+OpenJDK 11
 Apache Maven 3.5.2
 ```
 

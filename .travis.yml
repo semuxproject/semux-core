@@ -13,19 +13,10 @@ matrix:
         - mvn spotbugs:check
 
     # Linux tests
-    - env: NAME="Linux tests (Java 11)"
+    - env: NAME="Linux tests"
       os: linux
       sudo: false
       jdk: openjdk11
-      services:
-        - xvfb
-      script:
-        - mvn test
-
-    # macOS tests
-    - env: NAME="macOS tests (Java 13)"
-      os: osx
-      osx_image: xcode9.4
       services:
         - xvfb
       script:
