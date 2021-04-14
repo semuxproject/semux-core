@@ -41,7 +41,7 @@ public class MainnetConfigTest {
 
     @Before
     public void testLoad() {
-        config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new MainnetConfig(Constants.DEFAULT_ROOT_DIR);
         assertEquals(Network.MAINNET, config.network());
     }
 
@@ -80,7 +80,7 @@ public class MainnetConfigTest {
 
         String[][] primaryValidators = new String[blocks][views];
 
-        MainnetConfig config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        MainnetConfig config = new MainnetConfig(Constants.DEFAULT_ROOT_DIR);
         StringBuilder validatorsCSV = new StringBuilder();
         for (long i = 0; i < blocks; i++) {
             for (int view = 0; view < views; view++) {
@@ -110,7 +110,7 @@ public class MainnetConfigTest {
         assumeTrue(SystemUtil.getOsName().equals(SystemUtil.OsName.WINDOWS));
         Locale defaultLocale = Locale.getDefault();
         Locale.setDefault(Locale.forLanguageTag("tr-TR"));
-        assertThat(config.databaseDir().getCanonicalPath(), containsString("database\\mainnet"));
+        assertThat(config.chainDir().getCanonicalPath(), containsString("mainnet"));
         Locale.setDefault(defaultLocale); // reset
     }
 }

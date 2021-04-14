@@ -57,7 +57,7 @@ public abstract class Launcher {
 
     private final Options options = new Options();
 
-    private String dataDir = Constants.DEFAULT_DATA_DIR;
+    private String rootDir = Constants.DEFAULT_ROOT_DIR;
     private Network network = MAINNET;
 
     private Integer coinbase = null;
@@ -112,11 +112,11 @@ public abstract class Launcher {
     public Config getConfig() {
         switch (getNetwork()) {
         case MAINNET:
-            return new MainnetConfig(getDataDir());
+            return new MainnetConfig(rootDir);
         case TESTNET:
-            return new TestnetConfig(getDataDir());
+            return new TestnetConfig(rootDir);
         case DEVNET:
-            return new DevnetConfig(getDataDir());
+            return new DevnetConfig(rootDir);
         default:
             throw new UnreachableException();
         }
@@ -129,15 +129,6 @@ public abstract class Launcher {
      */
     public Network getNetwork() {
         return network;
-    }
-
-    /**
-     * Returns the data directory.
-     *
-     * @return
-     */
-    public String getDataDir() {
-        return dataDir;
     }
 
     /**
@@ -170,7 +161,7 @@ public abstract class Launcher {
         CommandLine cmd = parser.parse(getOptions(), args);
 
         if (cmd.hasOption(SemuxOption.DATA_DIR.toString())) {
-            setDataDir(cmd.getOptionValue(SemuxOption.DATA_DIR.toString()));
+            setRootDir(cmd.getOptionValue(SemuxOption.DATA_DIR.toString()));
         }
 
         if (cmd.hasOption(SemuxOption.NETWORK.toString())) {
@@ -208,11 +199,11 @@ public abstract class Launcher {
      * @param args
      * @throws ParseException
      */
-    protected void setupLogger(String[] args) throws ParseException {
+    protected void parseOptionsAndSetUpLogging(String[] args) throws ParseException {
         // parse options
         parseOptions(args);
 
-        LoggerConfigurator.configure(new File(dataDir));
+        LoggerConfigurator.configure(getConfig());
     }
 
     /**
@@ -253,10 +244,10 @@ public abstract class Launcher {
     /**
      * Sets the data directory.
      *
-     * @param dataDir
+     * @param rootDir
      */
-    protected void setDataDir(String dataDir) {
-        this.dataDir = dataDir;
+    protected void setRootDir(String rootDir) {
+        this.rootDir = rootDir;
     }
 
     /**

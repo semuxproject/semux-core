@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class VMPerformance {
     private static final Logger logger = LoggerFactory.getLogger(VMPerformance.class);
 
-    private static Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR) {
+    private static Config config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR) {
         @Override
         public Map<Fork, Long> manuallyActivatedForks() {
             return Collections.singletonMap(Fork.VIRTUAL_MACHINE, 0L);

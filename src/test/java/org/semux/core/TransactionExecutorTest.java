@@ -47,7 +47,7 @@ public class TransactionExecutorTest {
 
     @Before
     public void prepare() {
-        config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
         as = chain.getAccountState();
         ds = chain.getDelegateState();

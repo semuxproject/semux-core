@@ -41,7 +41,7 @@ public class BlockchainImplMigrationTest {
 
         // load the database
         DatabaseFactory dbFactory = new LeveldbDatabase.LeveldbFactory(new File(temporaryFolder.getRoot(), "database"));
-        Config config = new TestnetConfig(Constants.DEFAULT_DATA_DIR);
+        Config config = new TestnetConfig(Constants.DEFAULT_ROOT_DIR);
         BlockchainImpl blockchain = new BlockchainImpl(config, dbFactory);
 
         // the database should be upgraded to the latest version

@@ -51,14 +51,13 @@ public class SemuxGuiTest {
         Mockito.doNothing().when(gui).startKernel(any(), any(), any());
 
         String[] args = new String[] {
-                "--datadir", kernelRule.getKernel().getConfig().dataDir().getAbsolutePath(),
+                "--datadir", kernelRule.getKernel().getConfig().rootDir().getAbsolutePath(),
                 "--network", "mainnet",
                 "--coinbase", "0",
                 "--password", kernelRule.getPassword()
         };
         gui.start(args);
 
-        assertThat(gui.getDataDir()).isEqualTo(args[1]);
         assertThat(gui.getNetwork()).isEqualTo(Network.MAINNET);
         assertThat(gui.getCoinbase()).isEqualTo(0);
         assertThat(gui.getPassword()).isEqualTo(kernelRule.getPassword());
@@ -92,7 +91,7 @@ public class SemuxGuiTest {
         // prepare kernel
         Config config = kernel.getConfig();
         Blockchain chain = new BlockchainImpl(config,
-                new LeveldbDatabase.LeveldbFactory(kernel.getConfig().databaseDir()));
+                new LeveldbDatabase.LeveldbFactory(kernel.getConfig().chainDir()));
         kernel.setBlockchain(chain);
         ChannelManager channelMgr = new ChannelManager(kernel);
         kernel.setChannelManager(channelMgr);

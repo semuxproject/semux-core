@@ -7,6 +7,9 @@
 package org.semux.bench;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.semux.config.Constants;
 import org.semux.db.LeveldbDatabase;
@@ -19,11 +22,12 @@ public class DBPerformance {
 
     private static final int REPEAT = 100_000;
 
-    private static LeveldbDatabase getTestDB() {
-        return new LeveldbDatabase(new File(Constants.DEFAULT_DATA_DIR, "test"));
+    private static LeveldbDatabase getTestDB() throws IOException {
+        Path temp = Files.createTempDirectory("test");
+        return new LeveldbDatabase(temp.toFile());
     }
 
-    public static void testWrite() {
+    public static void testWrite() throws IOException {
         LeveldbDatabase db = getTestDB();
         try {
             long t1 = System.nanoTime();
@@ -39,7 +43,7 @@ public class DBPerformance {
         }
     }
 
-    public static void testRead() {
+    public static void testRead() throws IOException {
         LeveldbDatabase db = getTestDB();
         try {
             long t1 = System.nanoTime();
@@ -54,7 +58,7 @@ public class DBPerformance {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         testWrite();
         testRead();
 

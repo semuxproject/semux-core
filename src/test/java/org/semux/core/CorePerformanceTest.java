@@ -36,7 +36,7 @@ public class CorePerformanceTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CorePerformanceTest.class);
 
-    private Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+    private Config config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
 
     @Test
     public void testSortDelegate() {

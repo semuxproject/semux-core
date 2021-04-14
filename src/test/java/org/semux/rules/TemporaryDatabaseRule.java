@@ -19,7 +19,7 @@ import org.semux.db.LeveldbDatabase;
 
 public class TemporaryDatabaseRule extends TemporaryFolder implements DatabaseFactory {
 
-    private EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
+    private final EnumMap<DatabaseName, Database> databases = new EnumMap<>(DatabaseName.class);
 
     @Override
     public void before() throws Throwable {
@@ -35,7 +35,7 @@ public class TemporaryDatabaseRule extends TemporaryFolder implements DatabaseFa
     @Override
     public Database getDB(DatabaseName name) {
         return databases.computeIfAbsent(name, k -> {
-            File file = new File(getRoot(), Constants.DATABASE_DIR + File.separator + k.toString().toLowerCase());
+            File file = new File(getRoot(), k.toString().toLowerCase());
             return new LeveldbDatabase(file);
         });
     }

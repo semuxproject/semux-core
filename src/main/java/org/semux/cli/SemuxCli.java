@@ -59,7 +59,7 @@ public class SemuxCli extends Launcher {
             checkPrerequisite();
 
             // start CLI
-            cli.setupLogger(args);
+            cli.parseOptionsAndSetUpLogging(args);
             cli.start(args);
 
         } catch (LauncherException | ConfigException | IpFilterJsonParseException | IOException exception) {
@@ -172,7 +172,7 @@ public class SemuxCli extends Launcher {
 
     protected void reindex(String to) {
         Config config = getConfig();
-        DatabaseFactory dbFactory = new LeveldbDatabase.LeveldbFactory(config.databaseDir());
+        DatabaseFactory dbFactory = new LeveldbDatabase.LeveldbFactory(config.chainDir());
         BlockchainImpl.upgrade(config, dbFactory, to == null ? Long.MAX_VALUE : Long.parseLong(to));
     }
 
@@ -374,7 +374,6 @@ public class SemuxCli extends Launcher {
     }
 
     protected Wallet loadAndUnlockWallet() {
-
         Wallet wallet = loadWallet();
         if (getPassword() == null) {
             if (wallet.unlock("")) {
@@ -416,7 +415,8 @@ public class SemuxCli extends Launcher {
     }
 
     protected Wallet loadWallet() {
-        return new Wallet(new File(getDataDir(), "wallet.data"), getConfig().network());
+        File file = new File(getConfig().walletDir(), Constants.WALLET_FILE);
+        return new Wallet(file, getConfig().network());
     }
 
     protected void initializedHdSeed(Wallet wallet) {

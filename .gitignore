@@ -1,18 +1,15 @@
 # binary files and logs
 *.class
 *.log
-*.data
 
 # release binaries
 *.zip
 *.tar.gz
 
 # data folders
-/database/
-/keystore/
-/p2p/
-/node*
-/addressbook.json
+/chaindata/
+/wallet/
+/log/
 
 # cmake build dir
 build/

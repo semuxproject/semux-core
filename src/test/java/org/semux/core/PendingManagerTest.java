@@ -62,7 +62,7 @@ public class PendingManagerTest {
         kernel = kernelRule.getKernel();
 
         kernel.setBlockchain(
-                new BlockchainImpl(kernel.getConfig(), new LeveldbFactory(kernel.getConfig().databaseDir())));
+                new BlockchainImpl(kernel.getConfig(), new LeveldbFactory(kernel.getConfig().chainDir())));
         kernel.setChannelManager(new ChannelManager(kernel));
 
         accountState = kernel.getBlockchain().getAccountState();

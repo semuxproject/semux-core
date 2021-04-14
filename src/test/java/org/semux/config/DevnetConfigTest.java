@@ -15,7 +15,7 @@ public class DevnetConfigTest {
 
     @Test
     public void testNetworkId() {
-        Config config = new DevnetConfig(Constants.DEFAULT_DATA_DIR);
+        Config config = new DevnetConfig(Constants.DEFAULT_ROOT_DIR);
         assertEquals(Network.DEVNET, config.network());
     }
 

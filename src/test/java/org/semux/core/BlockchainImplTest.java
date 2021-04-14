@@ -60,7 +60,7 @@ public class BlockchainImplTest {
 
     @Before
     public void setUp() {
-        config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
         chain = new BlockchainImpl(config, temporaryDBFactory);
         res = new TransactionResult();
     }

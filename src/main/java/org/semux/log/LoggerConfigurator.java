@@ -17,6 +17,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.status.StatusData;
 import org.apache.logging.log4j.status.StatusListener;
 import org.apache.logging.log4j.status.StatusLogger;
+import org.semux.config.Config;
 import org.semux.config.Constants;
 import org.semux.util.SystemUtil;
 import org.xml.sax.SAXException;
@@ -34,13 +35,11 @@ public class LoggerConfigurator {
     private LoggerConfigurator() {
     }
 
-    public static void configure(File dataDir) {
-        File file = getConfigurationFile(dataDir);
+    public static void configure(Config config) {
+        File file = new File(config.configDir(), CONFIG_XML);
 
         if (file.exists()) {
-            if (System.getProperty("log.file") == null) {
-                System.setProperty("log.file", new File(dataDir, DEBUG_LOG).getAbsolutePath());
-            }
+            System.setProperty("log.file", new File(config.logDir(), DEBUG_LOG).getAbsolutePath());
 
             // register configuration error listener
             StatusListener errorStatusListener = new ConfigurationErrorStatusListener();
@@ -56,10 +55,6 @@ public class LoggerConfigurator {
             // remove configuration error listener
             StatusLogger.getLogger().removeListener(errorStatusListener);
         }
-    }
-
-    protected static File getConfigurationFile(File dataDir) {
-        return new File(dataDir, Constants.CONFIG_DIR + File.separator + CONFIG_XML);
     }
 
     /**

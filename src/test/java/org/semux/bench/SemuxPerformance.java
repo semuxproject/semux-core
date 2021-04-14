@@ -40,7 +40,7 @@ public class SemuxPerformance {
     private static String to = "";
 
     public static void testTransfer(int n) throws IOException, InterruptedException {
-        UnitTestnetConfig config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+        UnitTestnetConfig config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
 
         long t1 = TimeUtil.currentTimeMillis();
         for (int i = 1; i <= n; i++) {

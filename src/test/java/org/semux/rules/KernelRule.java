@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import org.junit.rules.TemporaryFolder;
 import org.semux.KernelMock;
 import org.semux.config.Config;
+import org.semux.config.Constants;
 import org.semux.config.UnitTestnetConfig;
 import org.semux.core.Block;
 import org.semux.core.BlockHeader;
@@ -91,7 +92,7 @@ public class KernelRule extends TemporaryFolder {
         }
 
         // wallet
-        Wallet wallet = new Wallet(new File(getRoot(), "wallet.data"), config.network());
+        Wallet wallet = new Wallet(new File(config.walletDir(), Constants.WALLET_FILE), config.network());
         wallet.unlock(password);
         for (Key key : keys) {
             wallet.addAccount(key);
@@ -178,7 +179,7 @@ public class KernelRule extends TemporaryFolder {
      * Opens the database.
      */
     public void openBlockchain() {
-        dbFactory = new LeveldbFactory(kernel.getConfig().databaseDir());
+        dbFactory = new LeveldbFactory(kernel.getConfig().chainDir());
         BlockchainImpl chain = new BlockchainImpl(kernel.getConfig(), dbFactory);
         kernel.setBlockchain(chain);
     }

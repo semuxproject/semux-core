@@ -33,7 +33,7 @@ public class JvmOptions {
             sb.append(" --add-opens=java.base/java.lang.reflect=ALL-UNNAMED");
         }
         if (Arrays.asList(args).contains("--gui")) {
-            sb.append(" -splash:./resources/splash.png");
+            sb.append(" -splash:./lib/splash.png");
         }
         if (!GraphicsEnvironment.isHeadless()) {
             int dpi = Toolkit.getDefaultToolkit().getScreenResolution();

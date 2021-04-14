@@ -36,7 +36,7 @@ public class ValidatorDistributionChart {
     public static void main(String[] args) {
         Random random = new Random();
 
-        MainnetConfig mainnetConfig = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        MainnetConfig mainnetConfig = new MainnetConfig(Constants.DEFAULT_ROOT_DIR);
         HashMap<Integer, AtomicInteger> mapPRNG = new HashMap<>();
         HashMap<Integer, AtomicInteger> mapPRNG_fast = new HashMap<>();
 

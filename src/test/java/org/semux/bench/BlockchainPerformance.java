@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class BlockchainPerformance {
     private static final Logger logger = LoggerFactory.getLogger(BlockchainPerformance.class);
 
-    private static Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+    private static Config config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
     private static Key key = new Key();
 
     public static Block testBlockCreation() {

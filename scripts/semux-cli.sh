@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 java_bin=./jvm/bin/java
 
 # default JVM options
-jvm_options=`${java_bin} -cp semux.jar org.semux.JvmOptions --cli`
+jvm_options=`${java_bin} -cp ./lib/semux.jar org.semux.JvmOptions --cli`
 
 # start kernel
-${java_bin} ${jvm_options} -cp semux.jar org.semux.Main --cli "$@"
+${java_bin} ${jvm_options} -cp ./lib/semux.jar org.semux.Main --cli "$@"

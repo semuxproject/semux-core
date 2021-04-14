@@ -36,7 +36,7 @@ public class AccountStateTest {
 
     @Before
     public void setUp() {
-        chain = new BlockchainImpl(new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
+        chain = new BlockchainImpl(new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR), temporaryDBFactory);
         state = chain.getAccountState();
     }
 

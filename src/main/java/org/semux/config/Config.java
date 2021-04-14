@@ -37,30 +37,25 @@ public interface Config {
     // =========================
 
     /**
-     * @return The config file itself.
-     */
-    File getFile();
-
-    /**
      * Returns the data directory.
      *
      * @return
      */
-    File dataDir();
+    File rootDir();
 
     /**
      * Returns the database directory.
      *
      * @return
      */
-    File databaseDir();
+    File chainDir();
 
     /**
      * Returns the database directory.
      *
      * @return
      */
-    File databaseDir(Network network);
+    File chainDir(Network network);
 
     /**
      * Returns the config directory.
@@ -68,6 +63,20 @@ public interface Config {
      * @return
      */
     File configDir();
+
+    /**
+     * Returns the wallet directory.
+     *
+     * @return
+     */
+    File walletDir();
+
+    /**
+     * Returns the log directory.
+     *
+     * @return
+     */
+    File logDir();
 
     /**
      * Returns the network.

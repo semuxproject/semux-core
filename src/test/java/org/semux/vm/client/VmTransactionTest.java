@@ -59,7 +59,7 @@ public class VmTransactionTest {
 
     @Before
     public void prepare() {
-        config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
         chain = Mockito.spy(new BlockchainImpl(config, temporaryDBFactory));
 
         as = chain.getAccountState();

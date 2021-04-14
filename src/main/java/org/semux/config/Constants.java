@@ -17,7 +17,9 @@ public class Constants {
     /**
      * Default data directory.
      */
-    public static final String DEFAULT_DATA_DIR = ".";
+    public static final String DEFAULT_ROOT_DIR = ".";
+    public static final String WALLET_FILE = "wallet.data";
+    public static final String CONFIG_FILE = "semux.properties";
 
     /**
      * Network versions.
@@ -34,7 +36,7 @@ public class Constants {
     /**
      * Version of this client.
      */
-    public static final String CLIENT_VERSION = "2.1.1";
+    public static final String CLIENT_VERSION = "2.2.0";
 
     /**
      * Algorithm name for the 256-bit hash.
@@ -49,7 +51,17 @@ public class Constants {
     /**
      * Name of the database directory.
      */
-    public static final String DATABASE_DIR = "database";
+    public static final String CHAIN_DIR = "chaindata";
+
+    /**
+     * Name of the database directory.
+     */
+    public static final String WALLET_DIR = "wallet";
+
+    /**
+     * Name of the database directory.
+     */
+    public static final String LOG_DIR = "log";
 
     /**
      * The default IP port for p2p protocol

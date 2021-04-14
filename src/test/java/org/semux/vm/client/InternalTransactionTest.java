@@ -51,7 +51,7 @@ public class InternalTransactionTest {
 
     @Before
     public void prepare() {
-        config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+        config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
         chain = spy(new BlockchainImpl(config, temporaryDBFactory));
         doReturn(true).when(chain).isForkActivated(any());
 

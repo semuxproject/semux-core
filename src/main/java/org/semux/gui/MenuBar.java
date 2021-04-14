@@ -293,7 +293,7 @@ public class MenuBar extends JMenuBar implements ActionListener {
 
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        chooser.setSelectedFile(new File("wallet.data"));
+        chooser.setSelectedFile(new File(Constants.WALLET_FILE));
         chooser.setFileFilter(new FileNameExtensionFilter(GuiMessages.get("WalletBinaryFormat"), "data"));
 
         int ret = chooser.showSaveDialog(frame);

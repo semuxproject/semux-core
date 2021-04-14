@@ -144,8 +144,7 @@ public class Kernel {
         // ====================================
         // initialize blockchain database
         // ====================================
-        relocateDatabaseIfNeeded();
-        dbFactory = new LeveldbFactory(config.databaseDir());
+        dbFactory = new LeveldbFactory(config.chainDir());
         chain = new BlockchainImpl(config, genesis, dbFactory);
         long number = chain.getLatestBlockNumber();
         logger.info("Latest block number = {}", number);
@@ -199,50 +198,6 @@ public class Kernel {
         Launcher.registerShutdownHook("kernel", this::stop);
 
         state = State.RUNNING;
-    }
-
-    /**
-     * Relocates database to the new location.
-     * <p>
-     * Old file structure:
-     * <ul>
-     * <li><code>./config</code></li>
-     * <li><code>./database</code></li>
-     * </ul>
-     *
-     * New file structure:
-     * <ul>
-     * <li><code>./config</code></li>
-     * <li><code>./database/mainnet</code></li>
-     * <li><code>./database/testnet</code></li>
-     * </ul>
-     *
-     */
-    protected void relocateDatabaseIfNeeded() {
-        File databaseDir = new File(config.dataDir(), Constants.DATABASE_DIR);
-        File blocksDir = new File(databaseDir, "block");
-
-        if (blocksDir.exists()) {
-            LeveldbDatabase db = new LeveldbDatabase(blocksDir);
-            byte[] header = db.get(Bytes.merge((byte) 0x00, Bytes.of(0L)));
-            db.close();
-
-            if (header == null || header.length < 33) {
-                logger.info("Unable to decode genesis header. Quit relocating");
-            } else {
-                String hash = Hex.encode(Arrays.copyOfRange(header, 1, 33));
-                switch (hash) {
-                case "1d4fb49444a5a14dbe68f5f6109808c68e517b893c1e9bbffce9d199b5037c8e":
-                    moveDatabase(databaseDir, config.databaseDir(Network.MAINNET));
-                    break;
-                case "abfe38563bed10ec431a4a9ad344a212ef62f6244c15795324cc06c2e8fa0f8d":
-                    moveDatabase(databaseDir, config.databaseDir(Network.TESTNET));
-                    break;
-                default:
-                    logger.info("Unable to recognize genesis hash. Quit relocating");
-                }
-            }
-        }
     }
 
     /**

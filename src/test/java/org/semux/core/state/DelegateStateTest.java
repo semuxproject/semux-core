@@ -42,7 +42,7 @@ public class DelegateStateTest {
 
     @Before
     public void init() {
-        chain = new BlockchainImpl(new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR), temporaryDBFactory);
+        chain = new BlockchainImpl(new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR), temporaryDBFactory);
         ds = chain.getDelegateState();
         delegates = chain.getGenesis().getDelegates();
     }

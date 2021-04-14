@@ -63,7 +63,7 @@ public class SemuxBftTest {
                 .collect(Collectors.toList());
 
         SemuxBft bft = mock(SemuxBft.class);
-        bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        bft.config = new MainnetConfig(Constants.DEFAULT_ROOT_DIR);
         bft.validators = validators;
         bft.chain = mock(Blockchain.class);
         when(bft.chain.isForkActivated(eq(UNIFORM_DISTRIBUTION))).thenReturn(false);
@@ -78,7 +78,7 @@ public class SemuxBftTest {
                 .collect(Collectors.toList());
 
         SemuxBft bft = mock(SemuxBft.class);
-        bft.config = new MainnetConfig(Constants.DEFAULT_DATA_DIR);
+        bft.config = new MainnetConfig(Constants.DEFAULT_ROOT_DIR);
         bft.validators = validators;
         bft.chain = mock(Blockchain.class);
         when(bft.chain.isForkActivated(eq(UNIFORM_DISTRIBUTION))).thenReturn(true);

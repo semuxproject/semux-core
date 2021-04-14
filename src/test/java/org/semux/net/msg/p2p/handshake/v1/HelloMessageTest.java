@@ -19,7 +19,7 @@ public class HelloMessageTest {
 
     @Test
     public void testCodec() {
-        Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+        Config config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
 
         Key key = new Key();
         String peerId = key.toAddressString();

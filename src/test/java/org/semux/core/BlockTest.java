@@ -30,7 +30,7 @@ import org.semux.util.TimeUtil;
 
 public class BlockTest {
 
-    private Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+    private Config config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
 
     private long number = 5;
     private byte[] coinbase = Bytes.random(20);

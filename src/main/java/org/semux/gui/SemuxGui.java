@@ -109,7 +109,7 @@ public class SemuxGui extends Launcher {
 
             // start GUI
             SemuxGui gui = new SemuxGui();
-            gui.setupLogger(args);
+            gui.parseOptionsAndSetUpLogging(args);
             gui.setupPubSub();
             gui.start(args);
 
@@ -191,7 +191,8 @@ public class SemuxGui extends Launcher {
         parseOptions(args);
 
         // create/unlock wallet
-        Wallet wallet = new Wallet(new File(getDataDir(), "wallet.data"), getConfig().network());
+        Config config = getConfig();
+        Wallet wallet = new Wallet(new File(config.walletDir(), Constants.WALLET_FILE), config.network());
         if (!wallet.exists()) {
             showWelcome(wallet);
         } else {

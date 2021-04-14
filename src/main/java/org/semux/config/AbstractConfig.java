@@ -54,8 +54,6 @@ public abstract class AbstractConfig implements Config, ChainSpec {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractConfig.class);
 
-    private static final String CONFIG_FILE = "semux.properties";
-
     // =========================
     // Chain spec
     // =========================
@@ -67,7 +65,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // =========================
     // General
     // =========================
-    protected File dataDir;
+    protected File rootDir;
     protected Network network;
     protected short networkVersion;
 
@@ -162,8 +160,8 @@ public abstract class AbstractConfig implements Config, ChainSpec {
         return this;
     }
 
-    protected AbstractConfig(String dataDir, Network network, short networkVersion) {
-        this.dataDir = new File(dataDir);
+    protected AbstractConfig(String rootDir, Network network, short networkVersion) {
+        this.rootDir = new File(rootDir);
         this.network = network;
         this.networkVersion = networkVersion;
 
@@ -312,28 +310,33 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
-    public File getFile() {
-        return new File(configDir(), CONFIG_FILE);
+    public File rootDir() {
+        return rootDir;
     }
 
     @Override
-    public File dataDir() {
-        return dataDir;
+    public File chainDir() {
+        return chainDir(network);
     }
 
     @Override
-    public File databaseDir() {
-        return databaseDir(network);
-    }
-
-    @Override
-    public File databaseDir(Network network) {
-        return new File(dataDir, Constants.DATABASE_DIR + File.separator + network.name().toLowerCase(Locale.ROOT));
+    public File chainDir(Network network) {
+        return new File(rootDir, Constants.CHAIN_DIR + File.separator + network.name().toLowerCase(Locale.ROOT));
     }
 
     @Override
     public File configDir() {
-        return new File(dataDir, Constants.CONFIG_DIR);
+        return new File(rootDir, Constants.CONFIG_DIR);
+    }
+
+    @Override
+    public File walletDir() {
+        return new File(rootDir, Constants.WALLET_DIR);
+    }
+
+    @Override
+    public File logDir() {
+        return new File(rootDir, Constants.LOG_DIR);
     }
 
     @Override
@@ -591,7 +594,7 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     protected void init() {
-        File f = getFile();
+        File f = new File(configDir(), Constants.CONFIG_FILE);
         if (!f.exists()) {
             // exit if the config file does not exist
             return;

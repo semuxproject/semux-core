@@ -27,7 +27,7 @@ public class TransactionTest {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
 
-    private Config config = new UnitTestnetConfig(Constants.DEFAULT_DATA_DIR);
+    private Config config = new UnitTestnetConfig(Constants.DEFAULT_ROOT_DIR);
     private Key key = new Key();
 
     private Network network = Network.DEVNET;
