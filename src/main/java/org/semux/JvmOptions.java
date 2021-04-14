@@ -1,11 +1,13 @@
 /**
  * Copyright (c) 2017-2020 The Semux Developers
- *
+ * <p>
  * Distributed under the MIT software license, see the accompanying file
  * LICENSE or https://opensource.org/licenses/mit-license.php
  */
 package org.semux;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -32,6 +34,14 @@ public class JvmOptions {
         }
         if (Arrays.asList(args).contains("--gui")) {
             sb.append(" -splash:./resources/splash.png");
+        }
+        if (!GraphicsEnvironment.isHeadless()) {
+            int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+            if (dpi >= 150) {
+                sb.append(" -Dsun.java2d.uiScale=2");
+            } else if (dpi >= 100) {
+                sb.append(" -Dsun.java2d.uiScale=1.5");
+            }
         }
 
         out.println(sb);
