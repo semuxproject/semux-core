@@ -585,7 +585,7 @@ public class SwingUtil {
         case DELEGATE:
             return GuiMessages.get("DelegateRegistration");
         case CREATE:
-            return GuiMessages.get("CreateContract") + " => "
+            return GuiMessages.get("NewContract") + " => "
                     + describeAddress(gui, HashUtil.calcNewAddress(tx.getFrom(), tx.getNonce()));
         default:
             return StringUtil.EMPTY_STRING;

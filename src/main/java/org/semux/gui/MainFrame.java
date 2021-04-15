@@ -38,11 +38,10 @@ import org.semux.Kernel;
 import org.semux.core.Wallet;
 import org.semux.gui.dialog.InputDialog;
 import org.semux.gui.model.WalletModel;
-import org.semux.gui.panel.ContractPanel;
+import org.semux.gui.panel.SendPanel;
 import org.semux.gui.panel.DelegatesPanel;
 import org.semux.gui.panel.HomePanel;
 import org.semux.gui.panel.ReceivePanel;
-import org.semux.gui.panel.SendPanel;
 import org.semux.gui.panel.TransactionsPanel;
 import org.semux.message.GuiMessages;
 import org.semux.util.exception.UnreachableException;
@@ -59,7 +58,6 @@ public class MainFrame extends JFrame implements ActionListener {
     private final HomePanel panelHome;
     private final SendPanel panelSend;
     private final ReceivePanel panelReceive;
-    private final ContractPanel panelContract;
     private final TransactionsPanel panelTransactions;
     private final DelegatesPanel panelDelegates;
     private final StatusBar statusBar;
@@ -67,7 +65,6 @@ public class MainFrame extends JFrame implements ActionListener {
     private final JButton btnHome;
     private final JButton btnSend;
     private final JButton btnReceive;
-    private final JButton btnContract;
     private final JButton btnTransactions;
     private final JButton btnDelegates;
     private final JButton btnLock;
@@ -107,7 +104,6 @@ public class MainFrame extends JFrame implements ActionListener {
         panelHome = new HomePanel(gui);
         panelSend = new SendPanel(gui, this);
         panelReceive = new ReceivePanel(gui);
-        panelContract = new ContractPanel(gui, this);
         panelTransactions = new TransactionsPanel(gui, this);
         panelDelegates = new DelegatesPanel(gui, this);
 
@@ -145,11 +141,6 @@ public class MainFrame extends JFrame implements ActionListener {
         btnSend = createButton(GuiMessages.get("Send"), "send", Action.SHOW_SEND);
         btnSend.setMnemonic(KeyEvent.VK_S);
         toolBar.add(btnSend);
-        toolBar.add(Box.createRigidArea(gap));
-
-        btnContract = createButton(GuiMessages.get("Contract"), "contract", Action.SHOW_CONTRACT);
-        btnContract.setMnemonic(KeyEvent.VK_C);
-        toolBar.add(btnContract);
         toolBar.add(Box.createRigidArea(gap));
 
         btnTransactions = createButton(GuiMessages.get("Transactions"), "transactions", Action.SHOW_TRANSACTIONS);
@@ -198,9 +189,6 @@ public class MainFrame extends JFrame implements ActionListener {
             break;
         case SHOW_RECEIVE:
             select(panelReceive, btnReceive);
-            break;
-        case SHOW_CONTRACT:
-            select(panelContract, btnContract);
             break;
         case SHOW_TRANSACTIONS:
             select(panelTransactions, btnTransactions);
