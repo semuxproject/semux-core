@@ -1,5 +1,30 @@
 # Change Log
 
+## [v2.2.x](https://github.com/semuxproject/semux-core/tree/v2.2.0) (2021-04-15)
+
+This release brings in various bugfixes and enhancements to Semux Core.
+
+**Bug fixes:**
+- Fixed a bug which allows state change of failed transactions
+
+**Enhancements:**
+- Removed deprecated APIs and bumped the version to `v2.5.0`
+- Added more seed nodes
+- Enabled `FAST_SYNC` by default
+- Added support for HiDPI displays 
+- Improved UX by merging Send and Smart Contract panels and simplifying HD initialization process
+- Added support for configuring min tx gas price and max gas limit
+
+Notably, this release introduces a new file layout:
+```
+/chaindata ->  blockchain data
+/wallet    ->  wallet data
+/log       ->  application logs
+```
+
+It's recommended to do a full sync after upgrading.
+
+
 ## [v2.1.x](https://github.com/semuxproject/semux-core/tree/v2.1.1) (2019-09-10)
 
 This release tries to fix several issues about the voting precompiled contracts. All nodes
