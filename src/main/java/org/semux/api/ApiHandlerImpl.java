@@ -69,6 +69,7 @@ public class ApiHandlerImpl implements ApiHandler {
         this.routes.put(ApiVersion.v2_2_0, routesV2);
         this.routes.put(ApiVersion.v2_3_0, routesV2);
         this.routes.put(ApiVersion.v2_4_0, routesV2);
+        this.routes.put(ApiVersion.v2_5_0, routesV2);
     }
 
     private void load(Map<ImmutablePair<HttpMethod, String>, Route> routes, SemuxApi impl,

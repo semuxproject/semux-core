@@ -50,26 +50,12 @@ public class SimpleApiClientTest {
     @Test
     public void testPost() throws IOException {
         Key key = new Key();
-        String uri = "/account";
+        String uri = "/create-account";
 
         SimpleApiClient apiClient = kernelRule.getKernel().getApiClient();
         String response = apiClient.post(uri, "name", "test", "privateKey", key.getPrivateKey());
 
         assertTrue(response.contains("\"success\":true"));
         assertTrue(response.contains(key.toAddressString()));
-    }
-
-    @Test
-    public void testDelete() throws IOException {
-        // prepare
-        Key key = new Key();
-        kernelRule.getKernel().getApiClient().post("/account", "name", "test", "privateKey", key.getPrivateKey());
-
-        String uri = "/account";
-
-        SimpleApiClient apiClient = kernelRule.getKernel().getApiClient();
-        String response = apiClient.delete(uri, "address", key.toAddress());
-
-        assertTrue(response.contains("\"success\":true"));
     }
 }

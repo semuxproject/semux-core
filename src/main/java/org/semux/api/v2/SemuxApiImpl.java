@@ -618,11 +618,6 @@ public final class SemuxApiImpl implements SemuxApi {
     }
 
     @Override
-    public Response broadcastRawTransactionDeprecated(String raw) {
-        return broadcastRawTransaction(raw);
-    }
-
-    @Override
     public Response signMessage(String address, String message) {
         try {
             byte[] addressBytes = parseAddress(address, true);
@@ -1022,15 +1017,5 @@ public final class SemuxApiImpl implements SemuxApi {
         } catch (CryptoException e) {
             throw new IllegalArgumentException("Parameter `" + name + "` is not a valid hexadecimal string");
         }
-    }
-
-    @Override
-    public Response createAccountDeprecated(String name, String privateKey) {
-        return createAccount(name, privateKey);
-    }
-
-    @Override
-    public Response deleteAccountDeprecated(String address) {
-        return deleteAccount(address);
     }
 }

@@ -108,7 +108,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.4.0.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.5.0.json</inputSpec>
                             <language>jaxrs-cxf</language>
                             <configOptions>
                                 <useGenericResponse>true</useGenericResponse>
@@ -138,7 +138,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.4.0.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/org/semux/api/swagger/v2.5.0.json</inputSpec>
                             <language>jaxrs-cxf-client</language>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>

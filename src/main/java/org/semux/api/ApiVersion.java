@@ -34,9 +34,11 @@ public enum ApiVersion {
 
     v2_3_0("v2.3.0"),
 
-    v2_4_0("v2.4.0");
+    v2_4_0("v2.4.0"),
 
-    public final static ApiVersion DEFAULT = v2_4_0;
+    v2_5_0("v2.5.0");
+
+    public final static ApiVersion DEFAULT = v2_5_0;
 
     public final String prefix;
 
