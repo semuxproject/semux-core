@@ -39,7 +39,7 @@ public class TransactionResultDialog extends JDialog {
 
         JLabel lblBlockNumber = new JLabel(GuiMessages.get("BlockNumber"));
         JLabel lblCode = new JLabel(GuiMessages.get("Code"));
-        JLabel lblGas = new JLabel(GuiMessages.get("Gas"));
+        JLabel lblGas = new JLabel(GuiMessages.get("gasLimit"));
         JLabel lblGasUsed = new JLabel(GuiMessages.get("GasUsed"));
         JLabel lblGasPrice = new JLabel(GuiMessages.get("GasPrice"));
         JLabel lblReturnData = new JLabel(GuiMessages.get("ReturnData"));

@@ -53,7 +53,7 @@ public class TransactionDialog extends JDialog implements ActionListener {
         JLabel lblNonce = new JLabel(GuiMessages.get("Nonce") + ":");
         JLabel lblTimestamp = new JLabel(GuiMessages.get("Timestamp") + ":");
         JLabel lblData = new JLabel(GuiMessages.get("Data") + ":");
-        JLabel lblGas = new JLabel(GuiMessages.get("Gas"));
+        JLabel lblGas = new JLabel(GuiMessages.get("gasLimit"));
         JLabel lblGasPrice = new JLabel(GuiMessages.get("GasPrice"));
         JLabel lblTransactionResult = new JLabel(GuiMessages.get("TransactionResult"));
 

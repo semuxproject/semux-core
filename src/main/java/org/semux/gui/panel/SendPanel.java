@@ -123,7 +123,7 @@ public class SendPanel extends JPanel implements ActionListener {
         txtValue.setActionCommand(Action.SEND.name());
         txtValue.addActionListener(this);
 
-        JLabel lblGas = new JLabel(GuiMessages.get("Gas") + ":");
+        JLabel lblGas = new JLabel(GuiMessages.get("gasLimit") + ":");
         lblGas.setHorizontalAlignment(SwingConstants.RIGHT);
 
         txtGas = SwingUtil.textFieldWithCopyPastePopup();
