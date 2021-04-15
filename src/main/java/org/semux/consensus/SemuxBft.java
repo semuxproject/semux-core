@@ -761,7 +761,7 @@ public class SemuxBft implements BftManager {
 
         // fetch pending transactions
         final List<PendingManager.PendingTransaction> pendingTxs = pendingMgr
-                .getPendingTransactions(config.poolBlockGasLimit());
+                .getPendingTransactions(config.poolMaxTotalGasConsumed());
         final List<Transaction> includedTxs = new ArrayList<>();
         final List<TransactionResult> includedResults = new ArrayList<>();
 
@@ -770,7 +770,7 @@ public class SemuxBft implements BftManager {
         SemuxBlock semuxBlock = new SemuxBlock(tempHeader, config.spec().maxBlockGasLimit());
 
         // only propose gas used up to configured block gas limit
-        long remainingBlockGas = config.poolBlockGasLimit();
+        long remainingBlockGas = config.poolMaxTotalGasConsumed();
         long gasUsedInBlock = 0;
         for (PendingManager.PendingTransaction pendingTx : pendingTxs) {
             Transaction tx = pendingTx.transaction;

@@ -386,7 +386,14 @@ public interface Config {
      *
      * @return
      */
-    int poolBlockGasLimit();
+    int poolMaxTotalGasConsumed();
+
+    /**
+     * Returns the max gas limit for any transaction proposed, local setting
+     *
+     * @return
+     */
+    long poolMaxTxGasLimit();
 
     /**
      * Returns the minimum gas price for any transaction proposed, local setting
@@ -401,7 +408,7 @@ public interface Config {
      *
      * @return
      */
-    long poolMaxTransactionTimeDrift();
+    long poolMaxTxTimeDrift();
 
     // =========================
     // UI

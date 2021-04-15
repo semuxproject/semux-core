@@ -137,9 +137,10 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // =========================
     // Transaction pool
     // =========================
-    protected int poolBlockGasLimit = 10_000_000;
-    protected Amount poolMinGasPrice = Amount.of(10); // 10 NanoSEM = 10 Gwei
-    protected long poolMaxTransactionTimeDrift = TimeUnit.HOURS.toMillis(2);
+    protected int poolMaxTotalGasConsumed = 10_000_000;
+    protected int poolMaxTxGasLimit = 5_000_000;
+    protected Amount poolMinTxGasPrice = Amount.of(10); // 10 NanoSEM = 10 Gwei
+    protected long poolMaxTxTimeDrift = TimeUnit.HOURS.toMillis(2);
 
     // =========================
     // UI
@@ -545,22 +546,27 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     }
 
     @Override
-    public int poolBlockGasLimit() {
+    public int poolMaxTotalGasConsumed() {
         if (this.network() == MAINNET) {
-            return poolBlockGasLimit;
+            return poolMaxTotalGasConsumed;
         } else {
-            return poolBlockGasLimit * 5;
+            return poolMaxTotalGasConsumed * 5;
         }
     }
 
     @Override
-    public Amount poolMinGasPrice() {
-        return poolMinGasPrice;
+    public long poolMaxTxGasLimit() {
+        return poolMaxTxGasLimit;
     }
 
     @Override
-    public long poolMaxTransactionTimeDrift() {
-        return poolMaxTransactionTimeDrift;
+    public Amount poolMinGasPrice() {
+        return poolMinTxGasPrice;
+    }
+
+    @Override
+    public long poolMaxTxTimeDrift() {
+        return poolMaxTxTimeDrift;
     }
 
     @Override
@@ -717,16 +723,20 @@ public abstract class AbstractConfig implements Config, ChainSpec {
                     uiFractionDigits = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
-                case "txpool.blockGasLimit": {
-                    poolBlockGasLimit = Integer.parseInt(props.getProperty(name).trim());
+                case "txpool.maxTotalGasConsumed": {
+                    poolMaxTotalGasConsumed = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
-                case "txpool.minGasPrice": {
-                    poolMinGasPrice = Amount.of(props.getProperty(name).trim());
+                case "txpool.maxTxGasLimit": {
+                    poolMaxTxGasLimit = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
-                case "txpool.maxTransactionTimeDrift": {
-                    poolMaxTransactionTimeDrift = Integer.parseInt(props.getProperty(name).trim());
+                case "txpool.minTxGasPrice": {
+                    poolMinTxGasPrice = Amount.of(props.getProperty(name).trim());
+                    break;
+                }
+                case "txpool.maxTxTimeDrift": {
+                    poolMaxTxTimeDrift = Integer.parseInt(props.getProperty(name).trim());
                     break;
                 }
                 default:

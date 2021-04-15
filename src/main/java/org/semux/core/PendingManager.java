@@ -320,9 +320,12 @@ public class PendingManager implements Runnable, BlockchainListener {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TYPE);
         }
 
-        // reject VM transaction with low gas price
-        if (tx.isVMTransaction() && tx.getGasPrice().lessThan(kernel.getConfig().poolMinGasPrice())) {
-            return new ProcessingResult(0, TransactionResult.Code.INVALID_FEE);
+        // reject VM transaction with low gas price or high gas limit
+        if (tx.isVMTransaction()) {
+            if (tx.getGasPrice().lessThan(kernel.getConfig().poolMinGasPrice())
+                    || tx.getGas() > kernel.getConfig().poolMaxTxGasLimit()) {
+                return new ProcessingResult(0, TransactionResult.Code.INVALID_FEE);
+            }
         }
 
         // reject transactions with a duplicated tx hash
@@ -332,8 +335,8 @@ public class PendingManager implements Runnable, BlockchainListener {
 
         // check transaction timestamp if this is a fresh transaction:
         // a time drift of 2 hours is allowed by default
-        if (tx.getTimestamp() < now - kernel.getConfig().poolMaxTransactionTimeDrift()
-                || tx.getTimestamp() > now + kernel.getConfig().poolMaxTransactionTimeDrift()) {
+        if (tx.getTimestamp() < now - kernel.getConfig().poolMaxTxTimeDrift()
+                || tx.getTimestamp() > now + kernel.getConfig().poolMaxTxTimeDrift()) {
             return new ProcessingResult(0, TransactionResult.Code.INVALID_TIMESTAMP);
         }
 
