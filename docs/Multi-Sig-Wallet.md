@@ -581,9 +581,11 @@ Binary:
 00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000300000000000000000000000008be88c5f839bfbd22f1505a7bb14f992886614900000000000000000000000013db16f8b684e037aca2fd8fe5d81845c16fc6d40000000000000000000000008b139acd0223fcee79f8371ca162e54f3d1dcd16
 ```
 
-Transaction: https://semux.info/explorer/transaction/0xe89853d2cda453f2f2117699597424b5e8878690de48d278a8bdbfb6f92ceff7
+Transaction: https://semux.info/explorer/transaction/0xa6a991ce92867971d0dc841861afd13ca10521b09c9eae6c5f85c297a13cc5e0
 
 
 ## Results
 
-The multi-sig wallet has been successfully deployed at https://semux.info/explorer/account/0x93f158fd14ff520babdbba189693bd85d97e06ed. The owners are semuxgo, orogvany and honeycrypto. Two confirmations are required to move funds from the wallet.
+The multi-sig wallet has been successfully deployed at https://semux.info/explorer/account/0x93f158fd14ff520babdbba189693bd85d97e06ed. 
+
+The owners are semuxgo, orogvany and honeycrypto and two confirmations are required to move funds from the wallet.

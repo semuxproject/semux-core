@@ -31,10 +31,12 @@ The max supply of SEM cryptocurrency is capped at 32,000,000 SEM.
 
 | Purpose       | Amount         | Note                                                                |
 |---------------|----------------|---------------------------------------------------------------------|
-| Block Rewards | 22,000,000 SEM | To be distributed to Semux validators                               |
-| Foundation    | 5,000,000 SEM  | Development, marketing, promotion and bounties                      |
-| Community     | 5,000,000 SEM  | Have been distributed to the community: Alpha/Beta/RC test participants, bitcointalk/BTC/ETH aidrdrop, etc. |
+| Block Rewards | 22,000,000 SEM | Block rewards for Semux Network validators                          |
+| Founders      |  1,000,000 SEM | Retained by the founders who developed the Semux technology         |
+| Development   |  4,000,000 SEM | Reserved for development, marketing and promotion                   |
+| Community     |  5,000,000 SEM | Distributed to airdrop and testing program participants             |
 
+All the remaining funds are moved to a multi-sig wallet. See [this doc](./Multi-Sig-Wallet.md) for more details.
 
 ### Real-time API
 
