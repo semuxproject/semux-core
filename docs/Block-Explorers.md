@@ -1,6 +1,6 @@
 # Block Explorers
 
-A block explorer is a website that allows querying the blockchain outside of the client.
+A block explorer is a website that allows querying the blockchain outside the client.
 
-- http://semuxchain.info/
+Public Semux explorers:
 - https://semux.info/explorer

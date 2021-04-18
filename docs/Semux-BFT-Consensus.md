@@ -23,14 +23,17 @@ dPOS is preferable for energy use and scalability.
 There are six phases to Semux BFT Consensus.  On each block, the validators will go through these phases to forge the 
 next block.
 
-#### New Height
-##### Time: 3 seconds (firm)
-Set height to lastHeight + 1
+### 1 - New Height
+
+**Time: 3 seconds (firm)**
+
+Set height to `lastHeight + 1`
 
 Send new height message to all peers.
 
-#### Propose
-##### Time: 12 seconds (firm)
+### 2 - Propose
+
+**Time: 12 seconds (firm)**
 
 If there are rejected votes, clear them, and increment view.
 
@@ -38,8 +41,9 @@ If you are the primary validator, propose a block, and broadcast it.
 
 Send new view message to all peers.
 
-#### Validate
-##### Time: 6 seconds (firm)
+### 3 - Validate
+
+**Time: 6 seconds (firm)**
 
 If you have received a proposal, validate it, and vote on results.
 
@@ -47,8 +51,9 @@ If you did not receive a proposal, vote no.
 
 Send validate vote to all peers.
 
-#### PreCommit
-##### Time: 6 seconds (firm)
+### 4 - PreCommit
+
+**Time: 6 seconds (firm)**
 
 Check if there is 2/3 validators approved votes, if so vote yes.
 
@@ -56,22 +61,24 @@ Else vote no.
 
 Send preCommit vote to all peers.
 
-##### On failure: go back to propose
+**On failure: go back to propose**
 
-#### Commit
-##### Time: 3 seconds (or less)
+### 5 - Commit
 
-Send message confirming receiving preCommit message.
+**Time: 3 seconds (or less)**
 
-If received other commit messages, move on to finalize.
+Send message confirming receiving 2/3 preCommit votes (finalized certificate).
 
-#### Finalize
-##### Time: 3 seconds (firm)
+Enter finalize phase upon time out or receiving 2/3 commit votes, whichever comes first.
+
+This phase is mainly for synchronization purpose.
+
+### 6 - Finalize
+
+**Time: 3 seconds (firm)**
 
 Check precommit votes again, just to be sure.
 
-Set the votes on the block.
+Write the block into database and update global state.
 
-Add block to the chain.
-
-##### On Success: go to new height
+**On Success: go to new height**

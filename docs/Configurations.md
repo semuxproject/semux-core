@@ -1,6 +1,6 @@
 # Configurations
 
-### Kernel configuration
+### Semux Core configuration
 
 ```
 ################################################################################
@@ -44,29 +44,35 @@ net.maxOutboundConnections = 128
 net.maxMessageQueueSize = 4096
 
 # Message relay redundancy
-net.relayRedundancy = 16
+net.relayRedundancy = 8
 
 # Channel idle timeout, ms
 net.channelIdleTimeout = 120000
 
 # DNS Seed (comma delimited)
-net.dnsSeeds.mainNet = mainnet.semux.org,mainnet.semux.net
-net.dnsSeeds.testNet = testnet.semux.org
+net.dnsSeeds.mainNet = mainnet.semux.org, mainnet-seed.semux.info
+net.dnsSeeds.testNet = testnet.semux.org, testnet-seed.semux.info
 
 #================
 # API
 #================
 
-# Be sure to set up authentication first before enabling API
+# Whether to enable API services. Make sure you change the password below.
 api.enabled = false
 
-# Listening address and port
+# Binding IP address and port
 api.listenIp = 127.0.0.1
 api.listenPort = 5171
 
-# Basic authentication
+# Basic access authentication credential
 api.username = YOUR_API_USERNAME
 api.password = YOUR_API_PASSWORD
+
+# Enable services below as public (authentication optional)
+api.public = blockchain,account,delegate,tool
+
+# Enable services below as private (authentication required)
+api.private = node,wallet
 
 #================
 # UI
@@ -81,17 +87,30 @@ ui.unit = SEM
 ui.fractionDigits = 9
 
 #================
-# VM
+# Transaction pool
 #================
 
-# Set the maximum gas this client can process in one block proposal
-txpool.blockGasLimit = 10000000
+# The max total gas consumed for block proposals
+txpool.maxTotalGasConsumed = 10000000
+
+# The max transaction gasLimit accepted
+txpool.maxTxGasLimit = 5000000
 
 # The minimum price this client will accept for gas
-txpool.minGasPrice = 1
+txpool.minTxGasPrice = 100
 
 # The max transaction time drift in milliseconds
-txpool.maxTransactionTimeDrift = 7200000
+txpool.maxTxTimeDrift = 7200000
+
+#================
+# Syncing
+#================
+
+# Disconnect the peer when an invalid block is received
+sync.disconnectOnInvalidBlock = false
+
+# Use the FAST_SYNC protocol, experimental
+sync.fastSync = true
 ```
 
 ### IP whitelist and blacklist

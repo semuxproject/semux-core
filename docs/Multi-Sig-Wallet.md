@@ -1,11 +1,11 @@
 # Multisig Wallet Log
 
-The Semux Team has decided to move all the remaining fund to a mult-sig wallet for decentralized governance. This article documents how this wallet is deployed.
-
+The Semux Developers moved all the remaining premined fund to a multi-sig wallet for decentralized governance. 
+This article documents how and where this wallet was deployed.
 
 ## Source code
 
-The multi-sig smart contract is copied from https://github.com/ConsenSysMesh/MultiSigWallet/blob/master/MultiSigWalletWithDailyLimit.sol with no modification.
+The multi-sig smart contract was copied from https://github.com/ConsenSysMesh/MultiSigWallet/blob/master/MultiSigWalletWithDailyLimit.sol with no modification.
 
 
 ## Solidity compiler

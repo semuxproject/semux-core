@@ -1,7 +1,7 @@
 # Network Protocol
 
 Clients send messages to peers in order to interact with the blockchain.  These can be
-divided into general peer messages, and messages that Validators use to forge new blocks.
+divided into general peer messages, and consensus methods used by validators for forging blocks.
 
 Messages are written using the Semux [Message Encoding](./Message-Encoding.md) format.
 

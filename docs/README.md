@@ -1,7 +1,7 @@
 Welcome to the Semux Documentation!
 
 ### How it Works
-* [Block Rewards](./Block-Rewards.md)
+* [Supply and Block Rewards](./Supply-and-Block-Rewards.md)
 * [Delegates and Validators](./Delegates-and-Validators.md)
 * [Semux BFT Consensus](./Semux-BFT-Consensus.md)
 * [Semux Virtual Machine](./Semux-Virtual-Machine.md)

@@ -8,12 +8,6 @@ Port 5161 is required to be open for running a full Semux node.
 
 ### Using pre-compiled binaries
 
-**Install JRE 8**
-
-```bash
-sudo apt-get install openjdk-8-jre
-```
-
 **Download & extract Semux pre-compiled binaries of the latest release**
 
 ```bash
@@ -23,26 +17,21 @@ tar -zxvf semux-linux-1.2.0-73852f9.tar.gz
 
 ### Compiling from source code
 
-**Install OpenJDK 8 & Maven**
-```bash
-sudo apt-get install openjdk-8-jdk maven
-```
+**Install OpenJDK 11 & Maven**
 
-**Clone source code**
+Please see guideline on https://adoptopenjdk.net/
+
+**Clone and compile source code**
 ```bash
 git clone https://github.com/semuxproject/semux-core.git
-```
-
-**Compile**
-```bash
-mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+mvn install -DskipTests=true
 ```
 
 The compiled binaries should be available at `dist/linux` once the compilation has completed.
 
 ### Create a wallet.data file
 
-A `wallet.data` file that stores a new private key should be automatically created in your installation directory during 
+A `wallet.data` file that stores a new private key should be automatically created under folder `./wallet` during 
 the startup of a fresh install of Semux wallet. This file is encrypted by a password specified in a CLI/GUI prompt during 
 the first time of wallet startup.
 
@@ -56,7 +45,7 @@ Please re-enter the new password:
 ### Automatic wallet unlock
 
 The standard wallet.data file of Semux is always encrypted even if you entered an empty password during wallet creation. 
-Therefore a wallet password is required to be provided for automatic unlock when you setup a full node.
+Therefore, a wallet password is required to be provided for automatic unlock when you set up a full node.
 
 The following ways are available for automatic wallet unlock which will be applied in sequence:
 
