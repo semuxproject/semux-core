@@ -1,7 +1,7 @@
 # Virtual Machine Contracts
 
 Semux utilizes the Ethereum VM smart contract language, so porting your favorite Ethereum contracts is a breeze!
-You can also use your favorite Ethereum tools to interact with the Semux blockchain like [Remix](https://remix.ethereum.org/)
+You can also use your favorite Ethereum tools to interact with the Semux blockchain like https://remix.ethereum.org/
 
 ## Writing a contract
 You should consider using [Solidity](https://solidity.readthedocs.io/en/v0.5.3/) when writing smart contracts for 
@@ -26,8 +26,8 @@ contract helloWorld {
 }
 ```
 
-## Compiling a contract
-Use a tool like [Remix](https://remix.ethereum.org/) to compile your solidity into bytecode
+## Compiling the contract
+Use a tool like https://remix.ethereum.org/ to compile your solidity into bytecode
 
 * Select the compiler that matches your version.
 * Select the EVM Version `constantinople`
@@ -73,7 +73,7 @@ You will get the following bytecode and ABI
 ]
 ```
 
-## Calling semux to create contract
+## Deploying it!
 
 To deploy a smart contract, you need to figure out three inputs:
 - The contract code, which is the `object` attribute of the bytecode JSON file above.
@@ -82,7 +82,7 @@ To deploy a smart contract, you need to figure out three inputs:
     * Paste the contract's ABI
     * Select function type `constructor` and provide the arguments
     * Copy the ABI-encoded output
-- The gasLimit to provide (use the default `2000000` unless you know the actual gas consumption)
+- The gasLimit to provide (use the default `2000000` or more; the unused gas will be refunded)
 
 Then, you can deploy a contract via the Semux API and Semux Core wallet:
 - Select transaction type: `Deploy a contract`
@@ -90,22 +90,23 @@ Then, you can deploy a contract via the Semux API and Semux Core wallet:
 - Paste the **contract code** and **ABI-encoded initialization arguments** into the data input box.
 - Click `Send`
 
-You now need to determine what your contract address is.  There are programmatic ways to determine it, but if you
-find the contract in your Transactions window, you can see something like ```To: 0xd2b17f8f2576e1e0a44656924140467591eb1a7b```
-This is your contract address.
+Once the transaction is processed sucessfully, a smart contract will be created. To get its address, you can:
+- Check the transaction result in Semux Core wallet.
+- **OR** visit https://www.semux.info/explorer.
+- **OR** compute the address programmatically.
 
-Alternatively, check the transaction on https://www.semux.info/explorer.
-
-## Calling the contract
+## Calling the deployed contract
  
-To call a method of the deployed contract, you need to figure out what data to pass to the transaction.
+To call a method of the deployed contract, you need to figure out what data to pass to it.
 
-Again, you can use the tool provided by https://abi.hashex.org/
-
-1. Past the contract's ABI
+1. Past the contract's ABI to https://abi.hashex.org/
 2. Select the method you'd like to call into and provide the arguments
 3. Copy the ABI-encode output, which will be used as the "Data" for your transaction.
 
+Then, switch to your Semux Core wallet or API explorer for sending transaction.
 
 ## Links
+- Block explorer: https://semux.info/explorer
+- Remix IDE: https://remix.ethereum.org
+- ABI tool: https://abi.hashex.org/
 - Ethereum Development Tutorial: https://github.com/ethereum/wiki/wiki/Ethereum-Development-Tutorial
