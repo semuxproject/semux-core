@@ -44,7 +44,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 public class ConsoleDialog extends JDialog implements ActionListener {
 
@@ -220,10 +220,10 @@ public class ConsoleDialog extends JDialog implements ActionListener {
 
         StringBuilder builder = new StringBuilder();
 
-        ApiOperation apiOperation = method.getAnnotation(ApiOperation.class);
+        Operation apiOperation = method.getAnnotation(Operation.class);
 
         if (apiOperation != null) {
-            String description = apiOperation.value();
+            String description = apiOperation.description();
             if (!description.trim().isEmpty()) {
                 builder.append(description).append("\n\t");
             }
@@ -244,9 +244,9 @@ public class ConsoleDialog extends JDialog implements ActionListener {
             builder.append(">");
         }
 
-        ApiOperation operation = method.getAnnotation(ApiOperation.class);
+        Operation operation = method.getAnnotation(Operation.class);
         if (operation != null) {
-            builder.append("\n\t").append(operation.notes()).append("\n");
+            builder.append("\n\t").append(operation.description()).append("\n");
         }
 
         builder.append("\n");
