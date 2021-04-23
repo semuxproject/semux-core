@@ -2,6 +2,7 @@ type=text/javascript    exts=js
 type=text/css   exts=css
 type=text/html  exts=html,htm
 type=application/json  exts=json,map
+type=application/x-yaml  exts=yml
 type=image/png  exts=png
 type=image/jpeg  exts=jpg
 type=image/gif  exts=gif

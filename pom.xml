@@ -269,7 +269,6 @@
                         <configuration>
                             <target>
                                 <replace token="import org.apache.cxf.jaxrs.ext.multipart.*;" value="" includes="**/*.java" dir="${project.basedir}/src/gen/java" />
-                                <replace token="import io.swagger.jaxrs.PATCH;" value="" includes="**/*.java" dir="${project.basedir}/src/gen/java" />
                             </target>
                         </configuration>
                     </execution>
@@ -496,7 +495,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
                                         <artifactId>maven-antrun-plugin</artifactId>
-                                        <versionRange>[1.8,)</versionRange>
+                                        <versionRange>1.8</versionRange>
                                         <goals>
                                             <goal>run</goal>
                                         </goals>
@@ -507,9 +506,9 @@
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>io.swagger</groupId>
+                                        <groupId>io.swagger.codegen.v3</groupId>
                                         <artifactId>swagger-codegen-maven-plugin</artifactId>
-                                        <versionRange>[2.3.1,)</versionRange>
+                                        <version>3.0.25</version>
                                         <goals>
                                             <goal>generate</goal>
                                         </goals>

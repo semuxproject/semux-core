@@ -30,7 +30,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /peers:
@@ -52,7 +52,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /syncing:
@@ -74,7 +74,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /pending-transactions:
@@ -96,7 +96,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /node:
@@ -125,7 +125,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /blacklist:
@@ -149,13 +149,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/AddToBlacklistResponse"
         "400":
           description: bad request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /whitelist:
@@ -179,13 +179,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/AddToWhitelistResponse"
         "400":
           description: bad request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /account:
@@ -215,7 +215,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /account/transactions:
@@ -261,7 +261,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /account/internal-transactions:
@@ -307,7 +307,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /account/pending-transactions:
@@ -353,7 +353,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
   /account/votes:
     get:
       tags:
@@ -381,7 +381,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /account/code:
@@ -411,7 +411,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
   /account/storage:
     get:
       tags:
@@ -446,7 +446,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
   /latest-block:
     get:
       tags:
@@ -466,7 +466,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /latest-block-number:
@@ -488,7 +488,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /block-by-hash:
@@ -518,7 +518,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /block-by-number:
@@ -549,7 +549,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction:
@@ -579,7 +579,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction-result:
@@ -609,7 +609,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction-limits:
@@ -647,7 +647,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /delegate:
@@ -677,7 +677,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /delegates:
@@ -699,7 +699,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /validators:
@@ -721,7 +721,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /vote:
@@ -758,7 +758,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /votes:
@@ -789,7 +789,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /accounts:
@@ -811,7 +811,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /create-account:
@@ -848,7 +848,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /delete-account:
@@ -878,7 +878,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction/transfer:
@@ -946,7 +946,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction/create:
@@ -1016,7 +1016,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction/call:
@@ -1093,7 +1093,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction/unvote:
@@ -1155,7 +1155,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction/vote:
@@ -1217,7 +1217,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /transaction/delegate:
@@ -1271,7 +1271,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /sign-message:
@@ -1308,7 +1308,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /sign-raw-transaction:
@@ -1347,7 +1347,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /local-call:
@@ -1409,7 +1409,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /local-create:
@@ -1464,7 +1464,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /estimate-gas:
@@ -1525,7 +1525,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /verify-message:
@@ -1568,7 +1568,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /compose-raw-transaction:
@@ -1679,7 +1679,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
   /broadcast-raw-transaction:
@@ -1709,7 +1709,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiHandlerResponse"
+                $ref: "#/components/schemas/FailureResponse"
       security:
         - basicAuth: []
 security:
@@ -1722,23 +1722,456 @@ components:
       type: http
       scheme: basic
   schemas:
-    ApiHandlerResponse:
+    FailureResponse:
       type: object
-      discriminator:
-        propertyName: ApiHandlerResponse
-      required:
-        - success
       properties:
         success:
-          description: Whether this operation was processed successfully
+          description: This property is deprecated, always false
+          type: boolean
+        message:
+          description: The exact failing cause
+          type: string
+    AddNodeResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
           type: boolean
         message:
           description: Success/error message
           type: string
-    GetRootResponse:
+    AddToBlacklistResponse:
       type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+    AddToWhitelistResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+    CreateAccountResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: The address of the newly created account
+          type: string
+          pattern: ^(0x)?[0-9a-fA-F]{40}$
+    DoTransactionResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: The transaction hash
+          type: string
+          pattern: ^(0x)?[0-9a-fA-F]{64}$
+    GetAccountResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/AccountType"
+    DeleteAccountResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+    GetAccountTransactionsResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionType"
+    GetAccountInternalTransactionsResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/InternalTransactionType"
+    GetAccountPendingTransactionsResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionType"
+    GetAccountVotesResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountVoteType"
+    GetAccountCodeResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: Account code encoded in hexadecimal string
+          type: string
+          pattern: ^(0x)?[0-9a-fA-F]*$
+          nullable: true
+    GetAccountStorageResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: Account storage encoded in hexadecimal string
+          type: string
+          pattern: ^(0x)?[0-9a-fA-F]*$
+          nullable: true
+    GetBlockResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/BlockType"
+    GetDelegateResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/DelegateType"
+    GetDelegatesResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/DelegateType"
+    GetInfoResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/InfoType"
+    GetLatestBlockNumberResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: The number of the latest block
+          type: string
+          format: int64
+          pattern: ^\d+$
+    GetLatestBlockResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/BlockType"
+    GetPeersResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/PeerType"
+    GetPendingTransactionsResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionType"
+    GetTransactionLimitsResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/TransactionLimitsType"
+    GetTransactionResultResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/TransactionResultType"
+    GetTransactionResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/TransactionType"
+    GetValidatorsResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: A list of validator addresses
+          type: array
+          items:
+            description: Validator address
+            type: string
+            pattern: ^(0x)?[0-9a-fA-F]{40}$
+    GetVoteResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: Total votes in nanoSEM
+          type: string
+          format: int64
+          pattern: ^\d+$
+    GetVotesResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: A map of [voter address] => [votes]
+          type: object
+          additionalProperties:
+            type: string
+            format: int64
+            pattern: ^\d+$
+    GetAccountsResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: A list of account addresses
+          type: array
+          items:
+            description: Account address
+            type: string
+            pattern: ^(0x)?[0-9a-fA-F]{40}$
+    SignMessageResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: The message signature encoded in hexadecimal string
+          type: string
+          pattern: ^(0x)?[0-9a-fA-F]{192}$
+    VerifyMessageResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        valid:
+          description: Whether the signature is valid
+          type: boolean
+    ComposeRawTransactionResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: The composed raw transaction encoded in hexadecimal string
+          type: string
+    SignRawTransactionResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: The signed raw transaction encoded in hexadecimal string
+          type: string
+    GetSyncingStatusResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/SyncingStatusType"
+    LocalCallResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/TransactionResultType"
+    LocalCreateResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          $ref: "#/components/schemas/TransactionResultType"
+    EstimateGasResponse:
+      type: object
+      properties:
+        success:
+          description: This property is deprecated, always true
+          type: boolean
+        message:
+          description: Success/error message
+          type: string
+        result:
+          description: The estimated gas usage
+          type: string
+          format: int64
+          pattern: ^\d+$
     AccountType:
       type: object
       properties:
@@ -1773,10 +2206,6 @@ components:
           description: The number of pending transaction from/to this account
           type: integer
           format: int32
-    AddNodeResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
     BlockType:
       type: object
       properties:
@@ -1827,15 +2256,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TransactionType"
-    CreateAccountResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: The address of the newly created account
-              type: string
-              pattern: ^(0x)?[0-9a-fA-F]{40}$
     DelegateType:
       type: object
       properties:
@@ -1874,82 +2294,6 @@ components:
         validator:
           description: Whether the delegate is currently a validator
           type: boolean
-    DoTransactionResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: The transaction hash
-              type: string
-              pattern: ^(0x)?[0-9a-fA-F]{64}$
-    GetAccountResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/AccountType"
-    DeleteAccountResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-    GetAccountTransactionsResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              type: array
-              items:
-                $ref: "#/components/schemas/TransactionType"
-    GetAccountInternalTransactionsResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              type: array
-              items:
-                $ref: "#/components/schemas/InternalTransactionType"
-    GetAccountPendingTransactionsResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              type: array
-              items:
-                $ref: "#/components/schemas/TransactionType"
-    GetAccountVotesResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              type: array
-              items:
-                $ref: "#/components/schemas/AccountVoteType"
-    GetAccountCodeResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: Account code encoded in hexadecimal string
-              type: string
-              pattern: ^(0x)?[0-9a-fA-F]*$
-              nullable: true
-    GetAccountStorageResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: Account storage encoded in hexadecimal string
-              type: string
-              pattern: ^(0x)?[0-9a-fA-F]*$
-              nullable: true
     AccountVoteType:
       type: object
       properties:
@@ -1960,154 +2304,6 @@ components:
           type: string
           format: int64
           pattern: ^\d+$
-    GetBlockResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/BlockType"
-    GetDelegateResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/DelegateType"
-    GetDelegatesResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              type: array
-              items:
-                $ref: "#/components/schemas/DelegateType"
-    GetInfoResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/InfoType"
-    GetLatestBlockNumberResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: The number of the latest block
-              type: string
-              format: int64
-              pattern: ^\d+$
-    GetLatestBlockResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/BlockType"
-    GetPeersResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              type: array
-              items:
-                $ref: "#/components/schemas/PeerType"
-    GetPendingTransactionsResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              type: array
-              items:
-                $ref: "#/components/schemas/TransactionType"
-    GetTransactionLimitsResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/TransactionLimitsType"
-    GetTransactionResultResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/TransactionResultType"
-    GetTransactionResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/TransactionType"
-    GetValidatorsResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: A list of validator addresses
-              type: array
-              items:
-                description: Validator address
-                type: string
-                pattern: ^(0x)?[0-9a-fA-F]{40}$
-    GetVoteResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: Total votes in nanoSEM
-              type: string
-              format: int64
-              pattern: ^\d+$
-    GetVotesResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: A map of [voter address] => [votes]
-              type: object
-              additionalProperties:
-                type: string
-                format: int64
-                pattern: ^\d+$
     InfoType:
       type: object
       properties:
@@ -2147,20 +2343,6 @@ components:
           description: The number of transactions in pending pool
           type: integer
           format: int32
-    GetAccountsResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: A list of account addresses
-              type: array
-              items:
-                description: Account address
-                type: string
-                pattern: ^(0x)?[0-9a-fA-F]{40}$
     PeerType:
       type: object
       properties:
@@ -2197,17 +2379,6 @@ components:
           type: array
           items:
             type: string
-    SignMessageResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: The message signature encoded in hexadecimal string
-              type: string
-              pattern: ^(0x)?[0-9a-fA-F]{192}$
     TransactionLimitsType:
       type: object
       properties:
@@ -2408,39 +2579,6 @@ components:
           type: array
           items:
             type: string
-    VerifyMessageResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            valid:
-              description: Whether the signature is valid
-              type: boolean
-    ComposeRawTransactionResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: The composed raw transaction encoded in hexadecimal string
-              type: string
-    SignRawTransactionResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: The signed raw transaction encoded in hexadecimal string
-              type: string
-    GetSyncingStatusResponse:
-      type: object
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/SyncingStatusType"
     SyncingStatusType:
       type: object
       required:
@@ -2464,33 +2602,3 @@ components:
           type: string
           format: int64
           pattern: ^\d+$
-    LocalCallResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/TransactionResultType"
-    LocalCreateResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              $ref: "#/components/schemas/TransactionResultType"
-    EstimateGasResponse:
-      type: object
-      required:
-        - success
-      allOf:
-        - $ref: "#/components/schemas/ApiHandlerResponse"
-        - properties:
-            result:
-              description: The estimated gas usage
-              type: string
-              format: int64
-              pattern: ^\d+$

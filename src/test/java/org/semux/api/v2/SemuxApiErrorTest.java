@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.semux.api.ApiVersion;
-import org.semux.api.v2.model.ApiHandlerResponse;
+import org.semux.api.v2.model.FailureResponse;
 import org.semux.api.v2.server.SemuxApi;
 import org.semux.crypto.Hex;
 import org.semux.util.Bytes;
@@ -217,7 +217,7 @@ public class SemuxApiErrorTest extends SemuxApiTestBase {
         assertNotNull(response);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        ApiHandlerResponse apiHandlerResponse = response.readEntity(ApiHandlerResponse.class);
+        FailureResponse apiHandlerResponse = response.readEntity(FailureResponse.class);
         assertNotNull(apiHandlerResponse);
         assertNotNull(apiHandlerResponse.getMessage());
         assertFalse(apiHandlerResponse.isSuccess());

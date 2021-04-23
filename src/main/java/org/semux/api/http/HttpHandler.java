@@ -79,7 +79,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private static final String JSON_CONTENT_TYPE = "application/json; charset=UTF-8";
 
-    private static final Pattern STATIC_FILE_PATTERN = Pattern.compile("^.+\\.(html|json|js|css|png)$");
+    private static final Pattern STATIC_FILE_PATTERN = Pattern.compile("^.+\\.(html|json|js|css|png|yml)$");
 
     private final Config config;
     private final ApiHandler apiHandler;

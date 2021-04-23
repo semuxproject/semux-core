@@ -10,6 +10,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.security.spec.InvalidKeySpecException;
@@ -29,12 +31,14 @@ import org.ethereum.vm.util.HashUtil;
 import org.semux.Kernel;
 import org.semux.api.util.TransactionBuilder;
 import org.semux.api.v2.model.AddNodeResponse;
-import org.semux.api.v2.model.ApiHandlerResponse;
+import org.semux.api.v2.model.AddToBlacklistResponse;
+import org.semux.api.v2.model.AddToWhitelistResponse;
 import org.semux.api.v2.model.ComposeRawTransactionResponse;
 import org.semux.api.v2.model.CreateAccountResponse;
 import org.semux.api.v2.model.DeleteAccountResponse;
 import org.semux.api.v2.model.DoTransactionResponse;
 import org.semux.api.v2.model.EstimateGasResponse;
+import org.semux.api.v2.model.FailureResponse;
 import org.semux.api.v2.model.GetAccountCodeResponse;
 import org.semux.api.v2.model.GetAccountInternalTransactionsResponse;
 import org.semux.api.v2.model.GetAccountPendingTransactionsResponse;
@@ -129,8 +133,8 @@ public final class SemuxApiImpl implements SemuxApi {
             ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
             kernel.getChannelManager().closeBlacklistedChannels();
 
-            ApiHandlerResponse resp = new ApiHandlerResponse();
-            return Response.ok().entity(resp.success(true)).build();
+            AddToBlacklistResponse resp = new AddToBlacklistResponse();
+            return success(resp);
         } catch (UnknownHostException | IllegalArgumentException ex) {
             return badRequest(ex.getMessage());
         }
@@ -145,8 +149,8 @@ public final class SemuxApiImpl implements SemuxApi {
             ipFilter.whitelistIp(whitelistIp);
             ipFilter.persist(new File(kernel.getConfig().configDir(), SemuxIpFilter.CONFIG_FILE).toPath());
 
-            ApiHandlerResponse resp = new ApiHandlerResponse();
-            return Response.ok().entity(resp.success(true)).build();
+            AddToWhitelistResponse resp = new AddToWhitelistResponse();
+            return success(resp);
         } catch (UnknownHostException | IllegalArgumentException ex) {
             return badRequest(ex.getMessage());
         }
@@ -789,9 +793,15 @@ public final class SemuxApiImpl implements SemuxApi {
      * @param resp
      * @return
      */
-    private Response success(ApiHandlerResponse resp) {
-        resp.setSuccess(true);
-        resp.setMessage("successful operation");
+    private <T> Response success(T resp) {
+        try {
+            Method setSuccess = resp.getClass().getMethod("setSuccess", Boolean.class);
+            Method setMessage = resp.getClass().getMethod("setMessage", String.class);
+            setSuccess.invoke(resp, Boolean.TRUE);
+            setMessage.invoke(resp, "Success");
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
 
         return Response.ok().entity(resp).build();
     }
@@ -803,7 +813,7 @@ public final class SemuxApiImpl implements SemuxApi {
      * @return
      */
     private Response badRequest(String message) {
-        ApiHandlerResponse resp = new ApiHandlerResponse();
+        FailureResponse resp = new FailureResponse();
         resp.setSuccess(false);
         resp.setMessage(message);
 
