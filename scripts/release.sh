@@ -18,6 +18,20 @@ mvn clean install -DskipTests
 # Navigate to the dist folder
 cd dist
 
+# Download JVM
+wget -nc https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jre_x64_windows_hotspot_11.0.11_9.zip
+unzip OpenJDK11U-jre_x64_windows_hotspot_11.0.11_9.zip
+mv jdk-11.0.11+9-jre ./windows/jvm
+
+wget -nc https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jre_x64_linux_hotspot_11.0.11_9.tar.gz
+tar -xvf OpenJDK11U-jre_x64_linux_hotspot_11.0.11_9.tar.gz
+mv jdk-11.0.11+9-jre ./linux/jvm
+
+wget -nc https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jre_x64_mac_hotspot_11.0.11_9.tar.gz
+tar -xvf OpenJDK11U-jre_x64_mac_hotspot_11.0.11_9.tar.gz
+mv jdk-11.0.11+9-jre/Contents/Home ./macos/jvm
+rm -fr jdk-11.0.11+9-jre
+
 # Make a Windows release
 folder=$name-windows-$label
 archive=$folder.zip
