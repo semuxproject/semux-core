@@ -2,7 +2,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.semux</groupId>
-    <artifactId>semux</artifactId>
+    <artifactId>semux-core</artifactId>
     <version>2.2.1</version>
     <packaging>jar</packaging>
     <description>Semux is an experimental high-performance blockchain platform that powers decentralized application.</description>
@@ -302,7 +302,7 @@
                                     </fileset>
                                 </copy>
                                 <copy file="${project.basedir}/src/main/resources/org/semux/gui/splash.png" todir="${dist.base}/windows/lib" />
-                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/windows/lib/semux.jar" />
+                                <copy file="${project.basedir}/target/semux-core-${project.version}-shaded.jar" tofile="${dist.base}/windows/lib/semux.jar" />
                                 <copy file="${project.basedir}/scripts/semux-cli.bat" tofile="${dist.base}/windows/semux-cli.bat" />
                                 <copy file="${project.basedir}/scripts/semux-gui.bat" tofile="${dist.base}/windows/semux-gui.bat" />
                                 <fixcrlf srcdir="${dist.base}/windows" includes="**/*.ini" eol="dos" eof="asis" />
@@ -317,7 +317,7 @@
                                     </fileset>
                                 </copy>
                                 <copy file="${project.basedir}/src/main/resources/org/semux/gui/splash.png" todir="${dist.base}/linux/lib" />
-                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/linux/lib/semux.jar" />
+                                <copy file="${project.basedir}/target/semux-core-${project.version}-shaded.jar" tofile="${dist.base}/linux/lib/semux.jar" />
                                 <copy file="${project.basedir}/scripts/semux-cli.sh" tofile="${dist.base}/linux/semux-cli.sh" />
                                 <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/linux/semux-gui.sh" />
                                 <chmod file="${dist.base}/linux/semux*.sh" perm="755" />
@@ -332,7 +332,7 @@
                                     </fileset>
                                 </copy>
                                 <copy file="${project.basedir}/src/main/resources/org/semux/gui/splash.png" todir="${dist.base}/macos/lib" />
-                                <copy file="${project.basedir}/target/semux-${project.version}-shaded.jar" tofile="${dist.base}/macos/lib/semux.jar" />
+                                <copy file="${project.basedir}/target/semux-core-${project.version}-shaded.jar" tofile="${dist.base}/macos/lib/semux.jar" />
                                 <copy file="${project.basedir}/scripts/semux-cli.sh" tofile="${dist.base}/macos/semux-cli.sh" />
                                 <copy file="${project.basedir}/scripts/semux-gui.sh" tofile="${dist.base}/macos/semux-gui.sh" />
                                 <chmod file="${dist.base}/macos/semux*.sh" perm="755" />
