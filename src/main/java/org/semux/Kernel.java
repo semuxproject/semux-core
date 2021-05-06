@@ -243,11 +243,7 @@ public class Kernel {
             // memory
             GlobalMemory m = hal.getMemory();
             long mb = 1024L * 1024L;
-            logger.info("Memory: total = {} MB, available = {} MB, swap total = {} MB, swap available = {} MB",
-                    m.getTotal() / mb,
-                    m.getAvailable() / mb,
-                    m.getSwapTotal() / mb,
-                    (m.getSwapTotal() - m.getSwapUsed()) / mb);
+            logger.info("Memory: total = {} MB, available = {} MB", m.getTotal() / mb, m.getAvailable() / mb);
 
             // disk
             for (HWDiskStore disk : hal.getDiskStores()) {
