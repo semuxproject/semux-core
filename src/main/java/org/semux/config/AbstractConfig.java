@@ -101,10 +101,10 @@ public abstract class AbstractConfig implements Config, ChainSpec {
     // =========================
     // Sync
     // =========================
-    protected long syncDownloadTimeout = 10_000L;
-    protected int syncMaxQueuedJobs = 8192;
-    protected int syncMaxPendingJobs = 256;
-    protected int syncMaxPendingBlocks = 512;
+    protected long syncDownloadTimeout = 1_000L;
+    protected int syncMaxQueuedJobs = 10_000;
+    protected int syncMaxPendingJobs = 200;
+    protected int syncMaxPendingBlocks = 2_000;
     protected boolean syncDisconnectOnInvalidBlock = false;
     protected boolean syncFastSync = false;
 

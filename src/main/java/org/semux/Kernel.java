@@ -102,6 +102,8 @@ public class Kernel {
     protected SemuxSync sync;
     protected SemuxBft bft;
 
+    private final byte[] DUMMY_ADDRESS = new Key().toAddress();
+
     /**
      * Creates a kernel instance and initializes it.
      * 
@@ -466,7 +468,7 @@ public class Kernel {
         Block prevBlock = getBlockchain().getLatestBlock();
         BlockHeader blockHeader = new BlockHeader(
                 prevBlock.getNumber() + 1,
-                new Key().toAddress(),
+                DUMMY_ADDRESS,
                 prevBlock.getHash(),
                 TimeUtil.currentTimeMillis(),
                 Bytes.EMPTY_HASH,

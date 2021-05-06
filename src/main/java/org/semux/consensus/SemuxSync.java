@@ -70,7 +70,7 @@ public class SemuxSync implements SyncManager {
     private static final Logger logger = LoggerFactory.getLogger(SemuxSync.class);
 
     private static final ThreadFactory factory = new ThreadFactory() {
-        private AtomicInteger cnt = new AtomicInteger(0);
+        private final AtomicInteger cnt = new AtomicInteger(0);
 
         @Override
         public Thread newThread(Runnable r) {
@@ -80,6 +80,7 @@ public class SemuxSync implements SyncManager {
 
     private static final ScheduledExecutorService timer1 = Executors.newSingleThreadScheduledExecutor(factory);
     private static final ScheduledExecutorService timer2 = Executors.newSingleThreadScheduledExecutor(factory);
+    private static final ScheduledExecutorService timer3 = Executors.newSingleThreadScheduledExecutor(factory);
 
     private final long DOWNLOAD_TIMEOUT;
 
@@ -89,39 +90,40 @@ public class SemuxSync implements SyncManager {
 
     private static final Random random = new Random();
 
-    private Config config;
+    private final Config config;
 
-    private Blockchain chain;
-    private ChannelManager channelMgr;
+    private final Blockchain chain;
+    private final ChannelManager channelMgr;
 
     // task queues
-    private AtomicLong latestQueuedTask = new AtomicLong();
+    private final AtomicLong latestQueuedTask = new AtomicLong();
 
     // Blocks to download
-    private TreeSet<Long> toDownload = new TreeSet<>();
+    private final TreeSet<Long> toDownload = new TreeSet<>();
 
     // Blocks which were requested but haven't been received
-    private Map<Long, Long> toReceive = new HashMap<>();
+    private final Map<Long, Long> toReceive = new HashMap<>();
 
     // Blocks which were received but haven't been validated
-    private TreeSet<Pair<Block, Channel>> toValidate = new TreeSet<>(
+    private final TreeSet<Pair<Block, Channel>> toValidate = new TreeSet<>(
             Comparator.comparingLong(o -> o.getKey().getNumber()));
 
     // Blocks which were validated but haven't been imported
-    private TreeMap<Long, Pair<Block, Channel>> toImport = new TreeMap<>();
+    private final TreeMap<Long, Pair<Block, Channel>> toImport = new TreeMap<>();
 
     private final Object lock = new Object();
 
     // current and target heights
-    private AtomicLong begin = new AtomicLong();
-    private AtomicLong current = new AtomicLong();
-    private AtomicLong target = new AtomicLong();
+    private final AtomicLong begin = new AtomicLong();
+    private final AtomicLong current = new AtomicLong();
+    private final AtomicLong target = new AtomicLong();
+    private final AtomicLong lastObserved = new AtomicLong();
 
     private Instant beginningInstant;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     // reset at the beginning of a sync task
-    private Set<String> badPeers = new HashSet<>();
+    private final Set<String> badPeers = new HashSet<>();
 
     public SemuxSync(Kernel kernel) {
         this.config = kernel.getConfig();
@@ -154,14 +156,25 @@ public class SemuxSync implements SyncManager {
                 begin.set(chain.getLatestBlockNumber() + 1);
                 current.set(chain.getLatestBlockNumber() + 1);
                 target.set(targetHeight);
+                lastObserved.set(chain.getLatestBlockNumber());
                 latestQueuedTask.set(chain.getLatestBlockNumber());
                 growToDownloadQueue();
             }
 
             // [2] start tasks
-            long period = config.syncFastSync() ? 1 : 5;
-            ScheduledFuture<?> download = timer1.scheduleAtFixedRate(this::download, 0, period, TimeUnit.MILLISECONDS);
-            ScheduledFuture<?> process = timer2.scheduleAtFixedRate(this::process, 0, period, TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> download = timer1.scheduleAtFixedRate(this::download, 0, 500, TimeUnit.MICROSECONDS);
+            ScheduledFuture<?> process = timer2.scheduleAtFixedRate(this::process, 0, 1000, TimeUnit.MICROSECONDS);
+            ScheduledFuture<?> reporter = timer3.scheduleAtFixedRate(() -> {
+                long newBlockNumber = chain.getLatestBlockNumber();
+                logger.info(
+                        "Syncing status: importing {} blocks per second, {} to download, {} to receive, {} to validate, {} to import",
+                        (newBlockNumber - lastObserved.get()) / 30,
+                        toDownload.size(),
+                        toReceive.size(),
+                        toValidate.size(),
+                        toImport.size());
+                lastObserved.set(newBlockNumber);
+            }, 30, 30, TimeUnit.SECONDS);
 
             // [3] wait until the sync is done
             while (isRunning.get()) {
@@ -179,6 +192,7 @@ public class SemuxSync implements SyncManager {
             // [4] cancel tasks
             download.cancel(true);
             process.cancel(false);
+            reporter.cancel(true);
 
             Instant end = Instant.now();
             logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(beginningInstant, end)));
