@@ -1,5 +1,15 @@
 # Change Log
 
+
+## [v2.3.x](https://github.com/semuxproject/semux-core/tree/v2.3.0) (2021-05-06)
+
+**Bug fixes:**
+- Fixed the launching issue for macOS Big Sur
+
+**Enhancements:**
+- Migrated API specs to Open API 3.0
+
+
 ## [v2.2.x](https://github.com/semuxproject/semux-core/tree/v2.2.0) (2021-04-15)
 
 This release brings in various bugfixes and enhancements to Semux Core.
