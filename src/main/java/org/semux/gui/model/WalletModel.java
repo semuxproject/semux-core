@@ -39,12 +39,12 @@ public class WalletModel {
 
     private final Config config;
 
-    private SyncManager.Progress syncProgress;
+    private volatile SyncManager.Progress syncProgress;
 
-    private Block latestBlock;
+    private volatile Block latestBlock;
 
-    private Key coinbase;
-    private Status status;
+    private volatile Key coinbase;
+    private volatile Status status;
 
     private volatile Map<ByteArray, Integer> accountsIndex = new HashMap<>();
     private volatile List<WalletAccount> accounts = new ArrayList<>();
@@ -52,7 +52,7 @@ public class WalletModel {
     private volatile List<String> validators = new ArrayList<>();
     private volatile boolean uniformDistributionEnabled = false;
 
-    private Map<String, Peer> activePeers = new HashMap<>();
+    private volatile Map<String, Peer> activePeers = new HashMap<>();
 
     public WalletModel(Config config) {
         this.config = config;

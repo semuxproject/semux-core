@@ -28,7 +28,7 @@ public class StatusBarTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testSyncProgress2() {
         testStatusBar(1234L, 10000L, Duration.ofSeconds(300000), 1234,
-                "12.34 % (24 days 15 hours 58 minutes 31 seconds)");
+                "12.34 % (24 days 15 hours 58 minutes 38 seconds)");
     }
 
     @Test

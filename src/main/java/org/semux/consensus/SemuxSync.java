@@ -6,6 +6,8 @@
  */
 package org.semux.consensus;
 
+import static java.time.Duration.ofSeconds;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -119,7 +121,7 @@ public class SemuxSync implements SyncManager {
     private final AtomicLong target = new AtomicLong();
     private final AtomicLong lastObserved = new AtomicLong();
 
-    private Instant beginningInstant;
+    private final AtomicLong beginningTimestamp = new AtomicLong();
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     // reset at the beginning of a sync task
@@ -140,7 +142,7 @@ public class SemuxSync implements SyncManager {
     @Override
     public void start(long targetHeight) {
         if (isRunning.compareAndSet(false, true)) {
-            beginningInstant = Instant.now();
+            beginningTimestamp.set(System.currentTimeMillis());
 
             badPeers.clear();
 
@@ -195,7 +197,8 @@ public class SemuxSync implements SyncManager {
             reporter.cancel(true);
 
             Instant end = Instant.now();
-            logger.info("Syncing finished, took {}", TimeUtil.formatDuration(Duration.between(beginningInstant, end)));
+            logger.info("Syncing finished, took {}",
+                    TimeUtil.formatDuration(Duration.between(Instant.ofEpochMilli(beginningTimestamp.get()), end)));
         }
     }
 
@@ -532,7 +535,7 @@ public class SemuxSync implements SyncManager {
                 begin.get(),
                 current.get(),
                 target.get(),
-                Duration.between(beginningInstant != null ? beginningInstant : Instant.now(), Instant.now()));
+                Duration.between(Instant.ofEpochMilli(beginningTimestamp.get()), Instant.now()));
     }
 
     public static class SemuxSyncProgress implements Progress {
@@ -569,27 +572,15 @@ public class SemuxSync implements SyncManager {
 
         @Override
         public Duration getSyncEstimation() {
-            Long speed = getSpeed();
-            if (speed == null || speed == 0) {
+            long durationInSeconds = duration.toSeconds();
+            long imported = currentHeight - startingHeight;
+            long remaining = targetHeight - currentHeight;
+
+            if (imported == 0) {
                 return null;
+            } else {
+                return Duration.ofSeconds(remaining * durationInSeconds / imported);
             }
-
-            return Duration.ofMillis(BigInteger.valueOf(getTargetHeight())
-                    .subtract(BigInteger.valueOf(getCurrentHeight()))
-                    .multiply(BigInteger.valueOf(speed))
-                    .longValue());
-        }
-
-        private Long getSpeed() {
-            long downloadedBlocks = currentHeight - startingHeight;
-            if (downloadedBlocks <= 0 || duration.toMillis() == 0) {
-                return null;
-            }
-
-            return BigDecimal.valueOf(duration.toMillis())
-                    .divide(BigDecimal.valueOf(downloadedBlocks), MathContext.DECIMAL64)
-                    .round(MathContext.DECIMAL64)
-                    .longValue();
         }
     }
 }
