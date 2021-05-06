@@ -6,7 +6,9 @@
  */
 package org.semux.crypto;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import java.time.Duration;
@@ -17,7 +19,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semux.util.Bytes;
 import org.slf4j.Logger;
@@ -39,9 +42,15 @@ public class NativeTest {
     private static final byte[] SIGNATURE = Hex
             .decode("cc52ae5b72af210073756f801cf8ffa36cefe96c5010b2cf25d04dfc5b0495e4ee3e14774c4607a4475f2b449a3181c9bd2c6aed46ed283debfebe19589f550e");
 
-    @Before
-    public void check() {
+    @BeforeClass
+    public static void setup() {
         assumeTrue(Native.isEnabled());
+        Native.disable();
+    }
+
+    @AfterClass
+    public static void teardown() {
+        Native.enable();
     }
 
     @Test(expected = CryptoException.class)

@@ -36,7 +36,7 @@ public class Constants {
     /**
      * Version of this client.
      */
-    public static final String CLIENT_VERSION = "2.2.1";
+    public static final String CLIENT_VERSION = "2.3.0";
 
     /**
      * Algorithm name for the 256-bit hash.
