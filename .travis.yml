@@ -5,7 +5,6 @@ matrix:
     # License, formatter, and FindBugs check
     - env: NAME="License, formatter, and FindBugs check"
       os: linux
-      sudo: false
       jdk: openjdk11
       script:
         - mvn license:check
@@ -15,7 +14,6 @@ matrix:
     # Linux tests
     - env: NAME="Linux tests (Java 11)"
       os: linux
-      sudo: false
       jdk: openjdk11
       services:
         - xvfb
@@ -29,7 +27,7 @@ matrix:
       services:
         - xvfb
       script:
-        - mvn test
+        - mvn test '-Dtest=!org.semux.gui.**'
 
 cache:
   directories:
